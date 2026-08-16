@@ -118,3 +118,76 @@ export const listeningLogSchema = z.object({
   ...logEntryBase,
 });
 export type ListeningLogInput = z.infer<typeof listeningLogSchema>;
+
+/** "Attach unknown word to SRS" quick-add from a reading log entry (T059). */
+export const attachToSrsSchema = z.object({
+  word: z.string().trim().min(1, 'Word is required').max(200),
+  reading: z.string().trim().max(200).optional().nullable(),
+  meaning: z.string().trim().min(1, 'Meaning is required').max(1000),
+  sourceReadingLogId: uuid,
+});
+export type AttachToSrsInput = z.infer<typeof attachToSrsSchema>;
+
+// ---------------------------------------------------------------------------
+// Mock tests (mock_test_results — T061) + exam date (study_goals — T063)
+// ---------------------------------------------------------------------------
+
+const score = z.number().int().min(0).max(1000).optional().nullable();
+
+export const mockTestResultSchema = z.object({
+  testDate: isoDate,
+  vocabGrammarScore: score,
+  readingScore: score,
+  listeningScore: score,
+  totalScore: score,
+});
+export type MockTestResultInput = z.infer<typeof mockTestResultSchema>;
+
+export const examDateSchema = z.object({
+  examDate: isoDate.optional().nullable(),
+});
+export type ExamDateInput = z.infer<typeof examDateSchema>;
+
+// ---------------------------------------------------------------------------
+// Mistake notebook (mistake_notebook — manual entries, T066)
+// ---------------------------------------------------------------------------
+
+export const mistakeSchema = z.object({
+  content: z.string().trim().min(1, 'Content is required').max(2000),
+  linkedVocabId: uuid.optional().nullable(),
+  linkedGrammarId: uuid.optional().nullable(),
+});
+export type MistakeInput = z.infer<typeof mistakeSchema>;
+
+// ---------------------------------------------------------------------------
+// Admin reference-data CRUD (T090-T092 — global vocab_entries/grammar_points
+// rows where user_id IS NULL, and grammar_confusable_pairs). Reachable only
+// via app/api/admin/reference-data/** using the service-role client
+// (data-model.md RLS Summary: no authenticated-role write policy exists for
+// these rows by design). `vocabEntrySchema` above already matches the global
+// vocab field set exactly, so it's reused as-is for admin vocab create/update
+// rather than duplicated.
+// ---------------------------------------------------------------------------
+
+export const grammarPointSchema = z.object({
+  pattern: z.string().trim().min(1, 'Pattern is required').max(200),
+  meaning: z.string().trim().min(1, 'Meaning is required').max(1000),
+  connectionForm: z.string().trim().max(500).optional().nullable(),
+  formalityNuance: z.string().trim().max(1000).optional().nullable(),
+  exampleSentences: z
+    .array(z.string().trim().min(1).max(500))
+    .max(20)
+    .optional()
+    .default([]),
+  jlptLevel: z.string().trim().max(10).optional().default('N2'),
+  frequencyTag: z.string().trim().max(20).optional().nullable(),
+  n3Overlap: z.boolean().optional().default(false),
+});
+export type GrammarPointInput = z.infer<typeof grammarPointSchema>;
+
+export const confusablePairSchema = z.object({
+  grammarPointIdA: uuid,
+  grammarPointIdB: uuid,
+  comparisonNote: z.string().trim().min(1, 'Comparison note is required').max(5000),
+});
+export type ConfusablePairInput = z.infer<typeof confusablePairSchema>;

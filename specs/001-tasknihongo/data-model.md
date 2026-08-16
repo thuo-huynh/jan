@@ -42,6 +42,7 @@ Ownership derived via `board_id → boards.user_id` (join-based RLS policy for c
 | srs_repetitions | int | consecutive-correct counter |
 | fail_count | int | default 0; increments on failed review, powers "weak items only" mode (FR-021) |
 | created_at | timestamptz | |
+| source_reading_log_id | uuid, FK → reading_logs.id, nullable | *(added — T059)* set when the entry was created via "attach unknown word to SRS" from a reading log; `on delete set null` since the entry should survive log deletion |
 
 Ownership: rows with non-null `user_id` are owner-scoped; rows with `user_id IS NULL` are globally readable by any authenticated user, admin-writable only (FR-048). Per-user SRS state (`srs_*`, `fail_count`) on a global row is not meaningful directly on that shared row — see **user_vocab_progress** below, which is how per-user scheduling against a shared reference word is actually stored without mutating the shared row.
 
@@ -196,6 +197,7 @@ Exactly one of `vocab_id`/`grammar_id` is non-null per row (check constraint). P
 | user_id | uuid, PK, FK → profiles.id | one row per user |
 | daily_grammar_target | int | default 0 |
 | daily_vocab_target | int | default 0 |
+| exam_date | date, nullable | *(added — T063)* powers the "days remaining" countdown widget (T064); reuses this one-row-per-user table rather than a new one |
 | updated_at | timestamptz | |
 
 Used by `lib/study/heatmap.ts` to compute goal-met days from `review_logs` counts grouped by day (research.md §10).

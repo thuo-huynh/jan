@@ -76,3 +76,62 @@ body {
     font-family: var(--font-jp), ui-sans-serif, sans-serif;
   }
 }
+
+@layer components {
+  /*
+   * Styling for sanitized react-markdown output (notes editor preview,
+   * apps/web/features/notes/components/MarkdownPreview.tsx). No
+   * @tailwindcss/typography plugin is installed in this project, so element
+   * styles are defined here directly against the design tokens instead of
+   * relying on `prose` utility classes.
+   */
+  .markdown-body h1 {
+    @apply mb-3 mt-6 text-2xl font-semibold text-foreground first:mt-0;
+  }
+  .markdown-body h2 {
+    @apply mb-2 mt-5 text-xl font-semibold text-foreground first:mt-0;
+  }
+  .markdown-body h3 {
+    @apply mb-2 mt-4 text-lg font-semibold text-foreground first:mt-0;
+  }
+  .markdown-body p {
+    @apply my-2 leading-relaxed text-foreground;
+  }
+  .markdown-body ul {
+    @apply my-2 list-disc space-y-1 pl-6 text-foreground;
+  }
+  .markdown-body ol {
+    @apply my-2 list-decimal space-y-1 pl-6 text-foreground;
+  }
+  .markdown-body a {
+    @apply text-primary underline underline-offset-2;
+  }
+  .markdown-body strong {
+    @apply font-semibold text-foreground;
+  }
+  .markdown-body em {
+    @apply italic;
+  }
+  .markdown-body blockquote {
+    @apply my-2 border-l-2 border-border pl-3 text-muted-foreground;
+  }
+  .markdown-body code {
+    @apply rounded bg-muted px-1 py-0.5 font-mono text-[0.85em] text-foreground;
+  }
+  .markdown-body pre {
+    @apply my-2 overflow-x-auto rounded-md bg-muted p-3;
+  }
+  .markdown-body pre code {
+    @apply bg-transparent p-0;
+  }
+  .markdown-body table {
+    @apply my-2 w-full border-collapse text-sm;
+  }
+  .markdown-body th,
+  .markdown-body td {
+    @apply border border-border px-2 py-1 text-left;
+  }
+  .markdown-body hr {
+    @apply my-4 border-border;
+  }
+}

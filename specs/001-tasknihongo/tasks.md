@@ -93,16 +93,16 @@ Two sibling apps per plan.md's Project Structure: `apps/web/` (Next.js: `app/` r
 
 ### Implementation for User Story 1
 
-- [ ] T031 [P] [US1] Board list page (create/list boards) in `apps/web/app/(app)/boards/page.tsx`
-- [ ] T032 [P] [US1] Board detail page shell (loads columns/tasks) in `apps/web/app/(app)/boards/[boardId]/page.tsx`
-- [ ] T033 [P] [US1] Column component (rename/add/remove/reorder) in `apps/web/features/kanban/components/Column.tsx`
-- [ ] T034 [P] [US1] Task card component (title, tags, due date, progress, attachment count, assignee avatar) in `apps/web/features/kanban/components/TaskCard.tsx`
-- [ ] T035 [US1] Task detail/edit modal (description, checklist editor) in `apps/web/features/kanban/components/TaskDetailModal.tsx`
-- [ ] T036 [US1] Board drag-and-drop wiring with dnd-kit (column reorder + task move/reorder) in `apps/web/features/kanban/components/Board.tsx` (depends on T033, T034)
-- [ ] T037 [US1] Optimistic task-move mutation with rollback-on-failure in `apps/web/features/kanban/components/Board.tsx` (depends on T036)
-- [ ] T038 [US1] Checklist item CRUD + progress % derivation on task in `apps/web/features/kanban/components/ChecklistEditor.tsx` (depends on T035)
-- [ ] T039 [US1] Task filter/search bar (by tag, due date, column/status) in `apps/web/features/kanban/components/BoardFilters.tsx`
-- [ ] T040 [US1] Board default-column seeding on board creation (Todo/In Progress/In Review/Done) in `apps/web/app/(app)/boards/page.tsx` create handler (depends on T031)
+- [x] T031 [P] [US1] Board list page (create/list boards) in `apps/web/app/(app)/boards/page.tsx`
+- [x] T032 [P] [US1] Board detail page shell (loads columns/tasks) in `apps/web/app/(app)/boards/[boardId]/page.tsx`
+- [x] T033 [P] [US1] Column component (rename/add/remove/reorder) in `apps/web/features/kanban/components/Column.tsx`
+- [x] T034 [P] [US1] Task card component (title, tags, due date, progress, attachment count, assignee avatar) in `apps/web/features/kanban/components/TaskCard.tsx`
+- [x] T035 [US1] Task detail/edit modal (description, checklist editor) in `apps/web/features/kanban/components/TaskDetailModal.tsx`
+- [x] T036 [US1] Board drag-and-drop wiring with dnd-kit (column reorder + task move/reorder) in `apps/web/features/kanban/components/Board.tsx` (depends on T033, T034)
+- [x] T037 [US1] Optimistic task-move mutation with rollback-on-failure in `apps/web/features/kanban/components/Board.tsx` (depends on T036)
+- [x] T038 [US1] Checklist item CRUD + progress % derivation on task in `apps/web/features/kanban/components/ChecklistEditor.tsx` (depends on T035)
+- [x] T039 [US1] Task filter/search bar (by tag, due date, column/status) in `apps/web/features/kanban/components/BoardFilters.tsx`
+- [x] T040 [US1] Board default-column seeding on board creation (Todo/In Progress/In Review/Done) in `apps/web/app/(app)/boards/page.tsx` create handler (depends on T031)
 
 **Checkpoint**: Kanban board is fully functional and independently testable/demoable.
 
@@ -116,14 +116,14 @@ Two sibling apps per plan.md's Project Structure: `apps/web/` (Next.js: `app/` r
 
 ### Implementation for User Story 2
 
-- [ ] T041 [P] [US2] Grammar list page (pattern/meaning/connection form/nuance/example/frequency tag, status control) in `apps/web/app/(app)/learn/grammar/page.tsx`
-- [ ] T042 [P] [US2] Grammar point row/status component in `apps/web/features/grammar/components/GrammarPointRow.tsx`
-- [ ] T043 [US2] Status update handler (lazy-create `user_grammar_status` row on first change) wired into T042
-- [ ] T044 [P] [US2] Personal note/mnemonic editor (markdown) attached to a grammar point in `apps/web/features/grammar/components/GrammarNoteEditor.tsx`
-- [ ] T045 [US2] N3-level-diff filter toggle (hides `n3_overlap = true` points) in `apps/web/app/(app)/learn/grammar/page.tsx` (depends on T041)
-- [ ] T046 [P] [US2] Confusable-pair comparison page in `apps/web/app/(app)/learn/grammar/confusables/[pairId]/page.tsx`
-- [ ] T047 [US2] Confusable-pair side-by-side comparison component in `apps/web/features/grammar/components/ConfusablePairCard.tsx` (depends on T046)
-- [ ] T048 [US2] Link confusable-pair entry points from the grammar list (badge/button per point that's part of a pair) in `apps/web/features/grammar/components/GrammarPointRow.tsx` (depends on T042, T047)
+- [x] T041 [P] [US2] Grammar list page (pattern/meaning/connection form/nuance/example/frequency tag, status control) in `apps/web/app/(app)/learn/grammar/page.tsx`
+- [x] T042 [P] [US2] Grammar point row/status component in `apps/web/features/grammar/components/GrammarPointRow.tsx`
+- [x] T043 [US2] Status update handler (lazy-create `user_grammar_status` row on first change) wired into T042
+- [x] T044 [P] [US2] Personal note/mnemonic editor (markdown) attached to a grammar point in `apps/web/features/grammar/components/GrammarNoteEditor.tsx`
+- [x] T045 [US2] N3-level-diff filter toggle (hides `n3_overlap = true` points) in `apps/web/app/(app)/learn/grammar/page.tsx` (depends on T041)
+- [x] T046 [P] [US2] Confusable-pair comparison page in `apps/web/app/(app)/learn/grammar/confusables/[pairId]/page.tsx`
+- [x] T047 [US2] Confusable-pair side-by-side comparison component in `apps/web/features/grammar/components/ConfusablePairCard.tsx` (depends on T046)
+- [x] T048 [US2] Link confusable-pair entry points from the grammar list (badge/button per point that's part of a pair) in `apps/web/features/grammar/components/GrammarPointRow.tsx` (depends on T042, T047)
 
 **Checkpoint**: Grammar tracker + confusables fully functional independently of Kanban and SRS review.
 
@@ -137,14 +137,14 @@ Two sibling apps per plan.md's Project Structure: `apps/web/` (Next.js: `app/` r
 
 ### Implementation for User Story 3
 
-- [ ] T049 [US3] `GET /api/review-queue` route handler (blended vocab+kanji+grammar due items, `weakOnly` param) in `apps/web/app/api/review-queue/route.ts` (depends on T029)
-- [ ] T050 [US3] `POST /api/reviews` route handler (resolves vocab vs. grammar, global vs. custom/owned state location, runs `sm2.ts`, writes `review_logs`) in `apps/web/app/api/reviews/route.ts` (depends on T029, T049)
-- [ ] T051 [P] [US3] Vocab/kanji deck management page (browse preloaded, add/edit custom entries) in `apps/web/app/(app)/learn/vocab/page.tsx`
-- [ ] T052 [P] [US3] Custom vocab entry form (word, reading, meaning, example, JLPT level, is_kanji) in `apps/web/features/vocab-srs/components/VocabEntryForm.tsx`
-- [ ] T053 [US3] Review queue page (pulls from `/api/review-queue`) in `apps/web/app/(app)/learn/review/page.tsx` (depends on T049)
-- [ ] T054 [US3] Review card component supporting reading→meaning and kanji recognition/writing-recall directions in `apps/web/features/vocab-srs/components/ReviewCard.tsx`
-- [ ] T055 [US3] Review grading controls (again/hard/good/easy) submitting to `/api/reviews` in `apps/web/features/vocab-srs/components/ReviewCard.tsx` (depends on T050, T054)
-- [ ] T056 [US3] "Review weak items only" toggle wired to `weakOnly` query param in `apps/web/app/(app)/learn/review/page.tsx` (depends on T053)
+- [x] T049 [US3] `GET /api/review-queue` route handler (blended vocab+kanji+grammar due items, `weakOnly` param) in `apps/web/app/api/review-queue/route.ts` (depends on T029)
+- [x] T050 [US3] `POST /api/reviews` route handler (resolves vocab vs. grammar, global vs. custom/owned state location, runs `sm2.ts`, writes `review_logs`) in `apps/web/app/api/reviews/route.ts` (depends on T029, T049)
+- [x] T051 [P] [US3] Vocab/kanji deck management page (browse preloaded, add/edit custom entries) in `apps/web/app/(app)/learn/vocab/page.tsx`
+- [x] T052 [P] [US3] Custom vocab entry form (word, reading, meaning, example, JLPT level, is_kanji) in `apps/web/features/vocab-srs/components/VocabEntryForm.tsx`
+- [x] T053 [US3] Review queue page (pulls from `/api/review-queue`) in `apps/web/app/(app)/learn/review/page.tsx` (depends on T049)
+- [x] T054 [US3] Review card component supporting reading→meaning and kanji recognition/writing-recall directions in `apps/web/features/vocab-srs/components/ReviewCard.tsx`
+- [x] T055 [US3] Review grading controls (again/hard/good/easy) submitting to `/api/reviews` in `apps/web/features/vocab-srs/components/ReviewCard.tsx` (depends on T050, T054)
+- [x] T056 [US3] "Review weak items only" toggle wired to `weakOnly` query param in `apps/web/app/(app)/learn/review/page.tsx` (depends on T053)
 
 **Checkpoint**: Blended vocab/kanji SRS review fully functional independently of grammar tracker UI, reading/listening, and Kanban.
 
@@ -158,10 +158,10 @@ Two sibling apps per plan.md's Project Structure: `apps/web/` (Next.js: `app/` r
 
 ### Implementation for User Story 4
 
-- [ ] T057 [P] [US4] Reading log entry form + history table in `apps/web/app/(app)/learn/reading/page.tsx`
-- [ ] T058 [P] [US4] Listening log entry form + history table in `apps/web/app/(app)/learn/listening/page.tsx`
-- [ ] T059 [US4] "Attach unknown word to SRS/notes" action from a reading log entry (creates a custom `vocab_entries` row linked back to the log) in `apps/web/features/reading-listening/components/AttachToSrsButton.tsx` (depends on T057)
-- [ ] T060 [US4] Reading comprehension by-passage-type breakdown component (feeds dashboard, but usable standalone on the reading page) in `apps/web/features/reading-listening/components/PassageTypeBreakdown.tsx` (depends on T057)
+- [x] T057 [P] [US4] Reading log entry form + history table in `apps/web/app/(app)/learn/reading/page.tsx`
+- [x] T058 [P] [US4] Listening log entry form + history table in `apps/web/app/(app)/learn/listening/page.tsx`
+- [x] T059 [US4] "Attach unknown word to SRS/notes" action from a reading log entry (creates a custom `vocab_entries` row linked back to the log) in `apps/web/features/reading-listening/components/AttachToSrsButton.tsx` (depends on T057)
+- [x] T060 [US4] Reading comprehension by-passage-type breakdown component (feeds dashboard, but usable standalone on the reading page) in `apps/web/features/reading-listening/components/PassageTypeBreakdown.tsx` (depends on T057)
 
 **Checkpoint**: Reading/listening logging functional independently of mock tests, mistakes, and dashboard.
 
@@ -175,10 +175,10 @@ Two sibling apps per plan.md's Project Structure: `apps/web/` (Next.js: `app/` r
 
 ### Implementation for User Story 5
 
-- [ ] T061 [US5] Mock test score entry form (section scores + total + date) in `apps/web/app/(app)/learn/mock-tests/page.tsx`
-- [ ] T062 [US5] Score trend chart (per-section, chronological) using recharts in `apps/web/features/mock-tests/components/ScoreTrendChart.tsx` (depends on T061)
-- [ ] T063 [P] [US5] Exam date setting control (stored on `profiles` or a small settings table — reuse `study_goals` row or add `exam_date` column via migration if needed) in `apps/web/features/mock-tests/components/ExamDateSetting.tsx`
-- [ ] T064 [US5] "Days remaining" countdown widget in `apps/web/features/mock-tests/components/ExamCountdownWidget.tsx` (depends on T063)
+- [x] T061 [US5] Mock test score entry form (section scores + total + date) in `apps/web/app/(app)/learn/mock-tests/page.tsx`
+- [x] T062 [US5] Score trend chart (per-section, chronological) using recharts in `apps/web/features/mock-tests/components/ScoreTrendChart.tsx` (depends on T061)
+- [x] T063 [P] [US5] Exam date setting control (stored on `profiles` or a small settings table — reuse `study_goals` row or add `exam_date` column via migration if needed) in `apps/web/features/mock-tests/components/ExamDateSetting.tsx`
+- [x] T064 [US5] "Days remaining" countdown widget in `apps/web/features/mock-tests/components/ExamCountdownWidget.tsx` (depends on T063)
 
 **Checkpoint**: Mock test tracking + countdown functional independently of other learning features.
 
@@ -192,11 +192,11 @@ Two sibling apps per plan.md's Project Structure: `apps/web/` (Next.js: `app/` r
 
 ### Implementation for User Story 6
 
-- [ ] T065 [US6] Mistake notebook page (list + manual-entry form, resolved/open filter) in `apps/web/app/(app)/learn/mistakes/page.tsx`
-- [ ] T066 [US6] Mistake entry component with vocab/grammar link picker in `apps/web/features/mistakes/components/MistakeEntryForm.tsx`
-- [ ] T067 [US6] `POST /api/mistakes/[id]/add-to-srs` route handler (nudge due date without full reset, 404 if unlinked) in `apps/web/app/api/mistakes/[id]/add-to-srs/route.ts` (depends on T029)
-- [ ] T068 [US6] "Add to SRS queue" button wired to T067, disabled state when entry has no link in `apps/web/features/mistakes/components/MistakeRow.tsx` (depends on T067)
-- [ ] T069 [US6] "Mark resolved" toggle (visually distinguishes, does not delete) in `apps/web/features/mistakes/components/MistakeRow.tsx`
+- [x] T065 [US6] Mistake notebook page (list + manual-entry form, resolved/open filter) in `apps/web/app/(app)/learn/mistakes/page.tsx`
+- [x] T066 [US6] Mistake entry component with vocab/grammar link picker in `apps/web/features/mistakes/components/MistakeEntryForm.tsx`
+- [x] T067 [US6] `POST /api/mistakes/[id]/add-to-srs` route handler (nudge due date without full reset, 404 if unlinked) in `apps/web/app/api/mistakes/[id]/add-to-srs/route.ts` (depends on T029)
+- [x] T068 [US6] "Add to SRS queue" button wired to T067, disabled state when entry has no link in `apps/web/features/mistakes/components/MistakeRow.tsx` (depends on T067)
+- [x] T069 [US6] "Mark resolved" toggle (visually distinguishes, does not delete) in `apps/web/features/mistakes/components/MistakeRow.tsx`
 
 **Checkpoint**: Mistake notebook + SRS integration functional independently of mock test data (manual entries work standalone).
 
@@ -210,11 +210,11 @@ Two sibling apps per plan.md's Project Structure: `apps/web/` (Next.js: `app/` r
 
 ### Implementation for User Story 7
 
-- [ ] T070 [US7] Daily goal settings form (grammar target + vocab target) writing to `study_goals` in `apps/web/features/study-plan/components/StudyGoalSettings.tsx`
-- [ ] T071 [US7] Daily-activity aggregation from `review_logs` grouped by local day, goal-met calc in `apps/web/features/study-plan/lib/heatmap.ts` (depends on T029's shared conventions, T070)
-- [ ] T072 [US7] Contribution heatmap component (GitHub-style, trailing ~12 months) in `apps/web/features/study-plan/components/StreakHeatmap.tsx` (depends on T071)
-- [ ] T073 [US7] Daily/weekly study-time chart using recharts in `apps/web/features/study-plan/components/StudyTimeChart.tsx` (depends on T071)
-- [ ] T074 [US7] Streak calculation (consecutive goal-met or ≥1-review days, resets on a skipped day) in `apps/web/features/study-plan/lib/heatmap.ts` (depends on T071)
+- [x] T070 [US7] Daily goal settings form (grammar target + vocab target) writing to `study_goals` in `apps/web/features/study-plan/components/StudyGoalSettings.tsx`
+- [x] T071 [US7] Daily-activity aggregation from `review_logs` grouped by local day, goal-met calc in `apps/web/features/study-plan/lib/heatmap.ts` (depends on T029's shared conventions, T070)
+- [x] T072 [US7] Contribution heatmap component (GitHub-style, trailing ~12 months) in `apps/web/features/study-plan/components/StreakHeatmap.tsx` (depends on T071)
+- [x] T073 [US7] Daily/weekly study-time chart using recharts in `apps/web/features/study-plan/components/StudyTimeChart.tsx` (depends on T071)
+- [x] T074 [US7] Streak calculation (consecutive goal-met or ≥1-review days, resets on a skipped day) in `apps/web/features/study-plan/lib/heatmap.ts` (depends on T071)
 
 **Checkpoint**: Study plan/streak functional independently, consuming existing `review_logs` from US2/US3 activity.
 
@@ -228,9 +228,9 @@ Two sibling apps per plan.md's Project Structure: `apps/web/` (Next.js: `app/` r
 
 ### Implementation for User Story 8
 
-- [ ] T075 [US8] `GET /api/dashboard` route handler aggregating grammar mastered/total, vocab/kanji learned, accuracy, streak, weak areas, exam countdown in `apps/web/app/api/dashboard/route.ts` (depends on T071, T074, T064)
-- [ ] T076 [US8] Weak-area aggregation logic (lowest-scoring reading passage type + lowest-accuracy grammar/vocab category) in `apps/web/features/dashboard/lib/weak-areas.ts` (depends on T060)
-- [ ] T077 [US8] Dashboard page composing mastery counters, heatmap, study-time chart, weak-area summary, exam countdown in `apps/web/app/(app)/learn/dashboard/page.tsx` (depends on T075, T072, T073, T064)
+- [x] T075 [US8] `GET /api/dashboard` route handler aggregating grammar mastered/total, vocab/kanji learned, accuracy, streak, weak areas, exam countdown in `apps/web/app/api/dashboard/route.ts` (depends on T071, T074, T064)
+- [x] T076 [US8] Weak-area aggregation logic (lowest-scoring reading passage type + lowest-accuracy grammar/vocab category) in `apps/web/features/dashboard/lib/weak-areas.ts` (depends on T060)
+- [x] T077 [US8] Dashboard page composing mastery counters, heatmap, study-time chart, weak-area summary, exam countdown in `apps/web/app/(app)/learn/dashboard/page.tsx` (depends on T075, T072, T073, T064)
 
 **Checkpoint**: Consolidated dashboard functional, correctly reflecting all upstream stories' data.
 
@@ -244,13 +244,13 @@ Two sibling apps per plan.md's Project Structure: `apps/web/` (Next.js: `app/` r
 
 ### Implementation for User Story 9
 
-- [ ] T078 [P] [US9] Notes list/search page (folder/tag filters, pinned view) in `apps/web/app/(app)/notes/page.tsx`
-- [ ] T079 [P] [US9] Note detail/editor page with markdown editing + sanitized rendering in `apps/web/app/(app)/notes/[noteId]/page.tsx`
-- [ ] T080 [US9] Folder/tag picker component in `apps/web/features/notes/components/FolderTagPicker.tsx`
-- [ ] T081 [US9] Pin toggle wired to `notes.pinned` in `apps/web/features/notes/components/NoteCard.tsx`
-- [ ] T082 [US9] Full-text search bar querying `notes.search_vector` in `apps/web/app/(app)/notes/page.tsx` (depends on T078)
-- [ ] T083 [US9] Task/vocab/grammar link picker for a note (writes `linked_task_id`/`linked_vocab_id`) in `apps/web/features/notes/components/NoteLinkPicker.tsx`
-- [ ] T084 [US9] Linked-item display + graceful "no longer available" state on the note when a link target is deleted in `apps/web/app/(app)/notes/[noteId]/page.tsx` (depends on T079, T083)
+- [x] T078 [P] [US9] Notes list/search page (folder/tag filters, pinned view) in `apps/web/app/(app)/notes/page.tsx`
+- [x] T079 [P] [US9] Note detail/editor page with markdown editing + sanitized rendering in `apps/web/app/(app)/notes/[noteId]/page.tsx`
+- [x] T080 [US9] Folder/tag picker component in `apps/web/features/notes/components/FolderTagPicker.tsx`
+- [x] T081 [US9] Pin toggle wired to `notes.pinned` in `apps/web/features/notes/components/NoteCard.tsx`
+- [x] T082 [US9] Full-text search bar querying `notes.search_vector` in `apps/web/app/(app)/notes/page.tsx` (depends on T078)
+- [x] T083 [US9] Task/vocab/grammar link picker for a note (writes `linked_task_id`/`linked_vocab_id`) in `apps/web/features/notes/components/NoteLinkPicker.tsx`
+- [x] T084 [US9] Linked-item display + graceful "no longer available" state on the note when a link target is deleted in `apps/web/app/(app)/notes/[noteId]/page.tsx` (depends on T079, T083)
 
 **Checkpoint**: Freeform notes fully functional independently.
 
@@ -264,18 +264,18 @@ Two sibling apps per plan.md's Project Structure: `apps/web/` (Next.js: `app/` r
 
 ### Implementation for User Story 10
 
-- [ ] T085 [P] [US10] `GET /api/admin/users` route handler (search/list, service-role client) in `apps/web/app/api/admin/users/route.ts`
-- [ ] T086 [US10] `POST /api/admin/users/[id]/suspend` route handler (status update + session invalidation) in `apps/web/app/api/admin/users/[id]/suspend/route.ts`
-- [ ] T087 [US10] `DELETE /api/admin/users/[id]` route handler (confirm required, self/last-admin guard) in `apps/web/app/api/admin/users/[id]/route.ts`
-- [ ] T088 [P] [US10] `GET /api/admin/content` and `DELETE /api/admin/content/[type]/[id]` route handlers (tasks/notes/vocab/grammar_notes/reading_logs/listening_logs/mistakes) in `apps/web/app/api/admin/content/route.ts` and `apps/web/app/api/admin/content/[type]/[id]/route.ts`
-- [ ] T089 [P] [US10] `GET /api/admin/stats` route handler (total users, 7d/30d active, total tasks/notes/vocab) in `apps/web/app/api/admin/stats/route.ts`
-- [ ] T090 [P] [US10] `GET/POST/PUT/DELETE /api/admin/reference-data/vocab` route handlers in `apps/web/app/api/admin/reference-data/vocab/route.ts`
-- [ ] T091 [P] [US10] `GET/POST/PUT/DELETE /api/admin/reference-data/grammar` route handlers in `apps/web/app/api/admin/reference-data/grammar/route.ts`
-- [ ] T092 [P] [US10] `GET/POST/PUT/DELETE /api/admin/reference-data/confusable-pairs` route handlers in `apps/web/app/api/admin/reference-data/confusable-pairs/route.ts`
-- [ ] T093 [US10] Admin user list/search page + suspend/delete actions in `apps/web/app/admin/users/page.tsx` (depends on T085, T086, T087)
-- [ ] T094 [US10] Admin content moderation page (search/inspect/remove) in `apps/web/app/admin/content/page.tsx` (depends on T088)
-- [ ] T095 [US10] Admin usage stats page in `apps/web/app/admin/stats/page.tsx` (depends on T089)
-- [ ] T096 [US10] Admin reference-data management page (vocab/grammar/confusable pairs CRUD UI) in `apps/web/app/admin/reference-data/page.tsx` (depends on T090, T091, T092)
+- [x] T085 [P] [US10] `GET /api/admin/users` route handler (search/list, service-role client) in `apps/web/app/api/admin/users/route.ts`
+- [x] T086 [US10] `POST /api/admin/users/[id]/suspend` route handler (status update + session invalidation) in `apps/web/app/api/admin/users/[id]/suspend/route.ts`
+- [x] T087 [US10] `DELETE /api/admin/users/[id]` route handler (confirm required, self/last-admin guard) in `apps/web/app/api/admin/users/[id]/route.ts`
+- [x] T088 [P] [US10] `GET /api/admin/content` and `DELETE /api/admin/content/[type]/[id]` route handlers (tasks/notes/vocab/grammar_notes/reading_logs/listening_logs/mistakes) in `apps/web/app/api/admin/content/route.ts` and `apps/web/app/api/admin/content/[type]/[id]/route.ts`
+- [x] T089 [P] [US10] `GET /api/admin/stats` route handler (total users, 7d/30d active, total tasks/notes/vocab) in `apps/web/app/api/admin/stats/route.ts`
+- [x] T090 [P] [US10] `GET/POST/PUT/DELETE /api/admin/reference-data/vocab` route handlers in `apps/web/app/api/admin/reference-data/vocab/route.ts`
+- [x] T091 [P] [US10] `GET/POST/PUT/DELETE /api/admin/reference-data/grammar` route handlers in `apps/web/app/api/admin/reference-data/grammar/route.ts`
+- [x] T092 [P] [US10] `GET/POST/PUT/DELETE /api/admin/reference-data/confusable-pairs` route handlers in `apps/web/app/api/admin/reference-data/confusable-pairs/route.ts`
+- [x] T093 [US10] Admin user list/search page + suspend/delete actions in `apps/web/app/admin/users/page.tsx` (depends on T085, T086, T087)
+- [x] T094 [US10] Admin content moderation page (search/inspect/remove) in `apps/web/app/admin/content/page.tsx` (depends on T088)
+- [x] T095 [US10] Admin usage stats page in `apps/web/app/admin/stats/page.tsx` (depends on T089)
+- [x] T096 [US10] Admin reference-data management page (vocab/grammar/confusable pairs CRUD UI) in `apps/web/app/admin/reference-data/page.tsx` (depends on T090, T091, T092)
 
 **Checkpoint**: All user stories independently functional; admin moderation layer complete.
 
