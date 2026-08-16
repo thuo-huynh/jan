@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { createClient } from '@/shared/supabase/server';
+import { AppNav, type NavLinkItem } from '@/shared/components/AppNav';
 
 /**
  * Role-gated admin route group. Per FR-003/research.md §1: the admin check
@@ -31,33 +32,24 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     redirect('/boards');
   }
 
+  const navLinks: NavLinkItem[] = [
+    { href: '/admin/users', label: 'Users' },
+    { href: '/admin/content', label: 'Content' },
+    { href: '/admin/stats', label: 'Stats' },
+    { href: '/admin/reference-data', label: 'Reference Data' },
+  ];
+
   return (
     <div className="min-h-screen bg-background">
-      <header className="border-b border-border bg-card">
+      <header className="relative border-b border-border bg-card">
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3">
-          <div className="flex items-center gap-6">
+          <div className="flex items-center gap-3 sm:gap-6">
             <Link href="/admin/users" className="text-base font-semibold text-foreground">
-              TaskNihongo Admin
+              JanGo Admin
             </Link>
-            <nav className="flex items-center gap-4 text-sm font-medium text-muted-foreground">
-              <Link href="/admin/users" className="transition-colors hover:text-foreground">
-                Users
-              </Link>
-              <Link href="/admin/content" className="transition-colors hover:text-foreground">
-                Content
-              </Link>
-              <Link href="/admin/stats" className="transition-colors hover:text-foreground">
-                Stats
-              </Link>
-              <Link
-                href="/admin/reference-data"
-                className="transition-colors hover:text-foreground"
-              >
-                Reference Data
-              </Link>
-            </nav>
+            <AppNav links={navLinks} />
           </div>
-          <Link href="/boards" className="text-sm font-medium text-primary hover:underline">
+          <Link href="/boards" className="shrink-0 text-sm font-medium text-primary hover:underline">
             Back to app
           </Link>
         </div>

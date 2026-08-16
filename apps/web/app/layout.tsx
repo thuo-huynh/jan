@@ -21,7 +21,7 @@ const notoSansJP = Noto_Sans_JP({
 });
 
 export const metadata: Metadata = {
-  title: 'TaskNihongo',
+  title: 'JanGo',
   description: 'Kanban task management + JLPT N2 Japanese study tracker',
 };
 

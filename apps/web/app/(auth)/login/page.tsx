@@ -44,7 +44,7 @@ function LoginForm() {
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="w-full max-w-sm rounded-lg border border-border bg-card p-8 shadow-sm">
         <h1 className="text-xl font-semibold text-foreground">Sign in</h1>
-        <p className="mt-1 text-sm text-muted-foreground">Welcome back to TaskNihongo.</p>
+        <p className="mt-1 text-sm text-muted-foreground">Welcome back to JanGo.</p>
 
         <form className="mt-6 space-y-4" onSubmit={handleSubmit}>
           <div>

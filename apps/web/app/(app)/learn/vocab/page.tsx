@@ -86,7 +86,7 @@ export default async function VocabDeckPage({ searchParams }: VocabPageProps) {
           </form>
         </div>
 
-        <div className="overflow-hidden rounded-lg border border-border">
+        <div className="overflow-x-auto rounded-lg border border-border">
           <table className="w-full text-left text-sm">
             <thead className="bg-muted text-muted-foreground">
               <tr>

@@ -1,4 +1,4 @@
-# TaskNihongo — Design System
+# JanGo — Design System
 
 Style: clean, minimal productivity/dashboard UI with subtle micro-interactions (150–300ms
 color/opacity transitions, no layout-shifting hover transforms — important around the Kanban
