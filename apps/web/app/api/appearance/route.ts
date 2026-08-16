@@ -5,6 +5,8 @@ import {
   APPEARANCE_COOKIE_MAX_AGE,
   APPEARANCE_COOKIE_NAME,
   serializeAppearanceCookie,
+  themeRowToColors,
+  type ThemeColorRow,
 } from '@/shared/appearance/cookie';
 
 /**
@@ -13,9 +15,16 @@ import {
  * Sets the caller's light/dark mode and/or color theme (contracts/api.md).
  * Upserts `user_appearance_preferences` and writes the `theme` cookie in the
  * same response so the two never drift (research.md §3) — this is the only
- * place either is written from.
+ * place either is written from. The cookie carries the theme's full color
+ * values (not just its slug) so `app/layout.tsx` never has to query the DB
+ * to render them — see shared/appearance/cookie.ts's header comment.
  */
 export const dynamic = 'force-dynamic';
+
+const THEME_COLUMNS =
+  'id, slug, name, primary_light, primary_foreground_light, secondary_light, secondary_foreground_light, accent_light, accent_foreground_light, primary_dark, primary_foreground_dark, secondary_dark, secondary_foreground_dark, accent_dark, accent_foreground_dark';
+
+type ThemeRow = ThemeColorRow & { id: string; slug: string; name: string };
 
 export async function POST(request: NextRequest) {
   const supabase = createClient();
@@ -44,10 +53,10 @@ export async function POST(request: NextRequest) {
 
   const { data: defaultTheme, error: defaultThemeError } = await supabase
     .from('themes')
-    .select('id, slug, name')
+    .select(THEME_COLUMNS)
     .order('sort_order', { ascending: true })
     .limit(1)
-    .maybeSingle();
+    .maybeSingle<ThemeRow>();
   if (defaultThemeError || !defaultTheme) {
     return NextResponse.json({ error: 'No themes are configured' }, { status: 500 });
   }
@@ -61,14 +70,14 @@ export async function POST(request: NextRequest) {
   const mode = parsed.data.mode ?? existing?.mode ?? 'light';
 
   let themeId = parsed.data.themeId ?? existing?.theme_id ?? defaultTheme.id;
-  let theme = defaultTheme;
+  let theme: ThemeRow = defaultTheme;
 
   if (parsed.data.themeId) {
     const { data: requestedTheme, error: themeError } = await supabase
       .from('themes')
-      .select('id, slug, name')
+      .select(THEME_COLUMNS)
       .eq('id', parsed.data.themeId)
-      .maybeSingle();
+      .maybeSingle<ThemeRow>();
     if (themeError || !requestedTheme) {
       return NextResponse.json({ error: 'themeId does not resolve to an existing theme' }, { status: 400 });
     }
@@ -77,9 +86,9 @@ export async function POST(request: NextRequest) {
   } else if (existing?.theme_id) {
     const { data: currentTheme } = await supabase
       .from('themes')
-      .select('id, slug, name')
+      .select(THEME_COLUMNS)
       .eq('id', existing.theme_id)
-      .maybeSingle();
+      .maybeSingle<ThemeRow>();
     if (currentTheme) {
       theme = currentTheme;
       themeId = currentTheme.id;
@@ -94,11 +103,15 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: upsertError.message }, { status: 500 });
   }
 
-  const response = NextResponse.json({ mode, theme });
-  response.cookies.set(APPEARANCE_COOKIE_NAME, serializeAppearanceCookie({ mode, themeSlug: theme.slug }), {
-    maxAge: APPEARANCE_COOKIE_MAX_AGE,
-    sameSite: 'lax',
-    path: '/',
-  });
+  const response = NextResponse.json({ mode, theme: { id: theme.id, slug: theme.slug, name: theme.name } });
+  response.cookies.set(
+    APPEARANCE_COOKIE_NAME,
+    serializeAppearanceCookie({ mode, themeSlug: theme.slug, colors: themeRowToColors(theme) }),
+    {
+      maxAge: APPEARANCE_COOKIE_MAX_AGE,
+      sameSite: 'lax',
+      path: '/',
+    },
+  );
   return response;
 }

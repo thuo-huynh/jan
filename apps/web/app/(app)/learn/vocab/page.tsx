@@ -1,4 +1,4 @@
-import { createClient } from '@/shared/supabase/server';
+import { createClient, getAuthedUser } from '@/shared/supabase/server';
 import {
   CustomVocabManager,
   type CustomVocabEntry,
@@ -19,9 +19,7 @@ interface VocabPageProps {
 
 export default async function VocabDeckPage({ searchParams }: VocabPageProps) {
   const supabase = createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getAuthedUser();
 
   const q = searchParams.q?.trim() ?? '';
   const page = Math.max(1, Number(searchParams.page ?? '1') || 1);

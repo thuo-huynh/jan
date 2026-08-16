@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
-import { createClient } from '@/shared/supabase/server';
+import { createClient, getAuthedUser } from '@/shared/supabase/server';
 import { ConfusablePairCard } from '@/features/grammar/components/ConfusablePairCard';
 import { mapGrammarPoint, type GrammarPointRecord, type UserGrammarStatusRecord } from '@/features/grammar/lib/mapGrammarPoint';
 
@@ -17,9 +17,7 @@ interface ConfusablePairPageProps {
  */
 export default async function ConfusablePairPage({ params }: ConfusablePairPageProps) {
   const supabase = createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getAuthedUser();
 
   if (!user) {
     redirect('/login');

@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation';
-import { createClient } from '@/shared/supabase/server';
+import { createClient, getAuthedUser } from '@/shared/supabase/server';
 import { loadDashboardData } from '@/features/dashboard/lib/aggregate';
 import { aggregateDailyActivity, fillTrailingDays } from '@/features/study-plan/lib/heatmap';
 import { StreakHeatmap } from '@/features/study-plan/components/StreakHeatmap';
@@ -24,9 +24,7 @@ const WEAK_AREA_ICON: Record<WeakAreaType, string> = {
  */
 export default async function DashboardPage() {
   const supabase = createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getAuthedUser();
 
   if (!user) {
     redirect('/login');

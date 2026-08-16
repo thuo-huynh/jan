@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation';
-import { createClient } from '@/shared/supabase/server';
+import { createClient, getAuthedUser } from '@/shared/supabase/server';
 import { ListeningLogManager } from '@/features/reading-listening/components/ListeningLogManager';
 import type { ListeningLog } from '@/features/reading-listening/types';
 
@@ -10,9 +10,7 @@ import type { ListeningLog } from '@/features/reading-listening/types';
  */
 export default async function ListeningLogPage() {
   const supabase = createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getAuthedUser();
 
   if (!user) {
     redirect('/login');

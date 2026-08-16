@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation';
-import { createClient } from '@/shared/supabase/server';
+import { createClient, getAuthedUser } from '@/shared/supabase/server';
 import { StudyGoalSettings } from '@/features/study-plan/components/StudyGoalSettings';
 import { StreakHeatmap } from '@/features/study-plan/components/StreakHeatmap';
 import { StudyTimeChart } from '@/features/study-plan/components/StudyTimeChart';
@@ -17,9 +17,7 @@ const TRAILING_DAYS = 371; // ~53 weeks, so the heatmap grid always fills full S
  */
 export default async function StudyPlanPage() {
   const supabase = createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getAuthedUser();
 
   if (!user) {
     redirect('/login');

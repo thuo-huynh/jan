@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation';
-import { createClient } from '@/shared/supabase/server';
+import { createClient, getAuthedUser } from '@/shared/supabase/server';
 import { MockTestManager } from '@/features/mock-tests/components/MockTestManager';
 import { ScoreTrendChart } from '@/features/mock-tests/components/ScoreTrendChart';
 import { ExamDateSetting } from '@/features/mock-tests/components/ExamDateSetting';
@@ -12,9 +12,7 @@ import type { MockTestResult } from '@/features/mock-tests/types';
  */
 export default async function MockTestsPage() {
   const supabase = createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getAuthedUser();
 
   if (!user) {
     redirect('/login');

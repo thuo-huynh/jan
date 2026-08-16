@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation';
-import { createClient } from '@/shared/supabase/server';
+import { createClient, getAuthedUser } from '@/shared/supabase/server';
 import { ReadingLogManager } from '@/features/reading-listening/components/ReadingLogManager';
 import { PassageTypeBreakdown } from '@/features/reading-listening/components/PassageTypeBreakdown';
 import type { ReadingLog } from '@/features/reading-listening/types';
@@ -13,9 +13,7 @@ import type { ReadingLog } from '@/features/reading-listening/types';
  */
 export default async function ReadingLogPage() {
   const supabase = createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getAuthedUser();
 
   if (!user) {
     redirect('/login');

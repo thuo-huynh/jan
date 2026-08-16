@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation';
-import { createClient } from '@/shared/supabase/server';
+import { createClient, getAuthedUser } from '@/shared/supabase/server';
 import { HabitGridManager } from '@/features/habits/components/HabitGridManager';
 import { getMonthDays } from '@/features/habits/lib/calendar';
 import type { Habit, HabitCompletion } from '@/features/habits/types';
@@ -16,9 +16,7 @@ interface HabitsPageProps {
 
 export default async function HabitsPage({ searchParams }: HabitsPageProps) {
   const supabase = createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getAuthedUser();
 
   if (!user) {
     redirect('/login');

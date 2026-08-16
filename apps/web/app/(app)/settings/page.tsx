@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation';
-import { createClient } from '@/shared/supabase/server';
+import { createClient, getAuthedUser } from '@/shared/supabase/server';
 import { AppearanceSettingsManager } from '@/features/appearance/components/AppearanceSettingsManager';
 import type { Theme } from '@/features/appearance/types';
 
@@ -12,9 +12,7 @@ import type { Theme } from '@/features/appearance/types';
  */
 export default async function SettingsPage() {
   const supabase = createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getAuthedUser();
 
   if (!user) {
     redirect('/login');

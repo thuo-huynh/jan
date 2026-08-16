@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation';
-import { createClient } from '@/shared/supabase/server';
+import { getAuthedUser } from '@/shared/supabase/server';
 
 /**
  * Root route: never renders content of its own — sends signed-in users to
@@ -8,10 +8,6 @@ import { createClient } from '@/shared/supabase/server';
  * here, so it went unnoticed until deployment.
  */
 export default async function RootPage() {
-  const supabase = createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
+  const user = await getAuthedUser();
   redirect(user ? '/boards' : '/login');
 }

@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation';
-import { createClient } from '@/shared/supabase/server';
+import { createClient, getAuthedUser } from '@/shared/supabase/server';
 import { MistakeNotebookManager } from '@/features/mistakes/components/MistakeNotebookManager';
 import type { GrammarLinkOption, MistakeEntry, VocabLinkOption } from '@/features/mistakes/types';
 
@@ -11,9 +11,7 @@ import type { GrammarLinkOption, MistakeEntry, VocabLinkOption } from '@/feature
  */
 export default async function MistakesPage() {
   const supabase = createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getAuthedUser();
 
   if (!user) {
     redirect('/login');

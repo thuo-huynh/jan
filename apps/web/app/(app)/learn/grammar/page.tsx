@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation';
-import { createClient } from '@/shared/supabase/server';
+import { createClient, getAuthedUser } from '@/shared/supabase/server';
 import { GrammarList } from '@/features/grammar/components/GrammarList';
 import { mapGrammarPoint, type GrammarPointRecord, type UserGrammarStatusRecord } from '@/features/grammar/lib/mapGrammarPoint';
 import type { ConfusablePairRef, GrammarPointWithProgress } from '@/features/grammar/types';
@@ -14,9 +14,7 @@ import type { ConfusablePairRef, GrammarPointWithProgress } from '@/features/gra
  */
 export default async function GrammarListPage() {
   const supabase = createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getAuthedUser();
 
   if (!user) {
     redirect('/login');

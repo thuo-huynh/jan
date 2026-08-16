@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
-import { createClient } from '@/shared/supabase/server';
+import { createClient, getAuthedUser } from '@/shared/supabase/server';
 import { BoardView } from '@/features/kanban/components/Board';
 import type { BoardColumn, BoardTask, ChecklistItem } from '@/features/kanban/types';
 
@@ -17,9 +17,7 @@ interface BoardDetailPageProps {
  */
 export default async function BoardDetailPage({ params }: BoardDetailPageProps) {
   const supabase = createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getAuthedUser();
 
   if (!user) {
     redirect('/login');

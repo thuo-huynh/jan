@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation';
-import { createClient } from '@/shared/supabase/server';
+import { createClient, getAuthedUser } from '@/shared/supabase/server';
 import { BoardList } from '@/features/kanban/components/BoardList';
 
 /**
@@ -10,9 +10,7 @@ import { BoardList } from '@/features/kanban/components/BoardList';
  */
 export default async function BoardsPage() {
   const supabase = createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getAuthedUser();
 
   if (!user) {
     redirect('/login');
