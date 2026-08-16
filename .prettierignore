@@ -1,0 +1,13 @@
+node_modules
+.next
+out
+build
+coverage
+supabase/.branches
+supabase/.temp
+package-lock.json
+
+# spec-kit planning directories — managed by spec-kit tooling, not app source
+.specify
+.claude
+specs
