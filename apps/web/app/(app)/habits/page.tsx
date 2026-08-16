@@ -1,0 +1,68 @@
+import { redirect } from 'next/navigation';
+import { createClient } from '@/shared/supabase/server';
+import { HabitGridManager } from '@/features/habits/components/HabitGridManager';
+import { getMonthDays } from '@/features/habits/lib/calendar';
+import type { Habit, HabitCompletion } from '@/features/habits/types';
+
+/**
+ * Habit grid page (T006) — month-view grid, habits as rows / days as
+ * columns (US1). Server Component fetches the signed-in user's habits plus
+ * the viewed month's completions; the grid/tick interactivity and month
+ * navigation (T013) live in the client HabitGridManager.
+ */
+interface HabitsPageProps {
+  searchParams: { year?: string; month?: string };
+}
+
+export default async function HabitsPage({ searchParams }: HabitsPageProps) {
+  const supabase = createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    redirect('/login');
+  }
+
+  const now = new Date();
+  const year = Number(searchParams.year) || now.getFullYear();
+  const month = Number(searchParams.month) || now.getMonth() + 1; // 1-12
+
+  const days = getMonthDays(year, month);
+  const monthStart = days[0];
+  const monthEnd = days[days.length - 1];
+
+  const [{ data: habits, error: habitsError }, { data: completions }] = await Promise.all([
+    supabase.from('habits').select('*').order('created_at', { ascending: true }),
+    supabase
+      .from('habit_completions')
+      .select('*')
+      .gte('completion_date', monthStart)
+      .lte('completion_date', monthEnd),
+  ]);
+
+  return (
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-xl font-semibold text-foreground">Habits</h1>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Track daily habits on a calendar grid — tick a day to mark it done.
+        </p>
+      </div>
+
+      {habitsError ? (
+        <p className="rounded-md border border-danger/30 bg-danger/10 px-3 py-2 text-sm text-danger">
+          Could not load habits: {habitsError.message}
+        </p>
+      ) : (
+        <HabitGridManager
+          year={year}
+          month={month}
+          days={days}
+          initialHabits={(habits ?? []) as Habit[]}
+          initialCompletions={(completions ?? []) as HabitCompletion[]}
+        />
+      )}
+    </div>
+  );
+}

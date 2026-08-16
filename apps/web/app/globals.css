@@ -28,31 +28,35 @@
   --srs-easy: #3b82f6;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0b1120;
-    --foreground: #f1f5f9;
-    --card: #111827;
-    --border: #1e293b;
-    --muted: #1e293b;
-    --muted-foreground: #94a3b8;
+/*
+ * Dark mode is driven by an explicit `.dark` class on <html>, set
+ * server-side from the user's persisted appearance preference — never from
+ * `prefers-color-scheme` alone (specs/002-habit-tracker-theme/research.md
+ * §1). Users default to light mode (FR-009) regardless of OS preference.
+ */
+:root.dark {
+  --background: #0b1120;
+  --foreground: #f1f5f9;
+  --card: #111827;
+  --border: #1e293b;
+  --muted: #1e293b;
+  --muted-foreground: #94a3b8;
 
-    --primary: #2dd4bf;
-    --primary-foreground: #042f2e;
-    --secondary: #5eead4;
-    --secondary-foreground: #042f2e;
-    --accent: #fb923c;
-    --accent-foreground: #431407;
+  --primary: #2dd4bf;
+  --primary-foreground: #042f2e;
+  --secondary: #5eead4;
+  --secondary-foreground: #042f2e;
+  --accent: #fb923c;
+  --accent-foreground: #431407;
 
-    --success: #4ade80;
-    --warning: #fbbf24;
-    --danger: #f87171;
+  --success: #4ade80;
+  --warning: #fbbf24;
+  --danger: #f87171;
 
-    --srs-again: #f87171;
-    --srs-hard: #fbbf24;
-    --srs-good: #2dd4bf;
-    --srs-easy: #60a5fa;
-  }
+  --srs-again: #f87171;
+  --srs-hard: #fbbf24;
+  --srs-good: #2dd4bf;
+  --srs-easy: #60a5fa;
 }
 
 body {

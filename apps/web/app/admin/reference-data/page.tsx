@@ -20,12 +20,13 @@ const secondaryButtonClass =
 const dangerButtonClass =
   'rounded-md border border-danger/40 px-3 py-1.5 text-xs font-medium text-danger transition-colors hover:bg-danger/10 disabled:opacity-60';
 
-type Tab = 'vocab' | 'grammar' | 'pairs';
+type Tab = 'vocab' | 'grammar' | 'pairs' | 'themes';
 
 const TABS: { value: Tab; label: string }[] = [
   { value: 'vocab', label: 'Vocab & Kanji' },
   { value: 'grammar', label: 'Grammar Points' },
   { value: 'pairs', label: 'Confusable Pairs' },
+  { value: 'themes', label: 'Themes' },
 ];
 
 export default function AdminReferenceDataPage() {
@@ -61,6 +62,7 @@ export default function AdminReferenceDataPage() {
       {tab === 'vocab' && <VocabTab />}
       {tab === 'grammar' && <GrammarTab />}
       {tab === 'pairs' && <PairsTab />}
+      {tab === 'themes' && <ThemesTab />}
     </div>
   );
 }
@@ -862,6 +864,340 @@ function PairsTab() {
         </table>
       </div>
       <p className="text-xs text-muted-foreground">{total} total confusable pairs.</p>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Themes tab (T029-T031 — appearance system, US3)
+//
+// Deviation from tasks.md's file paths (ThemeAdminForm.tsx/ThemeAdminTable.tsx
+// as separate feature components): every other tab on this page (Vocab,
+// Grammar, Pairs) is a single self-contained function in this same file, not
+// split into features/admin/components/* — matching that established
+// in-file convention here instead of introducing a one-off different
+// structure for just this tab. See report.
+// ---------------------------------------------------------------------------
+
+type ThemeRow = {
+  id: string;
+  slug: string;
+  name: string;
+  sort_order: number;
+  primary_light: string;
+  primary_foreground_light: string;
+  secondary_light: string;
+  secondary_foreground_light: string;
+  accent_light: string;
+  accent_foreground_light: string;
+  primary_dark: string;
+  primary_foreground_dark: string;
+  secondary_dark: string;
+  secondary_foreground_dark: string;
+  accent_dark: string;
+  accent_foreground_dark: string;
+};
+
+const emptyThemeForm = {
+  id: null as string | null,
+  slug: '',
+  name: '',
+  sortOrder: '0',
+  primaryLight: '#0d9488',
+  primaryForegroundLight: '#f0fdfa',
+  secondaryLight: '#14b8a6',
+  secondaryForegroundLight: '#f0fdfa',
+  accentLight: '#f97316',
+  accentForegroundLight: '#ffffff',
+  primaryDark: '#2dd4bf',
+  primaryForegroundDark: '#042f2e',
+  secondaryDark: '#5eead4',
+  secondaryForegroundDark: '#042f2e',
+  accentDark: '#fb923c',
+  accentForegroundDark: '#431407',
+};
+
+function ColorField({
+  label,
+  value,
+  onChange,
+}: {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+}) {
+  return (
+    <div>
+      <label className={labelClass}>{label}</label>
+      <div className="flex items-center gap-2">
+        <input
+          type="color"
+          value={/^#[0-9a-fA-F]{6}$/.test(value) ? value : '#000000'}
+          onChange={(e) => onChange(e.target.value)}
+          className="h-9 w-9 shrink-0 rounded border border-border bg-background p-0.5"
+        />
+        <input
+          className={inputClass}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder="#000000"
+        />
+      </div>
+    </div>
+  );
+}
+
+function ThemesTab() {
+  const [items, setItems] = useState<ThemeRow[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [form, setForm] = useState(emptyThemeForm);
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await fetch('/api/admin/reference-data/themes');
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error ?? 'Failed to load themes');
+      setItems(json.items);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load themes');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    load();
+  }, [load]);
+
+  async function handleSubmit() {
+    setSaving(true);
+    setError(null);
+    try {
+      const payload = {
+        slug: form.slug.trim(),
+        name: form.name.trim(),
+        sortOrder: Number(form.sortOrder) || 0,
+        primaryLight: form.primaryLight,
+        primaryForegroundLight: form.primaryForegroundLight,
+        secondaryLight: form.secondaryLight,
+        secondaryForegroundLight: form.secondaryForegroundLight,
+        accentLight: form.accentLight,
+        accentForegroundLight: form.accentForegroundLight,
+        primaryDark: form.primaryDark,
+        primaryForegroundDark: form.primaryForegroundDark,
+        secondaryDark: form.secondaryDark,
+        secondaryForegroundDark: form.secondaryForegroundDark,
+        accentDark: form.accentDark,
+        accentForegroundDark: form.accentForegroundDark,
+      };
+      const res = await fetch('/api/admin/reference-data/themes', {
+        method: form.id ? 'PUT' : 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(form.id ? { id: form.id, ...payload } : payload),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error?.formErrors?.[0] ?? json.error ?? 'Save failed');
+      setForm(emptyThemeForm);
+      await load();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Save failed');
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function handleDelete(id: string) {
+    if (!window.confirm('Delete this theme? Users who have it selected will fall back to the default theme.'))
+      return;
+    setError(null);
+    try {
+      const res = await fetch(`/api/admin/reference-data/themes?id=${id}`, { method: 'DELETE' });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error ?? 'Delete failed');
+      await load();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Delete failed');
+    }
+  }
+
+  return (
+    <div className="space-y-6">
+      <div className="rounded-lg border border-border bg-card p-4">
+        <h2 className="text-sm font-semibold text-foreground">
+          {form.id ? 'Edit theme' : 'Add new theme'}
+        </h2>
+        <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-3">
+          <div>
+            <label className={labelClass}>Name</label>
+            <input
+              className={inputClass}
+              value={form.name}
+              onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
+            />
+          </div>
+          <div>
+            <label className={labelClass}>Slug</label>
+            <input
+              className={inputClass}
+              placeholder="lowercase-with-hyphens"
+              value={form.slug}
+              onChange={(e) => setForm((f) => ({ ...f, slug: e.target.value }))}
+            />
+          </div>
+          <div>
+            <label className={labelClass}>Sort order</label>
+            <input
+              type="number"
+              className={inputClass}
+              value={form.sortOrder}
+              onChange={(e) => setForm((f) => ({ ...f, sortOrder: e.target.value }))}
+            />
+          </div>
+        </div>
+
+        <div className="mt-4 grid grid-cols-1 gap-6 sm:grid-cols-2">
+          <div>
+            <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+              Light mode
+            </h3>
+            <div className="space-y-3">
+              <ColorField label="Primary" value={form.primaryLight} onChange={(v) => setForm((f) => ({ ...f, primaryLight: v }))} />
+              <ColorField label="Primary foreground" value={form.primaryForegroundLight} onChange={(v) => setForm((f) => ({ ...f, primaryForegroundLight: v }))} />
+              <ColorField label="Secondary" value={form.secondaryLight} onChange={(v) => setForm((f) => ({ ...f, secondaryLight: v }))} />
+              <ColorField label="Secondary foreground" value={form.secondaryForegroundLight} onChange={(v) => setForm((f) => ({ ...f, secondaryForegroundLight: v }))} />
+              <ColorField label="Accent" value={form.accentLight} onChange={(v) => setForm((f) => ({ ...f, accentLight: v }))} />
+              <ColorField label="Accent foreground" value={form.accentForegroundLight} onChange={(v) => setForm((f) => ({ ...f, accentForegroundLight: v }))} />
+            </div>
+          </div>
+          <div>
+            <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+              Dark mode
+            </h3>
+            <div className="space-y-3">
+              <ColorField label="Primary" value={form.primaryDark} onChange={(v) => setForm((f) => ({ ...f, primaryDark: v }))} />
+              <ColorField label="Primary foreground" value={form.primaryForegroundDark} onChange={(v) => setForm((f) => ({ ...f, primaryForegroundDark: v }))} />
+              <ColorField label="Secondary" value={form.secondaryDark} onChange={(v) => setForm((f) => ({ ...f, secondaryDark: v }))} />
+              <ColorField label="Secondary foreground" value={form.secondaryForegroundDark} onChange={(v) => setForm((f) => ({ ...f, secondaryForegroundDark: v }))} />
+              <ColorField label="Accent" value={form.accentDark} onChange={(v) => setForm((f) => ({ ...f, accentDark: v }))} />
+              <ColorField label="Accent foreground" value={form.accentForegroundDark} onChange={(v) => setForm((f) => ({ ...f, accentForegroundDark: v }))} />
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-4 flex gap-2">
+          <button
+            type="button"
+            disabled={saving || !form.slug.trim() || !form.name.trim()}
+            onClick={handleSubmit}
+            className={primaryButtonClass}
+          >
+            {form.id ? 'Save changes' : 'Add theme'}
+          </button>
+          {form.id && (
+            <button type="button" onClick={() => setForm(emptyThemeForm)} className={secondaryButtonClass}>
+              Cancel
+            </button>
+          )}
+        </div>
+      </div>
+
+      {error && (
+        <div className="rounded-md border border-danger/30 bg-danger/10 px-4 py-2 text-sm text-danger">
+          {error}
+        </div>
+      )}
+
+      <div className="overflow-x-auto rounded-lg border border-border bg-card">
+        <table className="w-full text-left text-sm">
+          <thead className="border-b border-border text-xs uppercase tracking-wide text-muted-foreground">
+            <tr>
+              <th className="px-4 py-3">Order</th>
+              <th className="px-4 py-3">Name</th>
+              <th className="px-4 py-3">Slug</th>
+              <th className="px-4 py-3">Preview</th>
+              <th className="px-4 py-3 text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {loading && (
+              <tr>
+                <td colSpan={5} className="px-4 py-6 text-center text-muted-foreground">
+                  Loading…
+                </td>
+              </tr>
+            )}
+            {!loading && items.length === 0 && (
+              <tr>
+                <td colSpan={5} className="px-4 py-6 text-center text-muted-foreground">
+                  No themes yet.
+                </td>
+              </tr>
+            )}
+            {!loading &&
+              items.map((item) => (
+                <tr key={item.id} className="border-b border-border last:border-0">
+                  <td className="px-4 py-3 text-muted-foreground">{item.sort_order}</td>
+                  <td className="px-4 py-3 text-foreground">{item.name}</td>
+                  <td className="px-4 py-3 text-muted-foreground">{item.slug}</td>
+                  <td className="px-4 py-3">
+                    <div className="flex gap-1">
+                      <span
+                        className="h-5 w-5 rounded-full border border-border"
+                        style={{ backgroundColor: item.primary_light }}
+                      />
+                      <span
+                        className="h-5 w-5 rounded-full border border-border"
+                        style={{ backgroundColor: item.secondary_light }}
+                      />
+                      <span
+                        className="h-5 w-5 rounded-full border border-border"
+                        style={{ backgroundColor: item.accent_light }}
+                      />
+                    </div>
+                  </td>
+                  <td className="px-4 py-3">
+                    <div className="flex justify-end gap-2">
+                      <button
+                        type="button"
+                        className={secondaryButtonClass.replace('px-4 py-2', 'px-3 py-1.5 text-xs')}
+                        onClick={() =>
+                          setForm({
+                            id: item.id,
+                            slug: item.slug,
+                            name: item.name,
+                            sortOrder: String(item.sort_order),
+                            primaryLight: item.primary_light,
+                            primaryForegroundLight: item.primary_foreground_light,
+                            secondaryLight: item.secondary_light,
+                            secondaryForegroundLight: item.secondary_foreground_light,
+                            accentLight: item.accent_light,
+                            accentForegroundLight: item.accent_foreground_light,
+                            primaryDark: item.primary_dark,
+                            primaryForegroundDark: item.primary_foreground_dark,
+                            secondaryDark: item.secondary_dark,
+                            secondaryForegroundDark: item.secondary_foreground_dark,
+                            accentDark: item.accent_dark,
+                            accentForegroundDark: item.accent_foreground_dark,
+                          })
+                        }
+                      >
+                        Edit
+                      </button>
+                      <button type="button" className={dangerButtonClass} onClick={() => handleDelete(item.id)}>
+                        Delete
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+          </tbody>
+        </table>
+      </div>
+      <p className="text-xs text-muted-foreground">{items.length} total themes.</p>
     </div>
   );
 }

@@ -191,3 +191,54 @@ export const confusablePairSchema = z.object({
   comparisonNote: z.string().trim().min(1, 'Comparison note is required').max(5000),
 });
 export type ConfusablePairInput = z.infer<typeof confusablePairSchema>;
+
+// ---------------------------------------------------------------------------
+// Habit tracker (habits — T004)
+// ---------------------------------------------------------------------------
+
+export const habitSchema = z.object({
+  name: z.string().trim().min(1, 'Habit name is required').max(100),
+});
+export type HabitInput = z.infer<typeof habitSchema>;
+
+// ---------------------------------------------------------------------------
+// Appearance (user_appearance_preferences — T018, POST /api/appearance)
+// ---------------------------------------------------------------------------
+
+export const appearanceModeEnum = z.enum(['light', 'dark']);
+
+export const appearanceSchema = z.object({
+  mode: appearanceModeEnum.optional(),
+  themeId: uuid.optional(),
+});
+export type AppearanceInput = z.infer<typeof appearanceSchema>;
+
+// ---------------------------------------------------------------------------
+// Admin theme CRUD (themes — T030, /api/admin/reference-data/themes)
+// ---------------------------------------------------------------------------
+
+const hexColor = z.string().regex(/^#[0-9a-fA-F]{6}$/, 'Expected a hex color like #0d9488');
+
+export const themeSchema = z.object({
+  slug: z
+    .string()
+    .trim()
+    .min(1, 'Slug is required')
+    .max(50)
+    .regex(/^[a-z0-9-]+$/, 'Slug must be lowercase letters, numbers, and hyphens only'),
+  name: z.string().trim().min(1, 'Name is required').max(100),
+  sortOrder: z.number().int().min(0).optional().default(0),
+  primaryLight: hexColor,
+  primaryForegroundLight: hexColor,
+  secondaryLight: hexColor,
+  secondaryForegroundLight: hexColor,
+  accentLight: hexColor,
+  accentForegroundLight: hexColor,
+  primaryDark: hexColor,
+  primaryForegroundDark: hexColor,
+  secondaryDark: hexColor,
+  secondaryForegroundDark: hexColor,
+  accentDark: hexColor,
+  accentForegroundDark: hexColor,
+});
+export type ThemeInput = z.infer<typeof themeSchema>;
