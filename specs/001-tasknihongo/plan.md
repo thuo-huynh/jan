@@ -50,76 +50,79 @@ specs/001-tasknihongo/
 
 ### Source Code (repository root)
 
+Repository root splits into two top-level apps: `apps/web` (Next.js frontend) and `apps/supabase` (database schema/config), kept as plain sibling folders (no workspace tooling — a single app consumes Supabase today). Inside `apps/web`, routing lives under `app/` per Next.js App Router requirements, but route files stay thin and import their UI/logic from `features/<module>/` — one folder per user story, so each module's components and logic live in one place. Cross-module infrastructure (Supabase clients, SRS scheduler, shared validation) lives in `shared/`.
+
 ```text
-app/                              # Next.js App Router root
-├── (auth)/
-│   ├── login/page.tsx
-│   └── signup/page.tsx
-├── (app)/                        # authenticated user shell
-│   ├── boards/
-│   │   ├── page.tsx               # board list
-│   │   └── [boardId]/page.tsx     # single Kanban board
-│   ├── learn/
-│   │   ├── grammar/
-│   │   │   ├── page.tsx           # N2 grammar list, status, level-diff filter
-│   │   │   └── confusables/[pairId]/page.tsx  # side-by-side comparison view
-│   │   ├── vocab/page.tsx         # vocab/kanji deck management (browse/add custom)
-│   │   ├── review/page.tsx        # blended SRS review queue (vocab+kanji+grammar, weak-only mode)
-│   │   ├── reading/page.tsx       # reading log entry + history + by-type breakdown
-│   │   ├── listening/page.tsx     # listening log entry + history
-│   │   ├── mock-tests/page.tsx    # score entry + trend chart + exam countdown
-│   │   ├── mistakes/page.tsx      # mistake notebook
-│   │   └── dashboard/page.tsx     # consolidated progress dashboard + streak heatmap
-│   └── notes/
-│       ├── page.tsx               # notes list/search
-│       └── [noteId]/page.tsx
-├── admin/                         # role-gated admin route group
-│   ├── layout.tsx                 # server-side role check
-│   ├── users/page.tsx
-│   ├── content/page.tsx
-│   ├── stats/page.tsx
-│   └── reference-data/            # global vocab / kanji / grammar / confusable-pair management
-│       └── page.tsx
-├── api/                           # Next.js route handlers (server-side only actions)
-│   ├── reviews/route.ts           # SRS review submission (vocab/kanji/grammar; computes next interval)
-│   ├── mistakes/[id]/add-to-srs/route.ts  # one-click mistake → SRS scheduling
-│   └── admin/**/route.ts          # admin mutations using service-role client
-└── middleware.ts                  # session refresh + admin route guard
-
-lib/
-├── supabase/
-│   ├── client.ts                  # browser client
-│   ├── server.ts                  # server component / route handler client
-│   └── admin.ts                   # service-role client (server-only, admin routes)
-├── srs/
-│   └── sm2.ts                     # spaced-repetition scheduling logic, shared by vocab/kanji and grammar reviews
-├── study/
-│   └── heatmap.ts                 # daily-activity aggregation for streak heatmap + goal-met calc
-└── validation/                    # shared zod schemas for forms + API routes
-
-components/
-├── board/                         # Kanban board, column, task card, dnd-kit wiring
-├── learn/
-│   ├── grammar/                   # grammar list row, status control, confusable-pair comparison card
-│   ├── review/                    # unified review card (vocab/kanji/grammar), weak-only toggle
-│   ├── logs/                      # reading/listening log form + history table
-│   ├── mock-tests/                # score form, trend chart
-│   ├── mistakes/                  # mistake notebook table + add-to-SRS button
-│   └── dashboard/                 # mastery counters, heatmap, weak-area summary
-├── notes/                         # markdown editor/renderer, folder/tag picker
-└── admin/                         # user table, content moderation table, stats cards, reference-data editor
-
-supabase/
-├── migrations/                    # SQL migrations: schema + RLS policies
-└── seed.sql                       # global N2 grammar points, confusable pairs, N2 vocab/kanji seed data
-
-tests/
-├── unit/                          # sm2.ts, heatmap.ts, validation schemas, pure helpers
-├── integration/                   # Supabase RLS policy tests (per-table isolation, incl. grammar-status/logs)
-└── e2e/                           # Playwright: kanban dnd, grammar+confusables flow, blended review, mistake→SRS, admin gate
+apps/
+├── web/                             # Next.js application
+│   ├── app/                         # Next.js App Router root — routing only, thin pages
+│   │   ├── (auth)/
+│   │   │   ├── login/page.tsx
+│   │   │   └── signup/page.tsx
+│   │   ├── (app)/                   # authenticated user shell
+│   │   │   ├── boards/
+│   │   │   │   ├── page.tsx               # board list
+│   │   │   │   └── [boardId]/page.tsx     # single Kanban board
+│   │   │   ├── learn/
+│   │   │   │   ├── grammar/
+│   │   │   │   │   ├── page.tsx           # N2 grammar list, status, level-diff filter
+│   │   │   │   │   └── confusables/[pairId]/page.tsx  # side-by-side comparison view
+│   │   │   │   ├── vocab/page.tsx         # vocab/kanji deck management (browse/add custom)
+│   │   │   │   ├── review/page.tsx        # blended SRS review queue (vocab+kanji+grammar, weak-only mode)
+│   │   │   │   ├── reading/page.tsx       # reading log entry + history + by-type breakdown
+│   │   │   │   ├── listening/page.tsx     # listening log entry + history
+│   │   │   │   ├── mock-tests/page.tsx    # score entry + trend chart + exam countdown
+│   │   │   │   ├── mistakes/page.tsx      # mistake notebook
+│   │   │   │   └── dashboard/page.tsx     # consolidated progress dashboard + streak heatmap
+│   │   │   └── notes/
+│   │   │       ├── page.tsx               # notes list/search
+│   │   │       └── [noteId]/page.tsx
+│   │   ├── admin/                   # role-gated admin route group
+│   │   │   ├── layout.tsx                 # server-side role check
+│   │   │   ├── users/page.tsx
+│   │   │   ├── content/page.tsx
+│   │   │   ├── stats/page.tsx
+│   │   │   └── reference-data/            # global vocab / kanji / grammar / confusable-pair management
+│   │   │       └── page.tsx
+│   │   ├── api/                     # Next.js route handlers (server-side only actions)
+│   │   │   ├── reviews/route.ts           # SRS review submission (vocab/kanji/grammar; computes next interval)
+│   │   │   ├── mistakes/[id]/add-to-srs/route.ts  # one-click mistake → SRS scheduling
+│   │   │   └── admin/**/route.ts          # admin mutations using service-role client
+│   │   └── middleware.ts            # session refresh + admin route guard
+│   │
+│   ├── features/                    # one folder per user story — components + module-local logic
+│   │   ├── kanban/components/             # US1: board, column, task card, dnd-kit wiring
+│   │   ├── grammar/components/            # US2: grammar list row, status control, confusable-pair card
+│   │   ├── vocab-srs/components/          # US3: vocab/kanji forms, unified review card
+│   │   ├── reading-listening/components/  # US4: log form + history table, attach-to-SRS action
+│   │   ├── mock-tests/components/         # US5: score form, trend chart, exam date + countdown widget
+│   │   ├── mistakes/components/           # US6: mistake notebook table + add-to-SRS button
+│   │   ├── study-plan/{components,lib}/   # US7: goal settings, streak heatmap, study-time chart, heatmap.ts
+│   │   ├── dashboard/lib/                 # US8: weak-area aggregation (weak-areas.ts)
+│   │   ├── notes/components/              # US9: markdown editor/renderer, folder/tag picker
+│   │   └── admin/components/              # US10: user table, content moderation, stats cards, reference-data editor
+│   │
+│   ├── shared/                      # cross-module infrastructure
+│   │   ├── supabase/
+│   │   │   ├── client.ts                  # browser client
+│   │   │   ├── server.ts                  # server component / route handler client
+│   │   │   └── admin.ts                   # service-role client (server-only, admin routes)
+│   │   ├── srs/
+│   │   │   └── sm2.ts                     # spaced-repetition scheduling logic, shared by vocab/kanji and grammar reviews
+│   │   └── validation/                    # shared zod schemas for forms + API routes
+│   │
+│   └── tests/
+│       ├── unit/                    # sm2.ts, heatmap.ts, validation schemas, pure helpers
+│       ├── integration/             # Supabase RLS policy tests (per-table isolation, incl. grammar-status/logs)
+│       └── e2e/                     # Playwright: kanban dnd, grammar+confusables flow, blended review, mistake→SRS, admin gate
+│
+└── supabase/                        # Supabase project (schema/config only, no app code)
+    ├── config.toml
+    ├── migrations/                  # SQL migrations: schema + RLS policies
+    └── seed.sql                     # global N2 grammar points, confusable pairs, N2 vocab/kanji seed data
 ```
 
-**Structure Decision**: Single Next.js application (Supabase as an external managed backend rather than a custom backend service to build). Route groups separate the public/auth area, the authenticated user app shell — now with a substantially larger `learn/` subtree covering grammar, vocab/kanji, review, reading/listening logs, mock tests, mistakes, and dashboard — and the role-gated `/admin` area (now also managing reference data for grammar/confusables in addition to vocab).
+**Structure Decision**: Single Next.js application (Supabase as an external managed backend rather than a custom backend service to build), split into `apps/web` and `apps/supabase` as plain sibling folders — no workspace tooling, since only one app consumes Supabase today. Within `apps/web`, `app/` route groups separate the public/auth area, the authenticated user app shell — now with a substantially larger `learn/` subtree covering grammar, vocab/kanji, review, reading/listening logs, mock tests, mistakes, and dashboard — and the role-gated `/admin` area (now also managing reference data for grammar/confusables in addition to vocab); each route composes UI from its matching `features/<module>/` folder so a module's code stays in one place.
 
 ## Complexity Tracking
 

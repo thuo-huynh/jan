@@ -23,7 +23,7 @@ Submits a graded SRS review for one vocab/kanji item **or** one grammar point; s
 
 **Behavior**:
 1. Resolve current SRS state: for `itemType: "vocab"` with a global (`user_id IS NULL`) item, read/write `user_vocab_progress`; for a user-owned custom item, read/write `vocab_entries` directly. For `itemType: "grammar"`, read/write the SRS columns on `user_grammar_status` (data-model.md), scoped to the caller — creating the row lazily if this is the item's first review.
-2. Run `lib/srs/sm2.ts` with the current state + `result` → new state + `nextDueDate`; increment `fail_count` on `"again"`.
+2. Run `apps/web/shared/srs/sm2.ts` with the current state + `result` → new state + `nextDueDate`; increment `fail_count` on `"again"`.
 3. Persist the updated state; insert a `review_logs` row with exactly one of `vocab_id`/`grammar_id` set.
 4. Return the updated schedule.
 
@@ -109,7 +109,7 @@ Aggregates the consolidated progress dashboard in one call rather than N client-
 
 ## Admin routes (`/api/admin/**`)
 
-All routes in this group are additionally gated by the server-side role check in `app/admin/layout.tsx` (session role must be `admin`); route handlers use the service-role Supabase client (`lib/supabase/admin.ts`) since admin reads/writes intentionally cross the per-user RLS boundary.
+All routes in this group are additionally gated by the server-side role check in `apps/web/app/admin/layout.tsx` (session role must be `admin`); route handlers use the service-role Supabase client (`apps/web/shared/supabase/admin.ts`) since admin reads/writes intentionally cross the per-user RLS boundary.
 
 ### GET /api/admin/users?query=&page=
 
@@ -158,4 +158,4 @@ CRUD on the global (`user_id IS NULL`) rows of `vocab_entries`, `grammar_points`
 
 - Sign-up/sign-in: Supabase Auth email/password (+ optional OAuth provider), handled by `@supabase/ssr` helpers; no custom password-handling code (FR-001).
 - On successful auth, a `profiles` row is created/synced via a Postgres trigger on `auth.users` insert (standard Supabase pattern) — not a custom API contract.
-- `middleware.ts` refreshes the session on every request and redirects unauthenticated requests away from any `(app)` or `/admin` route (FR-001, FR-003).
+- `apps/web/middleware.ts` refreshes the session on every request and redirects unauthenticated requests away from any `(app)` or `/admin` route (FR-001, FR-003).
