@@ -28,12 +28,12 @@ Two sibling apps per plan.md's Project Structure: `apps/web/` (Next.js: `app/` r
 
 **Purpose**: Project initialization and basic structure
 
-- [ ] T001 Initialize Next.js 14+ App Router project with TypeScript and Tailwind CSS inside `apps/web/`
-- [ ] T002 Install core dependencies inside `apps/web/`: `@supabase/supabase-js`, `@supabase/ssr`, `dnd-kit` (`@dnd-kit/core`, `@dnd-kit/sortable`), `react-markdown`, `rehype-sanitize`, `remark-gfm`, `recharts`, `zod`
-- [ ] T003 [P] Configure ESLint + Prettier for the project
-- [ ] T004 [P] Initialize Supabase project config at `apps/supabase/config.toml` for local dev (`supabase init`), run inside `apps/supabase/`
-- [ ] T005 [P] Create `.env.example` documenting `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`
-- [ ] T006 [P] Create base directory structure per plan.md: `apps/web/app/(auth)/`, `apps/web/app/(app)/`, `apps/web/app/admin/`, `apps/web/app/api/`, `apps/web/shared/supabase/`, `apps/web/shared/srs/`, `apps/web/shared/validation/`, `apps/web/features/kanban/components/`, `apps/web/features/grammar/components/`, `apps/web/features/vocab-srs/components/`, `apps/web/features/reading-listening/components/`, `apps/web/features/mock-tests/components/`, `apps/web/features/mistakes/components/`, `apps/web/features/study-plan/components/`, `apps/web/features/study-plan/lib/`, `apps/web/features/dashboard/lib/`, `apps/web/features/notes/components/`, `apps/web/features/admin/components/`, `apps/web/tests/unit/`, `apps/web/tests/integration/`, `apps/web/tests/e2e/`, `apps/supabase/migrations/`
+- [x] T001 Initialize Next.js 14+ App Router project with TypeScript and Tailwind CSS inside `apps/web/`
+- [x] T002 Install core dependencies inside `apps/web/`: `@supabase/supabase-js`, `@supabase/ssr`, `dnd-kit` (`@dnd-kit/core`, `@dnd-kit/sortable`), `react-markdown`, `rehype-sanitize`, `remark-gfm`, `recharts`, `zod`
+- [x] T003 [P] Configure ESLint + Prettier for the project
+- [x] T004 [P] Initialize Supabase project config at `apps/supabase/config.toml` for local dev (`supabase init`), run inside `apps/supabase/`
+- [x] T005 [P] Create `.env.example` documenting `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`
+- [x] T006 [P] Create base directory structure per plan.md: `apps/web/app/(auth)/`, `apps/web/app/(app)/`, `apps/web/app/admin/`, `apps/web/app/api/`, `apps/web/shared/supabase/`, `apps/web/shared/srs/`, `apps/web/shared/validation/`, `apps/web/features/kanban/components/`, `apps/web/features/grammar/components/`, `apps/web/features/vocab-srs/components/`, `apps/web/features/reading-listening/components/`, `apps/web/features/mock-tests/components/`, `apps/web/features/mistakes/components/`, `apps/web/features/study-plan/components/`, `apps/web/features/study-plan/lib/`, `apps/web/features/dashboard/lib/`, `apps/web/features/notes/components/`, `apps/web/features/admin/components/`, `apps/web/tests/unit/`, `apps/web/tests/integration/`, `apps/web/tests/e2e/`, `apps/supabase/migrations/`
 
 **Checkpoint**: Project scaffold exists and installs/builds cleanly.
 
@@ -47,39 +47,39 @@ Two sibling apps per plan.md's Project Structure: `apps/web/` (Next.js: `app/` r
 
 ### Database schema & RLS
 
-- [ ] T007 Create migration for `profiles` table + trigger to sync from `auth.users` on signup in `apps/supabase/migrations/0001_profiles.sql`
-- [ ] T008 Create migration for `boards`, `columns`, `tasks`, `task_checklist_items` in `apps/supabase/migrations/0002_kanban.sql`
-- [ ] T009 Create migration for `vocab_entries` and `user_vocab_progress` in `apps/supabase/migrations/0003_vocab.sql`
-- [ ] T010 Create migration for `grammar_points`, `user_grammar_status`, `grammar_confusable_pairs` in `apps/supabase/migrations/0004_grammar.sql`
-- [ ] T011 Create migration for `reading_logs`, `listening_logs` in `apps/supabase/migrations/0005_logs.sql`
-- [ ] T012 Create migration for `mock_test_results` in `apps/supabase/migrations/0006_mock_tests.sql`
-- [ ] T013 Create migration for `mistake_notebook` in `apps/supabase/migrations/0007_mistakes.sql`
-- [ ] T014 Create migration for `notes` (incl. generated `search_vector` + GIN index) in `apps/supabase/migrations/0008_notes.sql`
-- [ ] T015 Create migration for `review_logs` (with `vocab_id`/`grammar_id` exactly-one-set check constraint) in `apps/supabase/migrations/0009_review_logs.sql`
-- [ ] T016 Create migration for `study_goals` in `apps/supabase/migrations/0010_study_goals.sql`
-- [ ] T017 Write RLS policies for all owner-scoped tables (`boards`, `columns`, `tasks`, `task_checklist_items`, `user_vocab_progress`, `user_grammar_status`, `reading_logs`, `listening_logs`, `mock_test_results`, `mistake_notebook`, `notes`, `review_logs`, `study_goals`, `profiles`) in `apps/supabase/migrations/0011_rls_owner_scoped.sql`, per data-model.md RLS Summary
-- [ ] T018 Write RLS policies for global/reference tables (`vocab_entries` and `grammar_points` where `user_id IS NULL` readable by all authenticated users, writable only by service-role; `grammar_confusable_pairs` readable by all, writable only by service-role) in `apps/supabase/migrations/0012_rls_reference_data.sql`
+- [x] T007 Create migration for `profiles` table + trigger to sync from `auth.users` on signup in `apps/supabase/migrations/0001_profiles.sql`
+- [x] T008 Create migration for `boards`, `columns`, `tasks`, `task_checklist_items` in `apps/supabase/migrations/0002_kanban.sql`
+- [x] T009 Create migration for `vocab_entries` and `user_vocab_progress` in `apps/supabase/migrations/0003_vocab.sql`
+- [x] T010 Create migration for `grammar_points`, `user_grammar_status`, `grammar_confusable_pairs` in `apps/supabase/migrations/0004_grammar.sql`
+- [x] T011 Create migration for `reading_logs`, `listening_logs` in `apps/supabase/migrations/0005_logs.sql`
+- [x] T012 Create migration for `mock_test_results` in `apps/supabase/migrations/0006_mock_tests.sql`
+- [x] T013 Create migration for `mistake_notebook` in `apps/supabase/migrations/0007_mistakes.sql`
+- [x] T014 Create migration for `notes` (incl. generated `search_vector` + GIN index) in `apps/supabase/migrations/0008_notes.sql`
+- [x] T015 Create migration for `review_logs` (with `vocab_id`/`grammar_id` exactly-one-set check constraint) in `apps/supabase/migrations/0009_review_logs.sql`
+- [x] T016 Create migration for `study_goals` in `apps/supabase/migrations/0010_study_goals.sql`
+- [x] T017 Write RLS policies for all owner-scoped tables (`boards`, `columns`, `tasks`, `task_checklist_items`, `user_vocab_progress`, `user_grammar_status`, `reading_logs`, `listening_logs`, `mock_test_results`, `mistake_notebook`, `notes`, `review_logs`, `study_goals`, `profiles`) in `apps/supabase/migrations/0011_rls_owner_scoped.sql`, per data-model.md RLS Summary
+- [x] T018 Write RLS policies for global/reference tables (`vocab_entries` and `grammar_points` where `user_id IS NULL` readable by all authenticated users, writable only by service-role; `grammar_confusable_pairs` readable by all, writable only by service-role) in `apps/supabase/migrations/0012_rls_reference_data.sql`
 
 ### Reference content seeding
 
-- [ ] T019 [P] Write `apps/supabase/seed.sql` seeding a representative sample of global `vocab_entries` (words + kanji, `is_kanji` flag set correctly) — full ~6,000/~1,000 content sourcing is a separate content task, seed enough for dev/test
-- [ ] T020 [P] Extend `apps/supabase/seed.sql` with ~200 global `grammar_points` rows and a handful of `grammar_confusable_pairs` (e.g. 〜として vs 〜にとって, 〜わけではない vs 〜わけがない) with comparison notes
+- [x] T019 [P] Write `apps/supabase/seed.sql` seeding a representative sample of global `vocab_entries` (words + kanji, `is_kanji` flag set correctly) — full ~6,000/~1,000 content sourcing is a separate content task, seed enough for dev/test
+- [x] T020 [P] Extend `apps/supabase/seed.sql` with ~200 global `grammar_points` rows and a handful of `grammar_confusable_pairs` (e.g. 〜として vs 〜にとって, 〜わけではない vs 〜わけがない) with comparison notes
 
 ### Auth & session
 
-- [ ] T021 Implement Supabase browser client in `apps/web/shared/supabase/client.ts`
-- [ ] T022 Implement Supabase server client (Server Components / Route Handlers) using `@supabase/ssr` in `apps/web/shared/supabase/server.ts`
-- [ ] T023 Implement Supabase service-role client (server-only) in `apps/web/shared/supabase/admin.ts`
-- [ ] T024 Implement `apps/web/middleware.ts`: refresh session on every request, redirect unauthenticated requests away from `(app)`/`admin` routes
-- [ ] T025 [P] Build sign-up page in `apps/web/app/(auth)/signup/page.tsx`
-- [ ] T026 [P] Build sign-in page in `apps/web/app/(auth)/login/page.tsx`
-- [ ] T027 Build authenticated app shell layout with nav (Boards / Learn / Notes) in `apps/web/app/(app)/layout.tsx`
-- [ ] T028 Build admin route group layout with server-side role check (redirect/403 if `profiles.role !== 'admin'`) in `apps/web/app/admin/layout.tsx`
+- [x] T021 Implement Supabase browser client in `apps/web/shared/supabase/client.ts`
+- [x] T022 Implement Supabase server client (Server Components / Route Handlers) using `@supabase/ssr` in `apps/web/shared/supabase/server.ts`
+- [x] T023 Implement Supabase service-role client (server-only) in `apps/web/shared/supabase/admin.ts`
+- [x] T024 Implement `apps/web/middleware.ts`: refresh session on every request, redirect unauthenticated requests away from `(app)`/`admin` routes
+- [x] T025 [P] Build sign-up page in `apps/web/app/(auth)/signup/page.tsx`
+- [x] T026 [P] Build sign-in page in `apps/web/app/(auth)/login/page.tsx`
+- [x] T027 Build authenticated app shell layout with nav (Boards / Learn / Notes) in `apps/web/app/(app)/layout.tsx`
+- [x] T028 Build admin route group layout with server-side role check (redirect/403 if `profiles.role !== 'admin'`) in `apps/web/app/admin/layout.tsx`
 
 ### Shared logic
 
-- [ ] T029 [P] Implement shared SM-2-style scheduler (`computeNextReview(state, result)`) in `apps/web/shared/srs/sm2.ts`
-- [ ] T030 [P] Implement shared zod validation schemas (task, board/column, vocab entry, grammar status, note, log entry forms) in `apps/web/shared/validation/schemas.ts`
+- [x] T029 [P] Implement shared SM-2-style scheduler (`computeNextReview(state, result)`) in `apps/web/shared/srs/sm2.ts`
+- [x] T030 [P] Implement shared zod validation schemas (task, board/column, vocab entry, grammar status, note, log entry forms) in `apps/web/shared/validation/schemas.ts`
 
 **Checkpoint**: Schema, RLS, auth, and shared scheduling/validation logic exist — user story implementation can now begin.
 
