@@ -3,25 +3,76 @@
 @tailwind utilities;
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #f8fafc;
+  --foreground: #0f172a;
+  --card: #ffffff;
+  --border: #e2e8f0;
+  --muted: #f1f5f9;
+  --muted-foreground: #475569;
+
+  --primary: #0d9488;
+  --primary-foreground: #f0fdfa;
+  --secondary: #14b8a6;
+  --secondary-foreground: #f0fdfa;
+  --accent: #f97316;
+  --accent-foreground: #ffffff;
+
+  --success: #22c55e;
+  --warning: #f59e0b;
+  --danger: #ef4444;
+
+  /* SRS review grading (Again/Hard/Good/Easy) */
+  --srs-again: #ef4444;
+  --srs-hard: #f59e0b;
+  --srs-good: #0d9488;
+  --srs-easy: #3b82f6;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: #0b1120;
+    --foreground: #f1f5f9;
+    --card: #111827;
+    --border: #1e293b;
+    --muted: #1e293b;
+    --muted-foreground: #94a3b8;
+
+    --primary: #2dd4bf;
+    --primary-foreground: #042f2e;
+    --secondary: #5eead4;
+    --secondary-foreground: #042f2e;
+    --accent: #fb923c;
+    --accent-foreground: #431407;
+
+    --success: #4ade80;
+    --warning: #fbbf24;
+    --danger: #f87171;
+
+    --srs-again: #f87171;
+    --srs-hard: #fbbf24;
+    --srs-good: #2dd4bf;
+    --srs-easy: #60a5fa;
   }
 }
 
 body {
   color: var(--foreground);
   background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family:
+    var(--font-sans),
+    var(--font-jp),
+    ui-sans-serif,
+    system-ui,
+    sans-serif;
 }
 
 @layer utilities {
   .text-balance {
     text-wrap: balance;
+  }
+
+  /* Use for Japanese-heavy content (vocab, grammar examples) so CJK renders in Noto Sans JP first */
+  .font-jp {
+    font-family: var(--font-jp), ui-sans-serif, sans-serif;
   }
 }
