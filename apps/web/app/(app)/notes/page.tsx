@@ -1,4 +1,5 @@
 import { Suspense } from 'react';
+import { StickyNote } from 'lucide-react';
 import { createClient } from '@/shared/supabase/server';
 import { NoteCard } from '@/features/notes/components/NoteCard';
 import { NoteFilters } from '@/features/notes/components/NoteFilters';
@@ -66,11 +67,11 @@ export default async function NotesPage({
   const noteList = (notes as Note[] | null) ?? [];
 
   return (
-    <div className="flex flex-col gap-6">
-      <div className="flex items-center justify-between gap-4">
+    <div>
+      <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-xl font-semibold text-foreground">Notes</h1>
-          <p className="text-sm text-muted-foreground">
+          <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">Notes</h1>
+          <p className="mt-1.5 text-sm text-muted-foreground">
             Freeform markdown notes — organize by folder/tags, pin favorites, link to tasks or
             vocab.
           </p>
@@ -78,26 +79,35 @@ export default async function NotesPage({
         <NewNoteButton />
       </div>
 
-      <Suspense fallback={<div className="h-10" />}>
-        <NoteFilters folderOptions={folderOptions} tagOptions={tagOptions} />
-      </Suspense>
+      <div className="flex flex-col gap-6">
+        <Suspense fallback={<div className="h-10" />}>
+          <NoteFilters folderOptions={folderOptions} tagOptions={tagOptions} />
+        </Suspense>
 
-      {error && (
-        <p className="rounded-md border border-danger/30 bg-danger/10 px-3 py-2 text-sm text-danger">
-          Could not load notes: {error.message}
-        </p>
-      )}
+        {error && (
+          <p className="rounded-lg border border-danger/30 bg-danger/10 px-3 py-2 text-sm text-danger">
+            Could not load notes: {error.message}
+          </p>
+        )}
 
-      {!error && noteList.length === 0 && (
-        <p className="rounded-md border border-dashed border-border px-4 py-8 text-center text-sm text-muted-foreground">
-          {hasActiveFilters ? 'No notes match these filters.' : 'No notes yet — create your first one.'}
-        </p>
-      )}
+        {!error && noteList.length === 0 && (
+          <div className="flex flex-col items-center gap-3 rounded-lg border border-dashed border-border p-10 text-center">
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
+              <StickyNote className="h-6 w-6 text-primary" aria-hidden="true" />
+            </div>
+            <p className="max-w-xs text-sm text-muted-foreground">
+              {hasActiveFilters
+                ? 'No notes match these filters.'
+                : 'No notes yet — create your first one above.'}
+            </p>
+          </div>
+        )}
 
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        {noteList.map((note) => (
-          <NoteCard key={note.id} note={note} />
-        ))}
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {noteList.map((note) => (
+            <NoteCard key={note.id} note={note} />
+          ))}
+        </div>
       </div>
     </div>
   );

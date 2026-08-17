@@ -3,7 +3,9 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState, type FormEvent } from 'react';
+import { MailCheck } from 'lucide-react';
 import { createClient } from '@/shared/supabase/client';
+import { AuthShell } from '@/shared/components/AuthShell';
 
 export default function SignupPage() {
   const router = useRouter();
@@ -53,21 +55,26 @@ export default function SignupPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4">
-      <div className="w-full max-w-sm rounded-lg border border-border bg-card p-8 shadow-sm">
-        <h1 className="text-xl font-semibold text-foreground">Create your account</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
+    <AuthShell>
+      <div>
+        <h1 className="text-2xl font-bold tracking-tight text-foreground">Create your account</h1>
+        <p className="mt-1.5 text-sm text-muted-foreground">
           Start tracking tasks and your N2 study progress.
         </p>
 
         {confirmationSent ? (
-          <p className="mt-6 rounded-md bg-muted p-3 text-sm text-foreground">
-            Check your email to confirm your account before signing in.
-          </p>
+          <div className="mt-8 flex flex-col items-center gap-3 rounded-lg border border-dashed border-border p-8 text-center">
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
+              <MailCheck className="h-6 w-6 text-primary" aria-hidden="true" />
+            </div>
+            <p className="text-sm text-foreground">
+              Check your email to confirm your account before signing in.
+            </p>
+          </div>
         ) : (
-          <form className="mt-6 space-y-4" onSubmit={handleSubmit}>
+          <form className="mt-8 space-y-4" onSubmit={handleSubmit}>
             <div>
-              <label htmlFor="email" className="mb-1 block text-sm font-medium text-foreground">
+              <label htmlFor="email" className="label-field">
                 Email
               </label>
               <input
@@ -77,11 +84,11 @@ export default function SignupPage() {
                 autoComplete="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground outline-none transition-colors focus:border-primary"
+                className="input-field"
               />
             </div>
             <div>
-              <label htmlFor="password" className="mb-1 block text-sm font-medium text-foreground">
+              <label htmlFor="password" className="label-field">
                 Password
               </label>
               <input
@@ -91,14 +98,12 @@ export default function SignupPage() {
                 autoComplete="new-password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground outline-none transition-colors focus:border-primary"
+                className="input-field"
               />
+              <p className="helper-text">At least 8 characters.</p>
             </div>
             <div>
-              <label
-                htmlFor="confirmPassword"
-                className="mb-1 block text-sm font-medium text-foreground"
-              >
+              <label htmlFor="confirmPassword" className="label-field">
                 Confirm password
               </label>
               <input
@@ -108,17 +113,13 @@ export default function SignupPage() {
                 autoComplete="new-password"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground outline-none transition-colors focus:border-primary"
+                className="input-field"
               />
             </div>
 
-            {error && <p className="text-sm text-danger">{error}</p>}
+            {error && <p className="error-text">{error}</p>}
 
-            <button
-              type="submit"
-              disabled={submitting}
-              className="w-full rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:opacity-90 disabled:opacity-60"
-            >
+            <button type="submit" disabled={submitting} className="btn-primary w-full">
               {submitting ? 'Creating account…' : 'Sign up'}
             </button>
           </form>
@@ -131,6 +132,6 @@ export default function SignupPage() {
           </Link>
         </p>
       </div>
-    </div>
+    </AuthShell>
   );
 }

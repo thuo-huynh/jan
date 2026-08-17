@@ -38,9 +38,9 @@ function LinkSelect<T extends { id: string }>({
 
   return (
     <div>
-      <label className="mb-1 block text-xs font-medium text-muted-foreground">{label}</label>
+      <label className="label-field">{label}</label>
       {selected ? (
-        <div className="flex items-center justify-between gap-2 rounded-md border border-border bg-background px-3 py-1.5 text-sm">
+        <div className="flex h-10 items-center justify-between gap-2 rounded border border-border bg-background px-3 text-sm">
           <span className="line-clamp-1 text-foreground">{renderLabel(selected)}</span>
           <button
             type="button"
@@ -59,10 +59,10 @@ function LinkSelect<T extends { id: string }>({
             onFocus={() => setOpen(true)}
             onBlur={() => setTimeout(() => setOpen(false), 150)}
             placeholder={placeholder}
-            className="w-full rounded-md border border-border bg-background px-3 py-1.5 text-sm text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+            className="input-field"
           />
           {open && (
-            <ul className="absolute z-10 mt-1 max-h-48 w-full overflow-auto rounded-md border border-border bg-card py-1 text-sm shadow-md">
+            <ul className="absolute z-10 mt-1 max-h-48 w-full overflow-auto rounded-lg border border-border bg-card py-1 text-sm shadow-lg">
               {filtered.length === 0 && (
                 <li className="px-3 py-1.5 text-muted-foreground">No matches</li>
               )}

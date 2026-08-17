@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
+import { Search, Users } from 'lucide-react';
 
 /**
  * T093 — Admin user list/search page + suspend/delete actions.
@@ -102,8 +103,8 @@ export default function AdminUsersPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-xl font-semibold text-foreground">Users</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
+        <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">Users</h1>
+        <p className="mt-1.5 text-sm text-muted-foreground">
           Search, suspend, and delete user accounts (FR-044/FR-045/FR-049).
         </p>
       </div>
@@ -121,18 +122,17 @@ export default function AdminUsersPage() {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Search by email…"
-          className="w-full max-w-sm rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground outline-none transition-colors focus:border-primary"
+          aria-label="Search by email"
+          className="input-field max-w-sm"
         />
-        <button
-          type="submit"
-          className="rounded-md border border-border px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-muted"
-        >
+        <button type="submit" className="btn-outline shrink-0">
+          <Search className="h-4 w-4" aria-hidden="true" />
           Search
         </button>
       </form>
 
       {error && (
-        <div className="rounded-md border border-danger/30 bg-danger/10 px-4 py-2 text-sm text-danger">
+        <div className="rounded-lg border border-danger/30 bg-danger/10 px-4 py-2 text-sm text-danger">
           {error}
         </div>
       )}
@@ -149,7 +149,7 @@ export default function AdminUsersPage() {
               <th className="px-4 py-3 text-right">Actions</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody className="divide-y divide-border">
             {loading && (
               <tr>
                 <td colSpan={6} className="px-4 py-6 text-center text-muted-foreground">
@@ -159,24 +159,25 @@ export default function AdminUsersPage() {
             )}
             {!loading && users.length === 0 && (
               <tr>
-                <td colSpan={6} className="px-4 py-6 text-center text-muted-foreground">
-                  No users found.
+                <td colSpan={6} className="px-4 py-12">
+                  <div className="flex flex-col items-center gap-2 text-center">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted">
+                      <Users className="h-6 w-6 text-muted-foreground" aria-hidden="true" />
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      {query ? 'No users match this search.' : 'No users found.'}
+                    </p>
+                  </div>
                 </td>
               </tr>
             )}
             {!loading &&
               users.map((user) => (
-                <tr key={user.id} className="border-b border-border last:border-0">
+                <tr key={user.id}>
                   <td className="px-4 py-3 text-foreground">{user.email}</td>
                   <td className="px-4 py-3 text-muted-foreground">{user.role}</td>
                   <td className="px-4 py-3">
-                    <span
-                      className={
-                        user.status === 'suspended'
-                          ? 'rounded-full bg-danger/10 px-2 py-0.5 text-xs font-medium text-danger'
-                          : 'rounded-full bg-success/10 px-2 py-0.5 text-xs font-medium text-success'
-                      }
-                    >
+                    <span className={user.status === 'suspended' ? 'badge-danger' : 'badge-success'}>
                       {user.status}
                     </span>
                   </td>
@@ -192,7 +193,7 @@ export default function AdminUsersPage() {
                         type="button"
                         disabled={busyId === user.id}
                         onClick={() => handleToggleSuspend(user)}
-                        className="rounded-md border border-border px-3 py-1.5 text-xs font-medium text-foreground transition-colors hover:bg-muted disabled:opacity-60"
+                        className="btn-outline h-8 px-3 text-xs"
                       >
                         {user.status === 'suspended' ? 'Reinstate' : 'Suspend'}
                       </button>
@@ -200,7 +201,7 @@ export default function AdminUsersPage() {
                         type="button"
                         disabled={busyId === user.id}
                         onClick={() => handleDelete(user)}
-                        className="rounded-md border border-danger/40 px-3 py-1.5 text-xs font-medium text-danger transition-colors hover:bg-danger/10 disabled:opacity-60"
+                        className="btn-outline h-8 border-danger/40 px-3 text-xs text-danger hover:bg-danger/10"
                       >
                         Delete
                       </button>
@@ -221,7 +222,7 @@ export default function AdminUsersPage() {
             type="button"
             disabled={page <= 1}
             onClick={() => setPage((p) => Math.max(1, p - 1))}
-            className="rounded-md border border-border px-3 py-1.5 disabled:opacity-40"
+            className="btn-outline h-8 px-3 text-xs disabled:opacity-40"
           >
             Previous
           </button>
@@ -229,7 +230,7 @@ export default function AdminUsersPage() {
             type="button"
             disabled={page >= totalPages}
             onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-            className="rounded-md border border-border px-3 py-1.5 disabled:opacity-40"
+            className="btn-outline h-8 px-3 text-xs disabled:opacity-40"
           >
             Next
           </button>

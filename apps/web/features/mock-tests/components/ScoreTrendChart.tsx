@@ -1,6 +1,5 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import {
   CartesianGrid,
   Legend,
@@ -15,17 +14,22 @@ import type { MockTestResult } from '../types';
 
 /**
  * Score trend chart (T062) — per-section, chronological (US5 acceptance
- * scenario 2). Three-series line chart; the app's own --primary/--secondary
- * tokens are both teal and fail categorical CVD-separation (validated via
- * dataviz skill's validate_palette.js — normal-vision floor ΔE 10.5, below
- * the 15 floor), so this borrows the dataviz skill's validated 3-slot
- * default (blue/orange/aqua) for series identity only; everything else
- * (surface, grid, text) stays on the app's own design tokens.
+ * scenario 2). Three-series line chart. Series colors reference the app's
+ * own design tokens directly (DESIGN.md "Japan Blue" palette) — `--primary`
+ * (indigo), `--accent` (amber), `--secondary` (sky) — rather than a
+ * separate chart-only palette, so the chart reads as part of the same
+ * product and automatically follows dark mode + the user's theme picker
+ * (DESIGN.md "The DB-backed theme system"). These three hues stay
+ * distinguishable under deuteranopia/protanopia simulation at this
+ * lightness/saturation. Passed as `var(--x)` strings straight into Recharts'
+ * SVG `stroke`/`fill` props, same pattern already used below for the grid/
+ * axis/tooltip colors — browsers resolve CSS custom properties on SVG
+ * presentation attributes natively, no `getComputedStyle` needed.
  */
 const SERIES = [
-  { key: 'vocab_grammar_score', label: '文字・語彙・文法', light: '#2a78d6', dark: '#3987e5' },
-  { key: 'reading_score', label: '読解', light: '#eb6834', dark: '#d95926' },
-  { key: 'listening_score', label: '聴解', light: '#1baf7a', dark: '#199e70' },
+  { key: 'vocab_grammar_score', label: '文字・語彙・文法', color: 'var(--primary)' },
+  { key: 'reading_score', label: '読解', color: 'var(--accent)' },
+  { key: 'listening_score', label: '聴解', color: 'var(--secondary)' },
 ] as const;
 
 interface ScoreTrendChartProps {
@@ -33,21 +37,13 @@ interface ScoreTrendChartProps {
 }
 
 export function ScoreTrendChart({ results }: ScoreTrendChartProps) {
-  const [isDark, setIsDark] = useState(false);
-
-  useEffect(() => {
-    const mql = window.matchMedia('(prefers-color-scheme: dark)');
-    setIsDark(mql.matches);
-    const listener = (e: MediaQueryListEvent) => setIsDark(e.matches);
-    mql.addEventListener('change', listener);
-    return () => mql.removeEventListener('change', listener);
-  }, []);
-
   if (results.length < 2) {
     return (
-      <p className="text-sm text-muted-foreground">
-        Record at least two mock test results to see the score trend.
-      </p>
+      <div className="card p-4">
+        <p className="text-sm text-muted-foreground">
+          Record at least two mock test results to see the score trend.
+        </p>
+      </div>
     );
   }
 
@@ -60,10 +56,10 @@ export function ScoreTrendChart({ results }: ScoreTrendChartProps) {
       listening_score: r.listening_score,
     }));
 
-  const ringColor = isDark ? '#111827' : '#ffffff';
+  const ringColor = 'var(--card)';
 
   return (
-    <div className="space-y-2 rounded-lg border border-border bg-card p-4">
+    <div className="card space-y-2 p-4">
       <h2 className="text-sm font-semibold text-foreground">Score trend</h2>
       <ResponsiveContainer width="100%" height={260}>
         <LineChart data={data} margin={{ top: 8, right: 16, bottom: 0, left: -16 }}>
@@ -107,9 +103,9 @@ export function ScoreTrendChart({ results }: ScoreTrendChartProps) {
               type="monotone"
               dataKey={s.key}
               name={s.label}
-              stroke={isDark ? s.dark : s.light}
+              stroke={s.color}
               strokeWidth={2}
-              dot={{ r: 4, strokeWidth: 2, stroke: ringColor, fill: isDark ? s.dark : s.light }}
+              dot={{ r: 4, strokeWidth: 2, stroke: ringColor, fill: s.color }}
               activeDot={{ r: 5, strokeWidth: 2, stroke: ringColor }}
               connectNulls
             />

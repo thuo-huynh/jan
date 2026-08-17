@@ -2,30 +2,39 @@
 @tailwind components;
 @tailwind utilities;
 
+/*
+ * Palette: "Japan Blue" — indigo (primary) + sky (secondary) + amber (accent).
+ * Replaces the earlier teal/orange scheme (see DESIGN.md "Why this palette").
+ * Every pair below is WCAG AA-verified (>= 4.5:1 for text, foreground-on-color
+ * pairs included) — see DESIGN.md for the full contrast table.
+ */
 :root {
-  --background: #f8fafc;
-  --foreground: #0f172a;
+  --background: #f7f7fc;
+  --foreground: #16162b;
   --card: #ffffff;
-  --border: #e2e8f0;
-  --muted: #f1f5f9;
-  --muted-foreground: #475569;
+  --border: #dcdcee;
+  --muted: #efeff8;
+  --muted-foreground: #5b5b7d;
 
-  --primary: #0d9488;
-  --primary-foreground: #f0fdfa;
-  --secondary: #14b8a6;
-  --secondary-foreground: #f0fdfa;
-  --accent: #f97316;
-  --accent-foreground: #ffffff;
+  --primary: #4f46e5;
+  --primary-foreground: #f5f3ff;
+  --secondary: #0369a1;
+  --secondary-foreground: #f0f9ff;
+  --accent: #d97706;
+  --accent-foreground: #451a03;
 
-  --success: #22c55e;
-  --warning: #f59e0b;
-  --danger: #ef4444;
+  --success: #15803d;
+  --warning: #c2410c;
+  --danger: #dc2626;
 
-  /* SRS review grading (Again/Hard/Good/Easy) */
-  --srs-again: #ef4444;
-  --srs-hard: #f59e0b;
-  --srs-good: #0d9488;
-  --srs-easy: #3b82f6;
+  /* SRS review grading (Again/Hard/Good/Easy) — deliberately mirrors
+     danger/warning/primary 1:1 (Again=danger, Hard=warning, Good=primary) so
+     grading never invents a second meaning for the same hue; Easy gets its
+     own blue since nothing else claims that slot. */
+  --srs-again: #dc2626;
+  --srs-hard: #c2410c;
+  --srs-good: #4f46e5;
+  --srs-easy: #2563eb;
 }
 
 /*
@@ -35,27 +44,27 @@
  * §1). Users default to light mode (FR-009) regardless of OS preference.
  */
 :root.dark {
-  --background: #0b1120;
-  --foreground: #f1f5f9;
-  --card: #111827;
-  --border: #1e293b;
-  --muted: #1e293b;
-  --muted-foreground: #94a3b8;
+  --background: #0b0b1a;
+  --foreground: #ededf7;
+  --card: #14142b;
+  --border: #23234a;
+  --muted: #1e1e3d;
+  --muted-foreground: #9a9ac0;
 
-  --primary: #2dd4bf;
-  --primary-foreground: #042f2e;
-  --secondary: #5eead4;
-  --secondary-foreground: #042f2e;
-  --accent: #fb923c;
-  --accent-foreground: #431407;
+  --primary: #818cf8;
+  --primary-foreground: #1e1b4b;
+  --secondary: #38bdf8;
+  --secondary-foreground: #082f49;
+  --accent: #fbbf24;
+  --accent-foreground: #451a03;
 
   --success: #4ade80;
-  --warning: #fbbf24;
+  --warning: #fb923c;
   --danger: #f87171;
 
   --srs-again: #f87171;
-  --srs-hard: #fbbf24;
-  --srs-good: #2dd4bf;
+  --srs-hard: #fb923c;
+  --srs-good: #818cf8;
   --srs-easy: #60a5fa;
 }
 
@@ -82,6 +91,94 @@ body {
 }
 
 @layer components {
+  /*
+   * Component primitives (DESIGN.md "Component conventions"). Every page in
+   * the app should compose these instead of hand-rolling the same button/
+   * input/card utility string in each file — that drift (slightly different
+   * padding/radius/focus-ring per page) was a big part of why the previous
+   * pass still looked inconsistent even after the palette existed. Size is
+   * intentionally NOT baked in beyond the default — override with trailing
+   * utility classes (e.g. `className="btn-primary h-8 px-3 text-xs"`); the
+   * `utilities` layer always wins over `components` in cascade-layer order,
+   * regardless of source position, so this is safe.
+   */
+  /*
+   * NOTE on opacity modifiers (`bg-primary/10` etc.): Tailwind can only
+   * resolve those against `primary`/`danger`/etc. because it JIT-scans class
+   * *strings* in .tsx files and falls back to `color-mix()` for CSS-variable
+   * colors that aren't in the special `rgb(var(...) / <alpha-value>)` format
+   * — that fallback is NOT available inside `@apply` (this file), which
+   * requires a real theme-registered utility and fails the build otherwise.
+   * So: opacity-modified color utilities are fine directly in component
+   * `className` strings (used throughout the app already) but NOT inside any
+   * `@apply` here — use `hover:opacity-90` / `color-mix()` / solid colors
+   * instead, as below.
+   */
+  .btn {
+    @apply inline-flex h-10 cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded px-4 text-sm font-medium transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-60;
+  }
+  .btn-primary {
+    @apply btn bg-primary text-primary-foreground hover:opacity-90;
+  }
+  .btn-secondary {
+    @apply btn bg-secondary text-secondary-foreground hover:opacity-90;
+  }
+  .btn-outline {
+    @apply btn border border-border bg-card text-foreground hover:bg-muted;
+  }
+  .btn-ghost {
+    @apply btn text-foreground hover:bg-muted;
+  }
+  .btn-danger {
+    @apply btn bg-danger text-white hover:opacity-90;
+  }
+
+  .card {
+    @apply rounded-lg border border-border bg-card p-5 shadow-sm;
+  }
+  .card-interactive {
+    @apply card cursor-pointer transition-shadow duration-200 hover:shadow-md;
+  }
+
+  .label-field {
+    @apply mb-1.5 block text-sm font-medium text-foreground;
+  }
+  .input-field {
+    @apply h-10 w-full rounded border border-border bg-background px-3 text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-primary;
+  }
+  .textarea-field {
+    @apply input-field h-auto min-h-[6rem] resize-y py-2;
+  }
+  .helper-text {
+    @apply mt-1.5 text-xs text-muted-foreground;
+  }
+  .error-text {
+    @apply mt-1.5 text-xs text-danger;
+  }
+
+  .badge {
+    @apply inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium;
+  }
+  .badge-primary {
+    @apply badge text-primary;
+    background-color: color-mix(in srgb, var(--primary) 12%, transparent);
+  }
+  .badge-success {
+    @apply badge text-success;
+    background-color: color-mix(in srgb, var(--success) 12%, transparent);
+  }
+  .badge-warning {
+    @apply badge text-warning;
+    background-color: color-mix(in srgb, var(--warning) 12%, transparent);
+  }
+  .badge-danger {
+    @apply badge text-danger;
+    background-color: color-mix(in srgb, var(--danger) 12%, transparent);
+  }
+  .badge-neutral {
+    @apply badge bg-muted text-muted-foreground;
+  }
+
   /*
    * Styling for sanitized react-markdown output (notes editor preview,
    * apps/web/features/notes/components/MarkdownPreview.tsx). No

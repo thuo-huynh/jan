@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
+import { GraduationCap, LogOut } from 'lucide-react';
 import { createClient, getAuthedUser } from '@/shared/supabase/server';
 import { AppNav, type NavLinkItem } from '@/shared/components/AppNav';
 
@@ -44,10 +45,11 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="relative border-b border-border bg-card">
-        <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3">
+      <header className="sticky top-0 z-30 border-b border-border bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/80">
+        <div className="relative mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-4">
           <div className="flex items-center gap-3 sm:gap-6">
-            <Link href="/boards" className="text-base font-semibold text-foreground">
+            <Link href="/boards" className="flex items-center gap-2 text-base font-bold tracking-tight text-foreground">
+              <GraduationCap className="h-6 w-6 text-primary" aria-hidden="true" />
               JanGo
             </Link>
             <AppNav links={navLinks} />
@@ -57,17 +59,15 @@ export default async function AppLayout({ children }: { children: React.ReactNod
               {profile?.email ?? user.email}
             </span>
             <form action={signOut}>
-              <button
-                type="submit"
-                className="rounded-md border border-border px-3 py-1.5 text-sm font-medium text-foreground transition-colors hover:bg-muted"
-              >
-                Sign out
+              <button type="submit" aria-label="Sign out" className="btn-outline">
+                <LogOut className="h-4 w-4" aria-hidden="true" />
+                <span className="hidden sm:inline">Sign out</span>
               </button>
             </form>
           </div>
         </div>
       </header>
-      <main className="mx-auto max-w-6xl px-4 py-6">{children}</main>
+      <main className="mx-auto max-w-6xl px-4 py-6 sm:py-8">{children}</main>
     </div>
   );
 }

@@ -66,7 +66,7 @@ export function StreakHeatmap({ days }: StreakHeatmapProps) {
   }, [weeks]);
 
   return (
-    <div className="space-y-2 rounded-lg border border-border bg-card p-4">
+    <div className="card space-y-2 p-4">
       <div className="flex items-center justify-between">
         <h2 className="text-sm font-semibold text-foreground">Activity</h2>
         {hovered && (

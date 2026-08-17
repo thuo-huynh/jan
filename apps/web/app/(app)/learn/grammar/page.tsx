@@ -61,15 +61,15 @@ export default async function GrammarListPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold text-foreground">N2 Grammar Tracker</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
+        <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">N2 Grammar Tracker</h1>
+        <p className="mt-1.5 text-sm text-muted-foreground">
           Browse the N2 grammar database, track your mastery, add personal notes, and compare
           confusable pairs.
         </p>
       </div>
 
       {combined.length === 0 ? (
-        <div className="rounded-lg border border-border bg-card p-8 text-center text-sm text-muted-foreground">
+        <div className="card p-8 text-center text-sm text-muted-foreground">
           No grammar points are available yet.
         </div>
       ) : (

@@ -22,9 +22,11 @@ export function PassageTypeBreakdown({ logs }: PassageTypeBreakdownProps) {
 
   if (scored.length === 0) {
     return (
-      <p className="text-sm text-muted-foreground">
-        Log a reading session with a comprehension score to see a breakdown by passage type.
-      </p>
+      <div className="card p-4">
+        <p className="text-sm text-muted-foreground">
+          Log a reading session with a comprehension score to see a breakdown by passage type.
+        </p>
+      </div>
     );
   }
 
@@ -48,7 +50,7 @@ export function PassageTypeBreakdown({ logs }: PassageTypeBreakdownProps) {
   const weakestType = rows[0]?.passageType;
 
   return (
-    <div className="space-y-3">
+    <div className="card space-y-3 p-4">
       <h2 className="text-sm font-semibold text-foreground">Comprehension by passage type</h2>
       <ul className="space-y-2">
         {rows.map((row) => {
@@ -58,11 +60,7 @@ export function PassageTypeBreakdown({ logs }: PassageTypeBreakdownProps) {
               <div className="flex items-center justify-between text-sm">
                 <span className="flex items-center gap-2 text-foreground">
                   <span className="font-jp">{row.passageType}</span>
-                  {isWeakest && (
-                    <span className="rounded-full bg-warning/15 px-2 py-0.5 text-xs font-medium text-warning">
-                      Weakest
-                    </span>
-                  )}
+                  {isWeakest && <span className="badge-warning">Weakest</span>}
                 </span>
                 <span className="text-muted-foreground">
                   {row.average}% <span className="text-xs">({row.count})</span>
@@ -70,7 +68,7 @@ export function PassageTypeBreakdown({ logs }: PassageTypeBreakdownProps) {
               </div>
               <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
                 <div
-                  className="h-full rounded-full bg-primary"
+                  className="h-full rounded-full bg-primary transition-all"
                   style={{ width: `${Math.max(row.average, 2)}%` }}
                 />
               </div>

@@ -105,7 +105,7 @@ export function AppearanceSettingsManager({
   }
 
   return (
-    <div className="space-y-6 rounded-lg border border-border bg-card p-4">
+    <div className="card space-y-6">
       <div>
         <h2 className="mb-2 text-sm font-semibold text-foreground">Mode</h2>
         <ModeToggle mode={mode} disabled={submitting} onChange={handleModeChange} />
@@ -120,7 +120,7 @@ export function AppearanceSettingsManager({
           onSelect={handleThemeSelect}
         />
       </div>
-      {error && <p className="text-sm text-danger">{error}</p>}
+      {error && <p className="error-text">{error}</p>}
     </div>
   );
 }

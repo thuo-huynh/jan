@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { Plus } from 'lucide-react';
 import { createClient } from '@/shared/supabase/client';
 
 /**
@@ -50,13 +51,9 @@ export function NewNoteButton() {
 
   return (
     <div className="flex flex-col items-end gap-1">
-      <button
-        type="button"
-        onClick={handleCreate}
-        disabled={creating}
-        className="rounded-md bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition-colors hover:opacity-90 disabled:opacity-60"
-      >
-        {creating ? 'Creating…' : '+ New note'}
+      <button type="button" onClick={handleCreate} disabled={creating} className="btn-primary shrink-0">
+        <Plus className="h-4 w-4" aria-hidden="true" />
+        {creating ? 'Creating…' : 'New note'}
       </button>
       {error && <span className="text-xs text-danger">{error}</span>}
     </div>

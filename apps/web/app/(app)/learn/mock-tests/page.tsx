@@ -28,8 +28,8 @@ export default async function MockTestsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-xl font-semibold text-foreground">Mock Tests</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
+        <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">Mock Tests</h1>
+        <p className="mt-1.5 text-sm text-muted-foreground">
           Track practice/past-paper results by section and count down to your exam date.
         </p>
       </div>

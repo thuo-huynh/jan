@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, type FormEvent } from 'react';
+import { Plus, X } from 'lucide-react';
 import { createClient } from '@/shared/supabase/client';
 import { attachToSrsSchema } from '@/shared/validation/schemas';
 
@@ -75,12 +76,18 @@ export function AttachToSrsButton({ readingLogId }: AttachToSrsButtonProps) {
 
   return (
     <div className="inline-block">
-      <button
-        type="button"
-        onClick={() => setOpen((v) => !v)}
-        className="rounded-md border border-border px-2 py-1 text-xs font-medium text-foreground transition-colors hover:bg-muted"
-      >
-        {open ? 'Cancel' : '+ Unknown word'}
+      <button type="button" onClick={() => setOpen((v) => !v)} className="btn-outline h-7 px-2 text-xs">
+        {open ? (
+          <>
+            <X className="h-3 w-3" aria-hidden="true" />
+            Cancel
+          </>
+        ) : (
+          <>
+            <Plus className="h-3 w-3" aria-hidden="true" />
+            Unknown word
+          </>
+        )}
       </button>
       {attachedCount > 0 && !open && (
         <span className="ml-2 text-xs text-muted-foreground">
@@ -89,44 +96,37 @@ export function AttachToSrsButton({ readingLogId }: AttachToSrsButtonProps) {
       )}
 
       {open && (
-        <form
-          onSubmit={handleSubmit}
-          className="mt-2 flex flex-wrap items-end gap-2 rounded-md border border-border bg-card p-3"
-        >
+        <form onSubmit={handleSubmit} className="mt-2 flex flex-wrap items-end gap-2 rounded-lg border border-border bg-card p-3">
           <div>
-            <label className="mb-1 block text-xs font-medium text-foreground">Word</label>
+            <label className="label-field text-xs">Word</label>
             <input
               value={word}
               onChange={(e) => setWord(e.target.value)}
               required
-              className="w-28 rounded-md border border-border bg-background px-2 py-1.5 text-sm font-jp text-foreground outline-none transition-colors focus:border-primary"
+              className="input-field h-9 w-28 font-jp"
             />
           </div>
           <div>
-            <label className="mb-1 block text-xs font-medium text-foreground">Reading</label>
+            <label className="label-field text-xs">Reading</label>
             <input
               value={reading}
               onChange={(e) => setReading(e.target.value)}
-              className="w-24 rounded-md border border-border bg-background px-2 py-1.5 text-sm font-jp text-foreground outline-none transition-colors focus:border-primary"
+              className="input-field h-9 w-24 font-jp"
             />
           </div>
           <div>
-            <label className="mb-1 block text-xs font-medium text-foreground">Meaning</label>
+            <label className="label-field text-xs">Meaning</label>
             <input
               value={meaning}
               onChange={(e) => setMeaning(e.target.value)}
               required
-              className="w-36 rounded-md border border-border bg-background px-2 py-1.5 text-sm text-foreground outline-none transition-colors focus:border-primary"
+              className="input-field h-9 w-36"
             />
           </div>
-          <button
-            type="submit"
-            disabled={submitting}
-            className="rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground transition-colors hover:opacity-90 disabled:opacity-60"
-          >
+          <button type="submit" disabled={submitting} className="btn-primary h-9 px-3 text-sm">
             {submitting ? 'Adding…' : 'Add to SRS'}
           </button>
-          {error && <p className="w-full text-xs text-danger">{error}</p>}
+          {error && <p className="error-text w-full">{error}</p>}
         </form>
       )}
     </div>

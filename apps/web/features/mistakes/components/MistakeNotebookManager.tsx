@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
+import { Plus, X } from 'lucide-react';
 import { MistakeEntryForm } from './MistakeEntryForm';
 import { MistakeRow } from './MistakeRow';
 import type { GrammarLinkOption, MistakeEntry, VocabLinkOption } from '../types';
@@ -50,7 +51,7 @@ export function MistakeNotebookManager({
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex gap-1 rounded-md border border-border bg-muted p-1">
+        <div className="flex gap-1 rounded border border-border bg-muted p-1">
           {tabs.map((tab) => (
             <button
               key={tab.key}
@@ -66,12 +67,18 @@ export function MistakeNotebookManager({
             </button>
           ))}
         </div>
-        <button
-          type="button"
-          onClick={() => setAdding((v) => !v)}
-          className="rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground transition-colors hover:opacity-90"
-        >
-          {adding ? 'Close' : 'Add mistake'}
+        <button type="button" onClick={() => setAdding((v) => !v)} className="btn-primary h-9 px-3 text-sm">
+          {adding ? (
+            <>
+              <X className="h-4 w-4" aria-hidden="true" />
+              Close
+            </>
+          ) : (
+            <>
+              <Plus className="h-4 w-4" aria-hidden="true" />
+              Add mistake
+            </>
+          )}
         </button>
       </div>
 
@@ -85,9 +92,11 @@ export function MistakeNotebookManager({
       )}
 
       {filtered.length === 0 ? (
-        <p className="text-sm text-muted-foreground">
-          {filter === 'open' ? 'No open mistakes — nice work.' : 'No entries here yet.'}
-        </p>
+        <div className="flex flex-col items-center gap-2 rounded-lg border border-dashed border-border p-8 text-center">
+          <p className="text-sm text-muted-foreground">
+            {filter === 'open' ? 'No open mistakes — nice work.' : 'No entries here yet.'}
+          </p>
+        </div>
       ) : (
         <ul className="space-y-2">
           {filtered.map((mistake) => (

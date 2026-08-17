@@ -2,6 +2,8 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { Menu, X } from 'lucide-react';
 
 /**
  * Responsive nav for the app shell headers (app/(app)/layout.tsx and
@@ -13,6 +15,10 @@ import Link from 'next/link';
  * breakpoint it collapses behind a hamburger toggle that opens a stacked
  * panel instead. The parent `<header>` must be `position: relative` for the
  * mobile panel to anchor correctly.
+ *
+ * DESIGN.md "Nav": active link is a tinted primary pill, inactive is muted
+ * text that darkens on hover — replaces the earlier "all links look the
+ * same regardless of current page" treatment.
  */
 export interface NavLinkItem {
   href: string;
@@ -23,8 +29,13 @@ interface AppNavProps {
   links: NavLinkItem[];
 }
 
+function isActive(pathname: string, href: string) {
+  return pathname === href || pathname.startsWith(`${href}/`);
+}
+
 export function AppNav({ links }: AppNavProps) {
   const [open, setOpen] = useState(false);
+  const pathname = usePathname();
 
   return (
     <>
@@ -33,43 +44,51 @@ export function AppNav({ links }: AppNavProps) {
         onClick={() => setOpen((v) => !v)}
         aria-expanded={open}
         aria-label="Toggle navigation menu"
-        className="rounded-md p-2 text-foreground transition-colors hover:bg-muted sm:hidden"
+        className="flex h-10 w-10 items-center justify-center rounded text-foreground transition-colors hover:bg-muted sm:hidden"
       >
-        {open ? (
-          <svg viewBox="0 0 20 20" fill="currentColor" className="h-5 w-5">
-            <path d="M6.28 5.22a.75.75 0 0 0-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 1 0 1.06 1.06L10 11.06l3.72 3.72a.75.75 0 1 0 1.06-1.06L11.06 10l3.72-3.72a.75.75 0 0 0-1.06-1.06L10 8.94 6.28 5.22Z" />
-          </svg>
-        ) : (
-          <svg viewBox="0 0 20 20" fill="currentColor" className="h-5 w-5">
-            <path
-              fillRule="evenodd"
-              d="M2 4.75A.75.75 0 0 1 2.75 4h14.5a.75.75 0 0 1 0 1.5H2.75A.75.75 0 0 1 2 4.75Zm0 10.5a.75.75 0 0 1 .75-.75h14.5a.75.75 0 0 1 0 1.5H2.75a.75.75 0 0 1-.75-.75ZM2.75 9.25a.75.75 0 0 0 0 1.5h14.5a.75.75 0 0 0 0-1.5H2.75Z"
-              clipRule="evenodd"
-            />
-          </svg>
-        )}
+        {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
       </button>
 
-      <nav className="hidden items-center gap-4 text-sm font-medium text-muted-foreground sm:flex">
-        {links.map((link) => (
-          <Link key={link.href} href={link.href} className="transition-colors hover:text-foreground">
-            {link.label}
-          </Link>
-        ))}
-      </nav>
-
-      {open && (
-        <nav className="absolute inset-x-0 top-full z-20 flex flex-col gap-1 border-b border-border bg-card px-4 py-3 shadow-sm sm:hidden">
-          {links.map((link) => (
+      <nav className="hidden items-center gap-1 text-sm font-medium sm:flex">
+        {links.map((link) => {
+          const active = isActive(pathname, link.href);
+          return (
             <Link
               key={link.href}
               href={link.href}
-              onClick={() => setOpen(false)}
-              className="rounded-md px-2 py-2 text-sm font-medium text-foreground transition-colors hover:bg-muted"
+              aria-current={active ? 'page' : undefined}
+              className={`rounded px-3 py-2 transition-colors ${
+                active
+                  ? 'bg-primary/10 font-semibold text-primary'
+                  : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+              }`}
             >
               {link.label}
             </Link>
-          ))}
+          );
+        })}
+      </nav>
+
+      {open && (
+        <nav className="absolute inset-x-0 top-full z-20 flex flex-col gap-1 border-b border-border bg-card px-4 py-3 shadow-lg sm:hidden">
+          {links.map((link) => {
+            const active = isActive(pathname, link.href);
+            return (
+              <Link
+                key={link.href}
+                href={link.href}
+                aria-current={active ? 'page' : undefined}
+                onClick={() => setOpen(false)}
+                className={`rounded px-3 py-2.5 text-sm font-medium transition-colors ${
+                  active
+                    ? 'bg-primary/10 font-semibold text-primary'
+                    : 'text-foreground hover:bg-muted'
+                }`}
+              >
+                {link.label}
+              </Link>
+            );
+          })}
         </nav>
       )}
     </>

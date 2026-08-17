@@ -30,8 +30,8 @@ export default async function MistakesPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-xl font-semibold text-foreground">Mistake Notebook</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
+        <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">Mistake Notebook</h1>
+        <p className="mt-1.5 text-sm text-muted-foreground">
           Log mistakes, link them to vocab or grammar, and send them straight into your SRS queue.
         </p>
       </div>

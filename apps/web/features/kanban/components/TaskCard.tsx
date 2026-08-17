@@ -2,6 +2,7 @@
 
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import { Paperclip } from 'lucide-react';
 import type { BoardTask } from '../types';
 
 interface TaskCardProps {
@@ -60,8 +61,8 @@ export function TaskCard({ task, onClick, overlay }: TaskCardProps) {
           onClick(task.id);
         }
       }}
-      className={`cursor-pointer rounded-md border border-border bg-card p-3 text-left shadow-sm transition-colors hover:border-primary focus:outline-none focus:ring-2 focus:ring-primary ${
-        overlay ? 'rotate-1 shadow-lg' : ''
+      className={`cursor-pointer rounded-lg border border-border bg-card p-3 text-left shadow-sm transition-colors hover:border-primary/40 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-primary ${
+        overlay ? 'shadow-lg' : ''
       }`}
     >
       <p className="text-sm font-medium text-foreground">{task.title}</p>
@@ -92,11 +93,7 @@ export function TaskCard({ task, onClick, overlay }: TaskCardProps) {
 
       <div className="mt-2 flex flex-wrap items-center gap-2 text-[11px] text-muted-foreground">
         {task.due_date && (
-          <span
-            className={`inline-flex items-center gap-1 rounded px-1.5 py-0.5 ${
-              overdue ? 'bg-muted font-medium text-danger' : 'bg-muted'
-            }`}
-          >
+          <span className={overdue ? 'badge-danger' : 'badge-neutral'}>
             {new Date(`${task.due_date}T00:00:00`).toLocaleDateString(undefined, {
               month: 'short',
               day: 'numeric',
@@ -104,25 +101,13 @@ export function TaskCard({ task, onClick, overlay }: TaskCardProps) {
           </span>
         )}
         {checklistTotal > 0 && (
-          <span className="inline-flex items-center gap-1 rounded bg-muted px-1.5 py-0.5">
+          <span className="badge-neutral">
             {checklistDone}/{checklistTotal}
           </span>
         )}
         {task.attachment_count > 0 && (
-          <span className="inline-flex items-center gap-1 rounded bg-muted px-1.5 py-0.5">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 20 20"
-              fill="currentColor"
-              className="h-3 w-3"
-              aria-hidden="true"
-            >
-              <path
-                fillRule="evenodd"
-                d="M15.621 4.379a3 3 0 0 0-4.242 0l-7 7a3 3 0 0 0 4.241 4.243h.001l.497-.5a.75.75 0 0 1 1.064 1.057l-.498.501-.002.002a4.5 4.5 0 0 1-6.364-6.364l7-7a4.5 4.5 0 0 1 6.368 6.36l-3.455 3.553A2.625 2.625 0 1 1 9.52 9.52l3.45-3.451a.75.75 0 1 1 1.061 1.06l-3.45 3.451a1.125 1.125 0 0 0 1.587 1.595l3.454-3.553a3 3 0 0 0 0-4.242Z"
-                clipRule="evenodd"
-              />
-            </svg>
+          <span className="badge-neutral">
+            <Paperclip className="h-3 w-3" aria-hidden="true" />
             {task.attachment_count}
           </span>
         )}

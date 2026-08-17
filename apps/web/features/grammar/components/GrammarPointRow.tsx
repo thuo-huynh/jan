@@ -66,21 +66,13 @@ export function GrammarPointRow({ point, userId, onStatusChange, onNoteChange }:
   }
 
   return (
-    <div className="rounded-lg border border-border bg-card p-4">
+    <div className="card p-4">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
             <h3 className="font-jp text-lg font-semibold text-foreground">{point.pattern}</h3>
-            {point.frequencyTag && (
-              <span className="rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground">
-                {point.frequencyTag}
-              </span>
-            )}
-            {point.n3Overlap && (
-              <span className="rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground">
-                N3 overlap
-              </span>
-            )}
+            {point.frequencyTag && <span className="badge-neutral">{point.frequencyTag}</span>}
+            {point.n3Overlap && <span className="badge-neutral">N3 overlap</span>}
           </div>
 
           <p className="mt-1 text-sm text-foreground">{point.meaning}</p>
@@ -119,7 +111,7 @@ export function GrammarPointRow({ point, userId, onStatusChange, onNoteChange }:
 
         <div className="flex flex-shrink-0 flex-col items-end gap-2">
           <div
-            className="inline-flex overflow-hidden rounded-md border border-border"
+            className="inline-flex overflow-hidden rounded border border-border"
             role="group"
             aria-label={`Status for ${point.pattern}`}
           >
@@ -145,14 +137,14 @@ export function GrammarPointRow({ point, userId, onStatusChange, onNoteChange }:
           <button
             type="button"
             onClick={() => setNotesOpen((open) => !open)}
-            className="text-xs font-medium text-primary transition-colors hover:text-primary/80"
+            className="text-xs font-medium text-primary transition-colors hover:opacity-80"
           >
             {notesOpen ? 'Hide notes' : point.notesUser ? 'Edit notes' : 'Add notes'}
           </button>
         </div>
       </div>
 
-      {error && <p className="mt-2 text-xs text-danger">{error}</p>}
+      {error && <p className="error-text mt-2">{error}</p>}
 
       {notesOpen && (
         <div className="mt-3 border-t border-border pt-3">

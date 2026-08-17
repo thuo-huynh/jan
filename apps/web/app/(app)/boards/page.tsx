@@ -24,8 +24,8 @@ export default async function BoardsPage() {
   return (
     <div>
       <div className="mb-6">
-        <h1 className="text-xl font-semibold text-foreground">Boards</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
+        <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">Boards</h1>
+        <p className="mt-1.5 text-sm text-muted-foreground">
           Organize your tasks into Kanban boards.
         </p>
       </div>

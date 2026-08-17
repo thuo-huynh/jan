@@ -58,12 +58,9 @@ export function NoteFilters({
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Search notes…"
           aria-label="Search notes"
-          className="w-full rounded-md border border-border bg-card px-3 py-1.5 text-sm text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+          className="input-field h-9"
         />
-        <button
-          type="submit"
-          className="shrink-0 rounded-md border border-border px-3 py-1.5 text-sm font-medium text-foreground transition-colors hover:bg-muted"
-        >
+        <button type="submit" className="btn-outline h-9 shrink-0 px-3 text-xs">
           Search
         </button>
       </form>
@@ -73,7 +70,7 @@ export function NoteFilters({
           value={folder}
           onChange={(e) => pushParams({ folder: e.target.value || null })}
           aria-label="Filter by folder"
-          className="rounded-md border border-border bg-card px-2 py-1.5 text-sm text-foreground focus:border-primary focus:outline-none"
+          className="h-9 rounded border border-border bg-card px-2 text-sm text-foreground focus:border-primary focus:outline-none"
         >
           <option value="">All folders</option>
           {folderOptions.map((f) => (
@@ -87,7 +84,7 @@ export function NoteFilters({
           value={tag}
           onChange={(e) => pushParams({ tag: e.target.value || null })}
           aria-label="Filter by tag"
-          className="rounded-md border border-border bg-card px-2 py-1.5 text-sm text-foreground focus:border-primary focus:outline-none"
+          className="h-9 rounded border border-border bg-card px-2 text-sm text-foreground focus:border-primary focus:outline-none"
         >
           <option value="">All tags</option>
           {tagOptions.map((t) => (
@@ -101,7 +98,7 @@ export function NoteFilters({
           type="button"
           onClick={() => pushParams({ pinned: pinnedOnly ? null : '1' })}
           aria-pressed={pinnedOnly}
-          className={`rounded-md border px-3 py-1.5 text-sm font-medium transition-colors ${
+          className={`h-9 rounded border px-3 text-sm font-medium transition-colors ${
             pinnedOnly
               ? 'border-accent/40 bg-accent/10 text-accent'
               : 'border-border text-muted-foreground hover:text-foreground'

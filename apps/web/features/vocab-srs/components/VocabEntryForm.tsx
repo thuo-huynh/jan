@@ -121,13 +121,10 @@ export function VocabEntryForm({
   }
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="space-y-3 rounded-lg border border-border bg-card p-4"
-    >
+    <form onSubmit={handleSubmit} className="card space-y-3 p-4">
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <div>
-          <label className="mb-1 block text-sm font-medium text-foreground" htmlFor="vocab-word">
+          <label className="label-field" htmlFor="vocab-word">
             Word
           </label>
           <input
@@ -135,26 +132,23 @@ export function VocabEntryForm({
             value={word}
             onChange={(e) => setWord(e.target.value)}
             required
-            className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm font-jp text-foreground outline-none transition-colors focus:border-primary"
+            className="input-field font-jp"
           />
         </div>
         <div>
-          <label
-            className="mb-1 block text-sm font-medium text-foreground"
-            htmlFor="vocab-reading"
-          >
+          <label className="label-field" htmlFor="vocab-reading">
             Reading
           </label>
           <input
             id="vocab-reading"
             value={reading ?? ''}
             onChange={(e) => setReading(e.target.value)}
-            className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm font-jp text-foreground outline-none transition-colors focus:border-primary"
+            className="input-field font-jp"
           />
         </div>
       </div>
       <div>
-        <label className="mb-1 block text-sm font-medium text-foreground" htmlFor="vocab-meaning">
+        <label className="label-field" htmlFor="vocab-meaning">
           Meaning
         </label>
         <input
@@ -162,11 +156,11 @@ export function VocabEntryForm({
           value={meaning}
           onChange={(e) => setMeaning(e.target.value)}
           required
-          className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground outline-none transition-colors focus:border-primary"
+          className="input-field"
         />
       </div>
       <div>
-        <label className="mb-1 block text-sm font-medium text-foreground" htmlFor="vocab-example">
+        <label className="label-field" htmlFor="vocab-example">
           Example sentence
         </label>
         <textarea
@@ -174,22 +168,19 @@ export function VocabEntryForm({
           value={example ?? ''}
           onChange={(e) => setExample(e.target.value)}
           rows={2}
-          className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm font-jp text-foreground outline-none transition-colors focus:border-primary"
+          className="textarea-field font-jp"
         />
       </div>
       <div className="flex flex-wrap items-end gap-4">
         <div>
-          <label
-            className="mb-1 block text-sm font-medium text-foreground"
-            htmlFor="vocab-level"
-          >
+          <label className="label-field" htmlFor="vocab-level">
             JLPT level
           </label>
           <input
             id="vocab-level"
             value={jlptLevel ?? ''}
             onChange={(e) => setJlptLevel(e.target.value)}
-            className="w-28 rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground outline-none transition-colors focus:border-primary"
+            className="input-field w-28"
           />
         </div>
         <label className="flex items-center gap-2 pb-2 text-sm text-foreground">
@@ -197,28 +188,20 @@ export function VocabEntryForm({
             type="checkbox"
             checked={isKanji}
             onChange={(e) => setIsKanji(e.target.checked)}
-            className="h-4 w-4 rounded border-border"
+            className="h-4 w-4 rounded border-border text-primary focus:ring-primary"
           />
           This is a kanji entry
         </label>
       </div>
 
-      {error && <p className="text-sm text-danger">{error}</p>}
+      {error && <p className="error-text">{error}</p>}
 
       <div className="flex gap-2">
-        <button
-          type="submit"
-          disabled={submitting}
-          className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:opacity-90 disabled:opacity-60"
-        >
+        <button type="submit" disabled={submitting} className="btn-primary">
           {submitting ? 'Saving…' : mode === 'create' ? 'Add word' : 'Save changes'}
         </button>
         {onCancel && (
-          <button
-            type="button"
-            onClick={onCancel}
-            className="rounded-md border border-border px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-muted"
-          >
+          <button type="button" onClick={onCancel} className="btn-outline">
             Cancel
           </button>
         )}

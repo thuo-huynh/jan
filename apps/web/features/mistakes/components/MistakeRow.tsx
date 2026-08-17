@@ -56,20 +56,12 @@ export function MistakeRow({ mistake, onResolvedChange }: MistakeRowProps) {
   }
 
   return (
-    <li
-      className={`rounded-lg border border-border bg-card p-3 ${mistake.resolved ? 'opacity-60' : ''}`}
-    >
+    <li className={`card p-3 ${mistake.resolved ? 'opacity-60' : ''}`}>
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div>
           <div className="mb-1 flex items-center gap-2">
-            <span className="rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground">
-              {mistake.source === 'mock_test' ? 'Mock test' : 'Manual'}
-            </span>
-            {mistake.resolved && (
-              <span className="rounded-full bg-success/15 px-2 py-0.5 text-xs font-medium text-success">
-                Resolved
-              </span>
-            )}
+            <span className="badge-neutral">{mistake.source === 'mock_test' ? 'Mock test' : 'Manual'}</span>
+            {mistake.resolved && <span className="badge-success">Resolved</span>}
           </div>
           <p className={`text-sm text-foreground ${mistake.resolved ? 'line-through' : ''}`}>
             {mistake.content}
@@ -79,7 +71,7 @@ export function MistakeRow({ mistake, onResolvedChange }: MistakeRowProps) {
           type="button"
           onClick={handleToggleResolved}
           disabled={togglingResolved}
-          className="shrink-0 rounded-md border border-border px-2 py-1 text-xs font-medium text-foreground transition-colors hover:bg-muted disabled:opacity-60"
+          className="btn-outline h-7 shrink-0 px-2 text-xs"
         >
           {mistake.resolved ? 'Reopen' : 'Mark resolved'}
         </button>
@@ -91,12 +83,12 @@ export function MistakeRow({ mistake, onResolvedChange }: MistakeRowProps) {
           onClick={handleAddToSrs}
           disabled={!hasLink || addingToSrs}
           title={hasLink ? undefined : 'Link a vocab or grammar item to add this to the SRS queue'}
-          className="rounded-md border border-border px-2 py-1 text-xs font-medium text-foreground transition-colors hover:bg-muted disabled:cursor-not-allowed disabled:opacity-40"
+          className="btn-outline h-7 px-2 text-xs disabled:cursor-not-allowed"
         >
           {addingToSrs ? 'Adding…' : 'Add to SRS queue'}
         </button>
         {srsMessage && <span className="text-xs text-success">{srsMessage}</span>}
-        {srsError && <span className="text-xs text-danger">{srsError}</span>}
+        {srsError && <span className="error-text mt-0">{srsError}</span>}
       </div>
     </li>
   );

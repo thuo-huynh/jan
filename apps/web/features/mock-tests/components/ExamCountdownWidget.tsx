@@ -24,9 +24,13 @@ export function ExamCountdownWidget({ examDate }: ExamCountdownWidgetProps) {
     return <p className="text-sm text-muted-foreground">Exam date has passed.</p>;
   }
 
+  const urgent = daysRemaining <= 14;
+
   return (
     <div className="flex items-baseline gap-2">
-      <span className="text-3xl font-semibold text-foreground">{daysRemaining}</span>
+      <span className={`text-3xl font-bold tracking-tight ${urgent ? 'text-accent' : 'text-foreground'}`}>
+        {daysRemaining}
+      </span>
       <span className="text-sm text-muted-foreground">
         {daysRemaining === 1 ? 'day' : 'days'} until the exam ({target.toLocaleDateString()})
       </span>

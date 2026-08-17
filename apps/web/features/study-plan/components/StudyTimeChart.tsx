@@ -51,10 +51,10 @@ export function StudyTimeChart({ sessions }: StudyTimeChartProps) {
   }, [sessions, granularity]);
 
   return (
-    <div className="space-y-2 rounded-lg border border-border bg-card p-4">
+    <div className="card space-y-2 p-4">
       <div className="flex items-center justify-between">
         <h2 className="text-sm font-semibold text-foreground">Study time</h2>
-        <div className="flex gap-1 rounded-md border border-border bg-muted p-0.5">
+        <div className="flex gap-1 rounded border border-border bg-muted p-0.5">
           {(['daily', 'weekly'] as const).map((g) => (
             <button
               key={g}

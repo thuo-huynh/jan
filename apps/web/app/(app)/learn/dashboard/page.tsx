@@ -79,34 +79,40 @@ export default async function DashboardPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-xl font-semibold text-foreground">Dashboard</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
+        <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">Dashboard</h1>
+        <p className="mt-1.5 text-sm text-muted-foreground">
           Your N2 study progress at a glance.
         </p>
       </div>
 
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         {stats.map((stat) => (
-          <div key={stat.label} className="rounded-lg border border-border bg-card p-4">
+          <div key={stat.label} className="card p-4">
             <p className="text-xs text-muted-foreground">{stat.label}</p>
-            <p className="mt-1 text-2xl font-semibold text-foreground">{stat.value}</p>
+            <p className="mt-1 text-2xl font-bold tracking-tight text-foreground">{stat.value}</p>
           </div>
         ))}
       </div>
 
-      <div className="rounded-lg border border-border bg-card p-4">
-        <h2 className="mb-2 text-sm font-semibold text-foreground">Exam countdown</h2>
+      <div className="card p-4">
+        <h2 className="mb-2 text-sm font-semibold tracking-tight text-foreground">Exam countdown</h2>
         {dashboard.examCountdownDays === null ? (
           <p className="text-sm text-muted-foreground">
             Set your exam date on the{' '}
-            <a href="/learn/mock-tests" className="text-primary hover:underline">
+            <a href="/learn/mock-tests" className="font-medium text-primary hover:opacity-80">
               mock tests page
             </a>{' '}
             to see a countdown.
           </p>
         ) : (
           <div className="flex items-baseline gap-2">
-            <span className="text-3xl font-semibold text-foreground">{dashboard.examCountdownDays}</span>
+            <span
+              className={`text-3xl font-bold tracking-tight ${
+                dashboard.examCountdownDays <= 14 ? 'text-accent' : 'text-foreground'
+              }`}
+            >
+              {dashboard.examCountdownDays}
+            </span>
             <span className="text-sm text-muted-foreground">
               {dashboard.examCountdownDays === 1 ? 'day' : 'days'} until the exam
             </span>
@@ -114,8 +120,8 @@ export default async function DashboardPage() {
         )}
       </div>
 
-      <div className="rounded-lg border border-border bg-card p-4">
-        <h2 className="mb-3 text-sm font-semibold text-foreground">Weak areas</h2>
+      <div className="card p-4">
+        <h2 className="mb-3 text-sm font-semibold tracking-tight text-foreground">Weak areas</h2>
         {dashboard.weakAreas.length === 0 ? (
           <p className="text-sm text-muted-foreground">
             Not enough activity yet to identify a weak area.
@@ -127,11 +133,7 @@ export default async function DashboardPage() {
                 <span className="flex items-center gap-2 text-foreground">
                   <span className="font-jp text-xs text-muted-foreground">{WEAK_AREA_ICON[area.type]}</span>
                   {area.label}
-                  {i === 0 && (
-                    <span className="rounded-full bg-warning/15 px-2 py-0.5 text-xs font-medium text-warning">
-                      Needs attention
-                    </span>
-                  )}
+                  {i === 0 && <span className="badge-warning">Needs attention</span>}
                 </span>
                 <span className="text-muted-foreground">{Math.round(area.score * 100)}%</span>
               </li>

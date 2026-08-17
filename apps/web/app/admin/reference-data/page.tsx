@@ -1,6 +1,18 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
+import { BookMarked, GitCompare, Palette, Pencil, PackageOpen, Trash2 } from 'lucide-react';
+
+function EmptyTableState({ icon: Icon, message }: { icon: typeof PackageOpen; message: string }) {
+  return (
+    <div className="flex flex-col items-center gap-2 py-6 text-center">
+      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-muted">
+        <Icon className="h-5 w-5 text-muted-foreground" aria-hidden="true" />
+      </div>
+      <p className="text-sm text-muted-foreground">{message}</p>
+    </div>
+  );
+}
 
 /**
  * T096 — Admin reference-data management page (vocab/grammar/confusable
@@ -10,15 +22,14 @@ import { useCallback, useEffect, useState } from 'react';
  * (`user_id IS NULL`) catalog rows, per FR-017/FR-012/FR-015/FR-048.
  */
 
-const inputClass =
-  'w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground outline-none transition-colors focus:border-primary';
-const labelClass = 'mb-1 block text-sm font-medium text-foreground';
-const primaryButtonClass =
-  'rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:opacity-90 disabled:opacity-60';
-const secondaryButtonClass =
-  'rounded-md border border-border px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-muted disabled:opacity-60';
-const dangerButtonClass =
-  'rounded-md border border-danger/40 px-3 py-1.5 text-xs font-medium text-danger transition-colors hover:bg-danger/10 disabled:opacity-60';
+const inputClass = 'input-field';
+const labelClass = 'label-field';
+const primaryButtonClass = 'btn-primary';
+const secondaryButtonClass = 'btn-outline';
+// Dense variants for table row actions (Edit/Delete), which need to stay
+// compact inside a data-dense admin table row rather than the default h-10.
+const rowButtonClass = 'btn-outline h-8 px-3 text-xs';
+const dangerButtonClass = 'btn-outline h-8 border-danger/40 px-3 text-xs text-danger hover:bg-danger/10';
 
 type Tab = 'vocab' | 'grammar' | 'pairs' | 'themes';
 
@@ -35,8 +46,10 @@ export default function AdminReferenceDataPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-xl font-semibold text-foreground">Reference data</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
+        <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+          Reference data
+        </h1>
+        <p className="mt-1.5 text-sm text-muted-foreground">
           Manage the shared/global N2 vocab, kanji, grammar points, and confusable pairs (FR-048)
           — independent of any user&apos;s own custom entries or personal notes.
         </p>
@@ -165,7 +178,7 @@ function VocabTab() {
 
   return (
     <div className="space-y-6">
-      <div className="rounded-lg border border-border bg-card p-4">
+      <div className="card">
         <h2 className="text-sm font-semibold text-foreground">
           {form.id ? 'Edit entry' : 'Add new entry'}
         </h2>
@@ -216,6 +229,7 @@ function VocabTab() {
                 type="checkbox"
                 checked={form.isKanji}
                 onChange={(e) => setForm((f) => ({ ...f, isKanji: e.target.checked }))}
+                className="h-4 w-4 rounded border-border accent-primary"
               />
               Is kanji
             </label>
@@ -257,7 +271,7 @@ function VocabTab() {
       </form>
 
       {error && (
-        <div className="rounded-md border border-danger/30 bg-danger/10 px-4 py-2 text-sm text-danger">
+        <div className="rounded-lg border border-danger/30 bg-danger/10 px-4 py-2 text-sm text-danger">
           {error}
         </div>
       )}
@@ -273,7 +287,7 @@ function VocabTab() {
               <th className="px-4 py-3 text-right">Actions</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody className="divide-y divide-border">
             {loading && (
               <tr>
                 <td colSpan={5} className="px-4 py-6 text-center text-muted-foreground">
@@ -283,14 +297,14 @@ function VocabTab() {
             )}
             {!loading && items.length === 0 && (
               <tr>
-                <td colSpan={5} className="px-4 py-6 text-center text-muted-foreground">
-                  No entries found.
+                <td colSpan={5}>
+                  <EmptyTableState icon={PackageOpen} message="No entries found." />
                 </td>
               </tr>
             )}
             {!loading &&
               items.map((item) => (
-                <tr key={item.id} className="border-b border-border last:border-0">
+                <tr key={item.id}>
                   <td className="px-4 py-3 font-jp text-foreground">{item.word}</td>
                   <td className="px-4 py-3 font-jp text-muted-foreground">{item.reading}</td>
                   <td className="px-4 py-3 text-muted-foreground">{item.meaning}</td>
@@ -299,7 +313,7 @@ function VocabTab() {
                     <div className="flex justify-end gap-2">
                       <button
                         type="button"
-                        className={secondaryButtonClass.replace('px-4 py-2', 'px-3 py-1.5 text-xs')}
+                        className={rowButtonClass}
                         onClick={() =>
                           setForm({
                             id: item.id,
@@ -312,9 +326,11 @@ function VocabTab() {
                           })
                         }
                       >
+                        <Pencil className="h-3.5 w-3.5" aria-hidden="true" />
                         Edit
                       </button>
                       <button type="button" className={dangerButtonClass} onClick={() => handleDelete(item.id)}>
+                        <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
                         Delete
                       </button>
                     </div>
@@ -436,7 +452,7 @@ function GrammarTab() {
 
   return (
     <div className="space-y-6">
-      <div className="rounded-lg border border-border bg-card p-4">
+      <div className="card">
         <h2 className="text-sm font-semibold text-foreground">
           {form.id ? 'Edit grammar point' : 'Add new grammar point'}
         </h2>
@@ -476,7 +492,7 @@ function GrammarTab() {
           <div className="sm:col-span-2">
             <label className={labelClass}>Example sentences (one per line)</label>
             <textarea
-              className={inputClass}
+              className="textarea-field"
               rows={3}
               value={form.exampleSentences}
               onChange={(e) => setForm((f) => ({ ...f, exampleSentences: e.target.value }))}
@@ -505,6 +521,7 @@ function GrammarTab() {
                 type="checkbox"
                 checked={form.n3Overlap}
                 onChange={(e) => setForm((f) => ({ ...f, n3Overlap: e.target.checked }))}
+                className="h-4 w-4 rounded border-border accent-primary"
               />
               N3 overlap
             </label>
@@ -546,7 +563,7 @@ function GrammarTab() {
       </form>
 
       {error && (
-        <div className="rounded-md border border-danger/30 bg-danger/10 px-4 py-2 text-sm text-danger">
+        <div className="rounded-lg border border-danger/30 bg-danger/10 px-4 py-2 text-sm text-danger">
           {error}
         </div>
       )}
@@ -562,7 +579,7 @@ function GrammarTab() {
               <th className="px-4 py-3 text-right">Actions</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody className="divide-y divide-border">
             {loading && (
               <tr>
                 <td colSpan={5} className="px-4 py-6 text-center text-muted-foreground">
@@ -572,14 +589,14 @@ function GrammarTab() {
             )}
             {!loading && items.length === 0 && (
               <tr>
-                <td colSpan={5} className="px-4 py-6 text-center text-muted-foreground">
-                  No grammar points found.
+                <td colSpan={5}>
+                  <EmptyTableState icon={BookMarked} message="No grammar points found." />
                 </td>
               </tr>
             )}
             {!loading &&
               items.map((item) => (
-                <tr key={item.id} className="border-b border-border last:border-0">
+                <tr key={item.id}>
                   <td className="px-4 py-3 font-jp text-foreground">{item.pattern}</td>
                   <td className="px-4 py-3 text-muted-foreground">{item.meaning}</td>
                   <td className="px-4 py-3 text-muted-foreground">{item.frequency_tag ?? '—'}</td>
@@ -588,7 +605,7 @@ function GrammarTab() {
                     <div className="flex justify-end gap-2">
                       <button
                         type="button"
-                        className={secondaryButtonClass.replace('px-4 py-2', 'px-3 py-1.5 text-xs')}
+                        className={rowButtonClass}
                         onClick={() =>
                           setForm({
                             id: item.id,
@@ -603,9 +620,11 @@ function GrammarTab() {
                           })
                         }
                       >
+                        <Pencil className="h-3.5 w-3.5" aria-hidden="true" />
                         Edit
                       </button>
                       <button type="button" className={dangerButtonClass} onClick={() => handleDelete(item.id)}>
+                        <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
                         Delete
                       </button>
                     </div>
@@ -730,7 +749,7 @@ function PairsTab() {
 
   return (
     <div className="space-y-6">
-      <div className="rounded-lg border border-border bg-card p-4">
+      <div className="card">
         <h2 className="text-sm font-semibold text-foreground">
           {form.id ? 'Edit confusable pair' : 'Add new confusable pair'}
         </h2>
@@ -768,7 +787,7 @@ function PairsTab() {
           <div className="sm:col-span-2">
             <label className={labelClass}>Comparison note</label>
             <textarea
-              className={inputClass}
+              className="textarea-field"
               rows={4}
               value={form.comparisonNote}
               onChange={(e) => setForm((f) => ({ ...f, comparisonNote: e.target.value }))}
@@ -799,7 +818,7 @@ function PairsTab() {
       </div>
 
       {error && (
-        <div className="rounded-md border border-danger/30 bg-danger/10 px-4 py-2 text-sm text-danger">
+        <div className="rounded-lg border border-danger/30 bg-danger/10 px-4 py-2 text-sm text-danger">
           {error}
         </div>
       )}
@@ -813,7 +832,7 @@ function PairsTab() {
               <th className="px-4 py-3 text-right">Actions</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody className="divide-y divide-border">
             {loading && (
               <tr>
                 <td colSpan={3} className="px-4 py-6 text-center text-muted-foreground">
@@ -823,14 +842,14 @@ function PairsTab() {
             )}
             {!loading && items.length === 0 && (
               <tr>
-                <td colSpan={3} className="px-4 py-6 text-center text-muted-foreground">
-                  No confusable pairs yet.
+                <td colSpan={3}>
+                  <EmptyTableState icon={GitCompare} message="No confusable pairs yet." />
                 </td>
               </tr>
             )}
             {!loading &&
               items.map((item) => (
-                <tr key={item.id} className="border-b border-border last:border-0">
+                <tr key={item.id}>
                   <td className="px-4 py-3 font-jp text-foreground">
                     {item.pointA?.pattern ?? '?'} vs {item.pointB?.pattern ?? '?'}
                   </td>
@@ -841,7 +860,7 @@ function PairsTab() {
                     <div className="flex justify-end gap-2">
                       <button
                         type="button"
-                        className={secondaryButtonClass.replace('px-4 py-2', 'px-3 py-1.5 text-xs')}
+                        className={rowButtonClass}
                         onClick={() =>
                           setForm({
                             id: item.id,
@@ -851,9 +870,11 @@ function PairsTab() {
                           })
                         }
                       >
+                        <Pencil className="h-3.5 w-3.5" aria-hidden="true" />
                         Edit
                       </button>
                       <button type="button" className={dangerButtonClass} onClick={() => handleDelete(item.id)}>
+                        <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
                         Delete
                       </button>
                     </div>
@@ -1026,7 +1047,7 @@ function ThemesTab() {
 
   return (
     <div className="space-y-6">
-      <div className="rounded-lg border border-border bg-card p-4">
+      <div className="card">
         <h2 className="text-sm font-semibold text-foreground">
           {form.id ? 'Edit theme' : 'Add new theme'}
         </h2>
@@ -1106,7 +1127,7 @@ function ThemesTab() {
       </div>
 
       {error && (
-        <div className="rounded-md border border-danger/30 bg-danger/10 px-4 py-2 text-sm text-danger">
+        <div className="rounded-lg border border-danger/30 bg-danger/10 px-4 py-2 text-sm text-danger">
           {error}
         </div>
       )}
@@ -1122,7 +1143,7 @@ function ThemesTab() {
               <th className="px-4 py-3 text-right">Actions</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody className="divide-y divide-border">
             {loading && (
               <tr>
                 <td colSpan={5} className="px-4 py-6 text-center text-muted-foreground">
@@ -1132,14 +1153,14 @@ function ThemesTab() {
             )}
             {!loading && items.length === 0 && (
               <tr>
-                <td colSpan={5} className="px-4 py-6 text-center text-muted-foreground">
-                  No themes yet.
+                <td colSpan={5}>
+                  <EmptyTableState icon={Palette} message="No themes yet." />
                 </td>
               </tr>
             )}
             {!loading &&
               items.map((item) => (
-                <tr key={item.id} className="border-b border-border last:border-0">
+                <tr key={item.id}>
                   <td className="px-4 py-3 text-muted-foreground">{item.sort_order}</td>
                   <td className="px-4 py-3 text-foreground">{item.name}</td>
                   <td className="px-4 py-3 text-muted-foreground">{item.slug}</td>
@@ -1163,7 +1184,7 @@ function ThemesTab() {
                     <div className="flex justify-end gap-2">
                       <button
                         type="button"
-                        className={secondaryButtonClass.replace('px-4 py-2', 'px-3 py-1.5 text-xs')}
+                        className={rowButtonClass}
                         onClick={() =>
                           setForm({
                             id: item.id,
@@ -1185,9 +1206,11 @@ function ThemesTab() {
                           })
                         }
                       >
+                        <Pencil className="h-3.5 w-3.5" aria-hidden="true" />
                         Edit
                       </button>
                       <button type="button" className={dangerButtonClass} onClick={() => handleDelete(item.id)}>
+                        <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
                         Delete
                       </button>
                     </div>

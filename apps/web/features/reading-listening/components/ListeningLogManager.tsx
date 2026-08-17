@@ -78,13 +78,10 @@ export function ListeningLogManager({ initialLogs }: ListeningLogManagerProps) {
 
   return (
     <div className="space-y-4">
-      <form
-        onSubmit={handleSubmit}
-        className="space-y-3 rounded-lg border border-border bg-card p-4"
-      >
+      <form onSubmit={handleSubmit} className="card space-y-3 p-4">
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <div>
-            <label className="mb-1 block text-sm font-medium text-foreground" htmlFor="listening-source">
+            <label className="label-field" htmlFor="listening-source">
               Source
             </label>
             <input
@@ -93,11 +90,11 @@ export function ListeningLogManager({ initialLogs }: ListeningLogManagerProps) {
               onChange={(e) => setSource(e.target.value)}
               placeholder="e.g. NHK Easy News podcast"
               required
-              className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground outline-none transition-colors focus:border-primary"
+              className="input-field"
             />
           </div>
           <div>
-            <label className="mb-1 block text-sm font-medium text-foreground" htmlFor="listening-duration">
+            <label className="label-field" htmlFor="listening-duration">
               Duration (min)
             </label>
             <input
@@ -107,12 +104,12 @@ export function ListeningLogManager({ initialLogs }: ListeningLogManagerProps) {
               value={durationMin}
               onChange={(e) => setDurationMin(e.target.value)}
               required
-              className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground outline-none transition-colors focus:border-primary"
+              className="input-field"
             />
           </div>
         </div>
         <div>
-          <label className="mb-1 block text-sm font-medium text-foreground" htmlFor="listening-score">
+          <label className="label-field" htmlFor="listening-score">
             Comprehension %
           </label>
           <input
@@ -122,11 +119,11 @@ export function ListeningLogManager({ initialLogs }: ListeningLogManagerProps) {
             max={100}
             value={comprehensionScore}
             onChange={(e) => setComprehensionScore(e.target.value)}
-            className="w-32 rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground outline-none transition-colors focus:border-primary"
+            className="input-field w-32"
           />
         </div>
         <div>
-          <label className="mb-1 block text-sm font-medium text-foreground" htmlFor="listening-notes">
+          <label className="label-field" htmlFor="listening-notes">
             Notes
           </label>
           <textarea
@@ -134,27 +131,25 @@ export function ListeningLogManager({ initialLogs }: ListeningLogManagerProps) {
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
             rows={2}
-            className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground outline-none transition-colors focus:border-primary"
+            className="textarea-field"
           />
         </div>
 
-        {error && <p className="text-sm text-danger">{error}</p>}
+        {error && <p className="error-text">{error}</p>}
 
-        <button
-          type="submit"
-          disabled={submitting}
-          className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:opacity-90 disabled:opacity-60"
-        >
+        <button type="submit" disabled={submitting} className="btn-primary">
           {submitting ? 'Saving…' : 'Log session'}
         </button>
       </form>
 
       {logs.length === 0 ? (
-        <p className="text-sm text-muted-foreground">No listening sessions logged yet.</p>
+        <div className="flex flex-col items-center gap-2 rounded-lg border border-dashed border-border p-8 text-center">
+          <p className="text-sm text-muted-foreground">No listening sessions logged yet.</p>
+        </div>
       ) : (
         <ul className="space-y-2">
           {logs.map((log) => (
-            <li key={log.id} className="rounded-lg border border-border bg-card p-3">
+            <li key={log.id} className="card p-3">
               <p className="text-sm font-medium text-foreground">{log.source}</p>
               <p className="text-xs text-muted-foreground">
                 {new Date(log.practiced_at).toLocaleDateString()} · {log.duration_min} min

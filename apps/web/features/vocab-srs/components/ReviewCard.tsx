@@ -68,21 +68,21 @@ export function ReviewCard({ item, onGraded }: ReviewCardProps) {
   }
 
   return (
-    <div className="space-y-4 rounded-lg border border-border bg-card p-8">
+    <div className="card space-y-4 p-8">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <span className="rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground">
+          <span className="badge-neutral">
             {item.itemType === 'vocab' ? (item.isCustom ? 'custom' : 'N2') : 'grammar'}
             {item.itemType === 'vocab' && item.isKanji ? ' · kanji' : ''}
           </span>
-          {item.isWeak && <span className="text-xs font-medium text-srs-again">weak</span>}
+          {item.isWeak && <span className="badge-danger">weak</span>}
         </div>
         {item.itemType === 'vocab' && item.isKanji && !revealed && (
           <div className="flex gap-1 text-xs">
             <button
               type="button"
               onClick={() => setKanjiMode('kanji_recognition')}
-              className={`rounded-md px-2 py-1 font-medium transition-colors ${
+              className={`rounded px-2 py-1 font-medium transition-colors ${
                 kanjiMode === 'kanji_recognition'
                   ? 'bg-primary text-primary-foreground'
                   : 'border border-border text-muted-foreground hover:bg-muted'
@@ -93,7 +93,7 @@ export function ReviewCard({ item, onGraded }: ReviewCardProps) {
             <button
               type="button"
               onClick={() => setKanjiMode('kanji_writing_recall')}
-              className={`rounded-md px-2 py-1 font-medium transition-colors ${
+              className={`rounded px-2 py-1 font-medium transition-colors ${
                 kanjiMode === 'kanji_writing_recall'
                   ? 'bg-primary text-primary-foreground'
                   : 'border border-border text-muted-foreground hover:bg-muted'
@@ -109,14 +109,10 @@ export function ReviewCard({ item, onGraded }: ReviewCardProps) {
         <CardFace item={item} kanjiMode={kanjiMode} revealed={revealed} />
       </div>
 
-      {error && <p className="text-center text-sm text-danger">{error}</p>}
+      {error && <p className="error-text text-center">{error}</p>}
 
       {!revealed ? (
-        <button
-          type="button"
-          onClick={() => setRevealed(true)}
-          className="w-full rounded-md border border-border px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-muted"
-        >
+        <button type="button" onClick={() => setRevealed(true)} className="btn-outline w-full">
           Show answer
         </button>
       ) : (
@@ -127,7 +123,7 @@ export function ReviewCard({ item, onGraded }: ReviewCardProps) {
               type="button"
               disabled={submitting}
               onClick={() => grade(btn.result)}
-              className={`rounded-md px-3 py-2 text-sm font-semibold text-white transition-colors hover:opacity-90 disabled:opacity-60 ${btn.className}`}
+              className={`rounded px-3 py-2 text-sm font-semibold text-white transition-colors hover:opacity-90 disabled:opacity-60 ${btn.className}`}
             >
               {btn.label}
             </button>

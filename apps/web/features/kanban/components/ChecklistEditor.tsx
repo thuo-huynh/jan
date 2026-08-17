@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, type FormEvent } from 'react';
+import { X } from 'lucide-react';
 import { createClient } from '@/shared/supabase/client';
 import type { ChecklistItem } from '../types';
 
@@ -155,11 +156,9 @@ export function ChecklistEditor({ taskId, items, onChange }: ChecklistEditorProp
                 type="button"
                 onClick={() => handleDelete(item)}
                 aria-label="Delete checklist item"
-                className="rounded p-1 text-muted-foreground transition-colors hover:bg-muted hover:text-danger"
+                className="flex h-6 w-6 shrink-0 items-center justify-center rounded text-muted-foreground transition-colors hover:bg-danger/10 hover:text-danger"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="h-3.5 w-3.5">
-                  <path d="M6.28 5.22a.75.75 0 0 0-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 1 0 1.06 1.06L10 11.06l3.72 3.72a.75.75 0 1 0 1.06-1.06L11.06 10l3.72-3.72a.75.75 0 0 0-1.06-1.06L10 8.94 6.28 5.22Z" />
-                </svg>
+                <X className="h-3.5 w-3.5" aria-hidden="true" />
               </button>
             </li>
           ))}
@@ -170,18 +169,14 @@ export function ChecklistEditor({ taskId, items, onChange }: ChecklistEditorProp
           value={draft}
           onChange={(e) => setDraft(e.target.value)}
           placeholder="Add checklist item"
-          className="flex-1 rounded-md border border-border bg-background px-2 py-1.5 text-sm text-foreground outline-none focus:border-primary"
+          className="input-field h-9 flex-1"
         />
-        <button
-          type="submit"
-          disabled={busy}
-          className="rounded-md border border-border px-3 py-1.5 text-sm font-medium text-foreground transition-colors hover:bg-muted disabled:opacity-60"
-        >
+        <button type="submit" disabled={busy} className="btn-outline h-9 px-3 text-sm">
           Add
         </button>
       </form>
 
-      {error && <p className="mt-2 text-sm text-danger">{error}</p>}
+      {error && <p className="error-text">{error}</p>}
     </div>
   );
 }

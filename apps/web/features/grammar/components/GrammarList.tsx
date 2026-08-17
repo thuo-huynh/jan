@@ -45,12 +45,12 @@ export function GrammarList({ points: initialPoints, userId }: GrammarListProps)
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border bg-card p-4">
-        <div className="flex flex-wrap items-center gap-4 text-sm">
+      <div className="card flex flex-wrap items-center justify-between gap-3 p-4">
+        <div className="flex flex-wrap items-center gap-2 text-sm">
           <span className="font-medium text-foreground">{points.length} grammar points</span>
-          <span className="text-success">{counts.mastered} mastered</span>
-          <span className="text-warning">{counts.learning} learning</span>
-          <span className="text-muted-foreground">{counts.not_started} not started</span>
+          <span className="badge-success">{counts.mastered} mastered</span>
+          <span className="badge-warning">{counts.learning} learning</span>
+          <span className="badge-neutral">{counts.not_started} not started</span>
         </div>
         <label className="flex cursor-pointer select-none items-center gap-2 text-sm text-foreground">
           <input
@@ -64,7 +64,7 @@ export function GrammarList({ points: initialPoints, userId }: GrammarListProps)
       </div>
 
       {visiblePoints.length === 0 ? (
-        <div className="rounded-lg border border-border bg-card p-8 text-center text-sm text-muted-foreground">
+        <div className="card p-8 text-center text-sm text-muted-foreground">
           No grammar points match the current filter.
         </div>
       ) : (

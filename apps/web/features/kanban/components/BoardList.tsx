@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState, type FormEvent } from 'react';
+import { LayoutGrid, Trash2 } from 'lucide-react';
 import { createClient } from '@/shared/supabase/client';
 import { boardSchema } from '@/shared/validation/schemas';
 import { DEFAULT_COLUMN_NAMES, type BoardSummary } from '../types';
@@ -100,7 +101,7 @@ export function BoardList({ initialBoards }: BoardListProps) {
 
   return (
     <div className="space-y-6">
-      <div className="rounded-lg border border-border bg-card p-4">
+      <div className="card">
         <h2 className="text-sm font-semibold text-foreground">Create a board</h2>
         <form className="mt-3 flex flex-col gap-3 sm:flex-row" onSubmit={handleCreate}>
           <input
@@ -108,32 +109,29 @@ export function BoardList({ initialBoards }: BoardListProps) {
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="e.g. N2 Study Sprint"
-            className="w-full flex-1 rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground outline-none transition-colors focus:border-primary"
+            aria-label="Board name"
+            className="input-field flex-1"
           />
-          <button
-            type="submit"
-            disabled={submitting}
-            className="whitespace-nowrap rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:opacity-90 disabled:opacity-60"
-          >
+          <button type="submit" disabled={submitting} className="btn-primary whitespace-nowrap">
             {submitting ? 'Creating…' : 'Create board'}
           </button>
         </form>
-        {error && <p className="mt-2 text-sm text-danger">{error}</p>}
+        {error && <p className="error-text">{error}</p>}
       </div>
 
       {boards.length === 0 ? (
-        <div className="rounded-lg border border-dashed border-border p-10 text-center">
-          <p className="text-sm text-muted-foreground">
+        <div className="flex flex-col items-center gap-3 rounded-lg border border-dashed border-border p-10 text-center">
+          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
+            <LayoutGrid className="h-6 w-6 text-primary" aria-hidden="true" />
+          </div>
+          <p className="max-w-xs text-sm text-muted-foreground">
             No boards yet. Create your first board above to start tracking tasks.
           </p>
         </div>
       ) : (
         <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {boards.map((board) => (
-            <li
-              key={board.id}
-              className="group relative rounded-lg border border-border bg-card p-4 transition-colors hover:border-primary"
-            >
+            <li key={board.id} className="card-interactive group relative hover:border-primary/40">
               <Link href={`/boards/${board.id}`} className="block">
                 <h3 className="truncate pr-6 text-sm font-semibold text-foreground">{board.name}</h3>
                 <p className="mt-1 text-xs text-muted-foreground">
@@ -145,20 +143,9 @@ export function BoardList({ initialBoards }: BoardListProps) {
                 onClick={() => handleDelete(board.id)}
                 disabled={deletingId === board.id}
                 aria-label={`Delete board ${board.name}`}
-                className="absolute right-3 top-3 rounded p-1 text-muted-foreground opacity-0 transition-opacity hover:bg-muted hover:text-danger focus:opacity-100 group-hover:opacity-100 disabled:opacity-40"
+                className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded text-muted-foreground opacity-0 transition-opacity hover:bg-danger/10 hover:text-danger focus-visible:opacity-100 group-hover:opacity-100 disabled:opacity-40"
               >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                  className="h-4 w-4"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M8.75 1A2.75 2.75 0 0 0 6 3.75v.443c-.795.077-1.584.176-2.365.298a.75.75 0 1 0 .23 1.482l.149-.022.841 10.518A2.75 2.75 0 0 0 7.596 19h4.807a2.75 2.75 0 0 0 2.742-2.53l.841-10.52.149.023a.75.75 0 0 0 .23-1.482 41.03 41.03 0 0 0-2.365-.298V3.75A2.75 2.75 0 0 0 11.25 1h-2.5ZM10 4c.84 0 1.673.025 2.5.075V3.75c0-.69-.56-1.25-1.25-1.25h-2.5c-.69 0-1.25.56-1.25 1.25v.325C8.327 4.025 9.16 4 10 4ZM8.58 7.72a.75.75 0 0 0-1.5.06l.3 7.5a.75.75 0 1 0 1.5-.06l-.3-7.5Zm4.34.06a.75.75 0 1 0-1.5-.06l-.3 7.5a.75.75 0 1 0 1.5.06l.3-7.5Z"
-                    clipRule="evenodd"
-                  />
-                </svg>
+                <Trash2 className="h-4 w-4" aria-hidden="true" />
               </button>
             </li>
           ))}

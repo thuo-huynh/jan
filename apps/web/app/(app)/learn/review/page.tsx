@@ -94,8 +94,8 @@ function ReviewSession() {
     <div className="mx-auto max-w-2xl space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-semibold text-foreground">Review Queue</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
+          <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">Review Queue</h1>
+          <p className="mt-1.5 text-sm text-muted-foreground">
             Blended N2 vocab, kanji, and grammar due today.
           </p>
         </div>
@@ -104,22 +104,22 @@ function ReviewSession() {
             type="checkbox"
             checked={weakOnly}
             onChange={(e) => toggleWeakOnly(e.target.checked)}
-            className="h-4 w-4 rounded border-border"
+            className="h-4 w-4 rounded border-border text-primary focus:ring-primary"
           />
           Weak items only
         </label>
       </div>
 
-      {error && <p className="text-sm text-danger">{error}</p>}
+      {error && <p className="error-text">{error}</p>}
 
       {items === null && !error && <p className="text-sm text-muted-foreground">Loading queue…</p>}
 
       {items !== null && items.length === 0 && (
-        <div className="rounded-lg border border-border bg-card p-8 text-center">
+        <div className="card p-8 text-center">
           <p className="text-foreground">
             {weakOnly ? 'No weak items right now — nice work.' : 'Nothing due for review right now.'}
           </p>
-          <Link href="/learn/vocab" className="mt-3 inline-block text-sm text-primary hover:underline">
+          <Link href="/learn/vocab" className="mt-3 inline-block text-sm font-medium text-primary hover:opacity-80">
             Browse the deck
           </Link>
         </div>
@@ -140,13 +140,9 @@ function ReviewSession() {
       )}
 
       {items !== null && items.length > 0 && index >= items.length && (
-        <div className="rounded-lg border border-border bg-card p-8 text-center">
+        <div className="card p-8 text-center">
           <p className="text-foreground">Session complete — {reviewedCount} card(s) reviewed.</p>
-          <button
-            type="button"
-            onClick={loadQueue}
-            className="mt-3 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:opacity-90"
-          >
+          <button type="button" onClick={loadQueue} className="btn-primary mt-3">
             Check for more due items
           </button>
         </div>

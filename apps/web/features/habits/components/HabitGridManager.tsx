@@ -116,9 +116,9 @@ export function HabitGridManager({ year, month, days, initialHabits, initialComp
       </div>
 
       {habits.length === 0 ? (
-        <p className="rounded-md border border-dashed border-border px-4 py-8 text-center text-sm text-muted-foreground">
-          No habits yet — add your first one above.
-        </p>
+        <div className="flex flex-col items-center gap-2 rounded-lg border border-dashed border-border p-8 text-center">
+          <p className="text-sm text-muted-foreground">No habits yet — add your first one above.</p>
+        </div>
       ) : (
         <div className="overflow-x-auto rounded-lg border border-border">
           <table className="border-collapse text-sm">

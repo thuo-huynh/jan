@@ -62,8 +62,8 @@ export default async function StudyPlanPage() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-baseline justify-between gap-2">
         <div>
-          <h1 className="text-xl font-semibold text-foreground">Study Plan</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
+          <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">Study Plan</h1>
+          <p className="mt-1.5 text-sm text-muted-foreground">
             Set a daily goal and track your consistency.
           </p>
         </div>

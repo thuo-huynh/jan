@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, type FormEvent } from 'react';
+import { Plus } from 'lucide-react';
 import { createClient } from '@/shared/supabase/client';
 import { habitSchema } from '@/shared/validation/schemas';
 import type { Habit } from '../types';
@@ -61,12 +62,9 @@ export function AddHabitForm({ onCreated }: AddHabitFormProps) {
 
   if (!open) {
     return (
-      <button
-        type="button"
-        onClick={() => setOpen(true)}
-        className="rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground transition-colors hover:opacity-90"
-      >
-        + Add habit
+      <button type="button" onClick={() => setOpen(true)} className="btn-primary h-9 px-3 text-sm">
+        <Plus className="h-4 w-4" aria-hidden="true" />
+        Add habit
       </button>
     );
   }
@@ -80,22 +78,14 @@ export function AddHabitForm({ onCreated }: AddHabitFormProps) {
           placeholder="e.g. Read 1 news article"
           autoFocus
           required
-          className="w-64 rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground outline-none transition-colors focus:border-primary"
+          className="input-field h-9 w-64"
         />
-        {error && <p className="mt-1 text-xs text-danger">{error}</p>}
+        {error && <p className="error-text">{error}</p>}
       </div>
-      <button
-        type="submit"
-        disabled={submitting}
-        className="rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground transition-colors hover:opacity-90 disabled:opacity-60"
-      >
+      <button type="submit" disabled={submitting} className="btn-primary h-9 px-3 text-sm">
         {submitting ? 'Adding…' : 'Add'}
       </button>
-      <button
-        type="button"
-        onClick={() => setOpen(false)}
-        className="rounded-md border border-border px-3 py-2 text-sm font-medium text-foreground transition-colors hover:bg-muted"
-      >
+      <button type="button" onClick={() => setOpen(false)} className="btn-outline h-9 px-3 text-sm">
         Cancel
       </button>
     </form>

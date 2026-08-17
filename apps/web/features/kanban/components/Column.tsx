@@ -5,6 +5,7 @@ import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { useDroppable } from '@dnd-kit/core';
 import { CSS } from '@dnd-kit/utilities';
 import { useState, type FormEvent, type KeyboardEvent } from 'react';
+import { X } from 'lucide-react';
 import { TaskCard } from './TaskCard';
 import type { BoardColumn } from '../types';
 
@@ -99,11 +100,9 @@ export function Column({ column, onRename, onDelete, onAddTask, onTaskClick }: C
           type="button"
           onClick={() => onDelete(column.id)}
           aria-label={`Delete column ${column.name}`}
-          className="rounded p-1 text-muted-foreground transition-colors hover:bg-muted hover:text-danger"
+          className="flex h-7 w-7 shrink-0 items-center justify-center rounded text-muted-foreground transition-colors hover:bg-danger/10 hover:text-danger"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4">
-            <path d="M6.28 5.22a.75.75 0 0 0-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 1 0 1.06 1.06L10 11.06l3.72 3.72a.75.75 0 1 0 1.06-1.06L11.06 10l3.72-3.72a.75.75 0 0 0-1.06-1.06L10 8.94 6.28 5.22Z" />
-          </svg>
+          <X className="h-4 w-4" aria-hidden="true" />
         </button>
       </div>
 
@@ -114,7 +113,9 @@ export function Column({ column, onRename, onDelete, onAddTask, onTaskClick }: C
           ))}
         </SortableContext>
         {column.tasks.length === 0 && (
-          <p className="px-1 py-2 text-center text-xs text-muted-foreground">No tasks</p>
+          <p className="rounded border border-dashed border-border px-2 py-3 text-center text-xs text-muted-foreground">
+            No tasks yet
+          </p>
         )}
       </div>
 
@@ -132,13 +133,10 @@ export function Column({ column, onRename, onDelete, onAddTask, onTaskClick }: C
                 }
               }}
               placeholder="Task title"
-              className="w-full rounded-md border border-border bg-background px-2 py-1.5 text-sm text-foreground outline-none focus:border-primary"
+              className="input-field h-9"
             />
             <div className="flex gap-2">
-              <button
-                type="submit"
-                className="rounded-md bg-primary px-3 py-1 text-xs font-medium text-primary-foreground transition-colors hover:opacity-90"
-              >
+              <button type="submit" className="btn-primary h-8 px-3 text-xs">
                 Add
               </button>
               <button
@@ -147,7 +145,7 @@ export function Column({ column, onRename, onDelete, onAddTask, onTaskClick }: C
                   setAddingTask(false);
                   setTaskTitleDraft('');
                 }}
-                className="rounded-md px-3 py-1 text-xs font-medium text-muted-foreground hover:bg-muted"
+                className="btn-ghost h-8 px-3 text-xs"
               >
                 Cancel
               </button>
@@ -157,7 +155,7 @@ export function Column({ column, onRename, onDelete, onAddTask, onTaskClick }: C
           <button
             type="button"
             onClick={() => setAddingTask(true)}
-            className="w-full rounded-md px-2 py-1.5 text-left text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+            className="w-full rounded px-2 py-1.5 text-left text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
           >
             + Add task
           </button>

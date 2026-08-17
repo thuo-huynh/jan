@@ -81,12 +81,9 @@ export function StudyGoalSettings({
   }
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="flex flex-wrap items-end gap-3 rounded-lg border border-border bg-card p-4"
-    >
+    <form onSubmit={handleSubmit} className="card flex flex-wrap items-end gap-3 p-4">
       <div>
-        <label className="mb-1 block text-sm font-medium text-foreground" htmlFor="goal-grammar">
+        <label className="label-field" htmlFor="goal-grammar">
           Daily grammar reviews
         </label>
         <input
@@ -95,11 +92,11 @@ export function StudyGoalSettings({
           min={0}
           value={grammarTarget}
           onChange={(e) => setGrammarTarget(e.target.value)}
-          className="w-28 rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground outline-none transition-colors focus:border-primary"
+          className="input-field w-28"
         />
       </div>
       <div>
-        <label className="mb-1 block text-sm font-medium text-foreground" htmlFor="goal-vocab">
+        <label className="label-field" htmlFor="goal-vocab">
           Daily vocab/kanji reviews
         </label>
         <input
@@ -108,18 +105,14 @@ export function StudyGoalSettings({
           min={0}
           value={vocabTarget}
           onChange={(e) => setVocabTarget(e.target.value)}
-          className="w-28 rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground outline-none transition-colors focus:border-primary"
+          className="input-field w-28"
         />
       </div>
-      <button
-        type="submit"
-        disabled={submitting}
-        className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:opacity-90 disabled:opacity-60"
-      >
+      <button type="submit" disabled={submitting} className="btn-primary">
         {submitting ? 'Saving…' : 'Save goal'}
       </button>
       {saved && <span className="text-sm text-success">Saved.</span>}
-      {error && <span className="text-sm text-danger">{error}</span>}
+      {error && <span className="error-text">{error}</span>}
     </form>
   );
 }

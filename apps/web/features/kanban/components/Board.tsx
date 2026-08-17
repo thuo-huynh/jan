@@ -19,6 +19,7 @@ import {
   sortableKeyboardCoordinates,
 } from '@dnd-kit/sortable';
 import { useCallback, useMemo, useRef, useState, type FormEvent } from 'react';
+import { Plus, X } from 'lucide-react';
 import { createClient } from '@/shared/supabase/client';
 import { Column } from './Column';
 import { TaskCard } from './TaskCard';
@@ -330,7 +331,7 @@ export function BoardView({ boardId, initialColumns }: BoardProps) {
   return (
     <div>
       {error && (
-        <div className="mb-4 flex items-center justify-between rounded-md border border-danger bg-card px-3 py-2 text-sm text-danger">
+        <div className="mb-4 flex items-center justify-between rounded-lg border border-danger bg-card px-3 py-2 text-sm text-danger">
           <span>{error}</span>
           <button type="button" onClick={() => setError(null)} className="font-medium hover:opacity-80">
             Dismiss
@@ -341,9 +342,11 @@ export function BoardView({ boardId, initialColumns }: BoardProps) {
       <BoardFilters columns={columns} filters={filters} onChange={setFilters} />
 
       {columns.length === 0 && (
-        <p className="mb-4 text-sm text-muted-foreground">
-          This board has no columns yet. Use &quot;+ Add column&quot; below to create one.
-        </p>
+        <div className="mb-4 flex flex-col items-center gap-2 rounded-lg border border-dashed border-border p-8 text-center">
+          <p className="text-sm text-muted-foreground">
+            This board has no columns yet. Use &quot;+ Add column&quot; below to create one.
+          </p>
+        </div>
       )}
 
       <DndContext
@@ -369,10 +372,7 @@ export function BoardView({ boardId, initialColumns }: BoardProps) {
 
           <div className="w-72 shrink-0">
             {addingColumn ? (
-              <form
-                onSubmit={handleAddColumn}
-                className="rounded-lg border border-border bg-card p-3"
-              >
+              <form onSubmit={handleAddColumn} className="rounded-lg border border-border bg-card p-3">
                 <input
                   autoFocus
                   value={newColumnName}
@@ -384,13 +384,10 @@ export function BoardView({ boardId, initialColumns }: BoardProps) {
                     }
                   }}
                   placeholder="Column name"
-                  className="w-full rounded-md border border-border bg-background px-2 py-1.5 text-sm text-foreground outline-none focus:border-primary"
+                  className="input-field h-9"
                 />
                 <div className="mt-2 flex gap-2">
-                  <button
-                    type="submit"
-                    className="rounded-md bg-primary px-3 py-1 text-xs font-medium text-primary-foreground transition-colors hover:opacity-90"
-                  >
+                  <button type="submit" className="btn-primary h-8 px-3 text-xs">
                     Add column
                   </button>
                   <button
@@ -399,8 +396,9 @@ export function BoardView({ boardId, initialColumns }: BoardProps) {
                       setAddingColumn(false);
                       setNewColumnName('');
                     }}
-                    className="rounded-md px-3 py-1 text-xs font-medium text-muted-foreground hover:bg-muted"
+                    className="btn-ghost h-8 px-3 text-xs"
                   >
+                    <X className="h-3.5 w-3.5" aria-hidden="true" />
                     Cancel
                   </button>
                 </div>
@@ -409,9 +407,10 @@ export function BoardView({ boardId, initialColumns }: BoardProps) {
               <button
                 type="button"
                 onClick={() => setAddingColumn(true)}
-                className="w-full rounded-lg border border-dashed border-border p-3 text-left text-sm text-muted-foreground transition-colors hover:border-primary hover:text-foreground"
+                className="flex w-full items-center gap-1.5 rounded-lg border border-dashed border-border p-3 text-left text-sm text-muted-foreground transition-colors hover:border-primary hover:text-foreground"
               >
-                + Add column
+                <Plus className="h-4 w-4" aria-hidden="true" />
+                Add column
               </button>
             )}
           </div>

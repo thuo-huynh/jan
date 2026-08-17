@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
+import { ArrowLeft } from 'lucide-react';
 import { createClient, getAuthedUser } from '@/shared/supabase/server';
 import { ConfusablePairCard } from '@/features/grammar/components/ConfusablePairCard';
 import { mapGrammarPoint, type GrammarPointRecord, type UserGrammarStatusRecord } from '@/features/grammar/lib/mapGrammarPoint';
@@ -69,14 +70,18 @@ export default async function ConfusablePairPage({ params }: ConfusablePairPageP
   return (
     <div className="space-y-6">
       <div>
-        <Link href="/learn/grammar" className="text-sm text-primary hover:underline">
-          ← Back to grammar list
+        <Link
+          href="/learn/grammar"
+          className="inline-flex items-center gap-1.5 text-sm font-medium text-primary transition-colors hover:opacity-80"
+        >
+          <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+          Back to grammar list
         </Link>
-        <h1 className="mt-2 text-2xl font-semibold text-foreground">
+        <h1 className="mt-2 text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
           <span className="font-jp">{pointA.pattern}</span> vs.{' '}
           <span className="font-jp">{pointB.pattern}</span>
         </h1>
-        <p className="mt-1 text-sm text-muted-foreground">
+        <p className="mt-1.5 text-sm text-muted-foreground">
           Side-by-side comparison to help disambiguate this confusable pair.
         </p>
       </div>

@@ -104,10 +104,10 @@ export function GrammarNoteEditor({
           rows={4}
           maxLength={10_000}
           placeholder="Write a mnemonic or usage note in markdown..."
-          className="w-full rounded-md border border-border bg-background p-2 text-sm text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+          className="textarea-field"
         />
       ) : (
-        <div className="min-h-24 rounded-md border border-border bg-background p-2">
+        <div className="min-h-24 rounded border border-border bg-background p-2">
           {draft.trim() ? (
             <GrammarMarkdown>{draft}</GrammarMarkdown>
           ) : (
@@ -117,18 +117,11 @@ export function GrammarNoteEditor({
       )}
 
       <div className="flex items-center gap-3">
-        <button
-          type="button"
-          onClick={handleSave}
-          disabled={saving || !dirty}
-          className="rounded-md bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
-        >
+        <button type="button" onClick={handleSave} disabled={saving || !dirty} className="btn-primary h-8 px-3 text-xs">
           {saving ? 'Saving...' : 'Save note'}
         </button>
-        {error && <span className="text-xs text-danger">{error}</span>}
-        {!error && justSaved && !dirty && (
-          <span className="text-xs text-success">Saved</span>
-        )}
+        {error && <span className="error-text">{error}</span>}
+        {!error && justSaved && !dirty && <span className="text-xs text-success">Saved</span>}
       </div>
     </div>
   );

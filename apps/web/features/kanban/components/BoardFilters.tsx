@@ -1,5 +1,6 @@
 'use client';
 
+import { Search, X } from 'lucide-react';
 import type { BoardColumn } from '../types';
 
 export interface BoardFilterState {
@@ -29,19 +30,25 @@ export function BoardFilters({ columns, filters, onChange }: BoardFiltersProps) 
   const hasActiveFilters = Boolean(filters.query || filters.tag || filters.dueBefore || filters.columnId);
 
   return (
-    <div className="mb-4 flex flex-wrap items-center gap-2 rounded-lg border border-border bg-card p-3">
-      <input
-        type="search"
-        value={filters.query}
-        onChange={(e) => onChange({ ...filters, query: e.target.value })}
-        placeholder="Search tasks…"
-        className="min-w-[10rem] flex-1 rounded-md border border-border bg-background px-3 py-1.5 text-sm text-foreground outline-none focus:border-primary"
-      />
+    <div className="card mb-4 flex flex-wrap items-center gap-2 p-3">
+      <div className="relative min-w-[10rem] flex-1">
+        <Search
+          className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground"
+          aria-hidden="true"
+        />
+        <input
+          type="search"
+          value={filters.query}
+          onChange={(e) => onChange({ ...filters, query: e.target.value })}
+          placeholder="Search tasks…"
+          className="input-field h-9 pl-8"
+        />
+      </div>
 
       <select
         value={filters.tag ?? ''}
         onChange={(e) => onChange({ ...filters, tag: e.target.value || null })}
-        className="rounded-md border border-border bg-background px-2 py-1.5 text-sm text-foreground outline-none focus:border-primary"
+        className="input-field h-9 w-auto"
       >
         <option value="">All tags</option>
         {allTags.map((tag) => (
@@ -54,7 +61,7 @@ export function BoardFilters({ columns, filters, onChange }: BoardFiltersProps) 
       <select
         value={filters.columnId ?? ''}
         onChange={(e) => onChange({ ...filters, columnId: e.target.value || null })}
-        className="rounded-md border border-border bg-background px-2 py-1.5 text-sm text-foreground outline-none focus:border-primary"
+        className="input-field h-9 w-auto"
       >
         <option value="">All columns</option>
         {columns.map((column) => (
@@ -73,16 +80,13 @@ export function BoardFilters({ columns, filters, onChange }: BoardFiltersProps) 
           type="date"
           value={filters.dueBefore ?? ''}
           onChange={(e) => onChange({ ...filters, dueBefore: e.target.value || null })}
-          className="rounded-md border border-border bg-background px-2 py-1.5 text-sm text-foreground outline-none focus:border-primary"
+          className="input-field h-9 w-auto"
         />
       </div>
 
       {hasActiveFilters && (
-        <button
-          type="button"
-          onClick={() => onChange(EMPTY_FILTERS)}
-          className="rounded-md px-2 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-        >
+        <button type="button" onClick={() => onChange(EMPTY_FILTERS)} className="btn-ghost h-9 px-2.5 text-xs">
+          <X className="h-3.5 w-3.5" aria-hidden="true" />
           Clear filters
         </button>
       )}

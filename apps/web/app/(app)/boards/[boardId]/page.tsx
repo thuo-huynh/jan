@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
+import { ArrowLeft } from 'lucide-react';
 import { createClient, getAuthedUser } from '@/shared/supabase/server';
 import { BoardView } from '@/features/kanban/components/Board';
 import type { BoardColumn, BoardTask, ChecklistItem } from '@/features/kanban/types';
@@ -81,18 +82,12 @@ export default async function BoardDetailPage({ params }: BoardDetailPageProps) 
       <div className="mb-6 flex items-center gap-3">
         <Link
           href="/boards"
-          className="rounded p-1 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+          className="flex h-9 w-9 shrink-0 items-center justify-center rounded text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
           aria-label="Back to boards"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="h-5 w-5">
-            <path
-              fillRule="evenodd"
-              d="M17 10a.75.75 0 0 1-.75.75H5.612l4.158 3.96a.75.75 0 1 1-1.04 1.08l-5.5-5.25a.75.75 0 0 1 0-1.08l5.5-5.25a.75.75 0 1 1 1.04 1.08L5.612 9.25H16.25A.75.75 0 0 1 17 10Z"
-              clipRule="evenodd"
-            />
-          </svg>
+          <ArrowLeft className="h-5 w-5" aria-hidden="true" />
         </Link>
-        <h1 className="text-xl font-semibold text-foreground">{board.name}</h1>
+        <h1 className="truncate text-2xl font-bold tracking-tight text-foreground sm:text-3xl">{board.name}</h1>
       </div>
 
       <BoardView boardId={board.id} initialColumns={columns} />

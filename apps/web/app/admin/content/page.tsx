@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
+import { Inbox, Search } from 'lucide-react';
 
 /**
  * T094 — Admin content moderation page (search/inspect/remove).
@@ -111,8 +112,10 @@ export default function AdminContentPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-xl font-semibold text-foreground">Content moderation</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
+        <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+          Content moderation
+        </h1>
+        <p className="mt-1.5 text-sm text-muted-foreground">
           Inspect and remove user-generated content (FR-046).
         </p>
       </div>
@@ -150,18 +153,17 @@ export default function AdminContentPage() {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Search content…"
-          className="w-full max-w-sm rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground outline-none transition-colors focus:border-primary"
+          aria-label="Search content"
+          className="input-field max-w-sm"
         />
-        <button
-          type="submit"
-          className="rounded-md border border-border px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-muted"
-        >
+        <button type="submit" className="btn-outline shrink-0">
+          <Search className="h-4 w-4" aria-hidden="true" />
           Search
         </button>
       </form>
 
       {error && (
-        <div className="rounded-md border border-danger/30 bg-danger/10 px-4 py-2 text-sm text-danger">
+        <div className="rounded-lg border border-danger/30 bg-danger/10 px-4 py-2 text-sm text-danger">
           {error}
         </div>
       )}
@@ -176,7 +178,7 @@ export default function AdminContentPage() {
               <th className="px-4 py-3 text-right">Actions</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody className="divide-y divide-border">
             {loading && (
               <tr>
                 <td colSpan={4} className="px-4 py-6 text-center text-muted-foreground">
@@ -186,8 +188,15 @@ export default function AdminContentPage() {
             )}
             {!loading && items.length === 0 && (
               <tr>
-                <td colSpan={4} className="px-4 py-6 text-center text-muted-foreground">
-                  No items found.
+                <td colSpan={4} className="px-4 py-12">
+                  <div className="flex flex-col items-center gap-2 text-center">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted">
+                      <Inbox className="h-6 w-6 text-muted-foreground" aria-hidden="true" />
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      {query ? 'No items match this search.' : 'No items found.'}
+                    </p>
+                  </div>
                 </td>
               </tr>
             )}
@@ -195,7 +204,7 @@ export default function AdminContentPage() {
               items.map((item) => {
                 const createdAt = createdAtOf(item);
                 return (
-                  <tr key={item.id} className="border-b border-border last:border-0">
+                  <tr key={item.id}>
                     <td className="px-4 py-3 text-muted-foreground">
                       {item.ownerEmail ?? '—'}
                     </td>
@@ -211,7 +220,7 @@ export default function AdminContentPage() {
                           type="button"
                           disabled={busyId === item.id}
                           onClick={() => handleRemove(item)}
-                          className="rounded-md border border-danger/40 px-3 py-1.5 text-xs font-medium text-danger transition-colors hover:bg-danger/10 disabled:opacity-60"
+                          className="btn-outline h-8 border-danger/40 px-3 text-xs text-danger hover:bg-danger/10"
                         >
                           {type === 'grammar_notes' ? 'Clear note' : 'Remove'}
                         </button>
@@ -233,7 +242,7 @@ export default function AdminContentPage() {
             type="button"
             disabled={page <= 1}
             onClick={() => setPage((p) => Math.max(1, p - 1))}
-            className="rounded-md border border-border px-3 py-1.5 disabled:opacity-40"
+            className="btn-outline h-8 px-3 text-xs disabled:opacity-40"
           >
             Previous
           </button>
@@ -241,7 +250,7 @@ export default function AdminContentPage() {
             type="button"
             disabled={page >= totalPages}
             onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-            className="rounded-md border border-border px-3 py-1.5 disabled:opacity-40"
+            className="btn-outline h-8 px-3 text-xs disabled:opacity-40"
           >
             Next
           </button>

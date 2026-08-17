@@ -46,7 +46,7 @@ export function FolderTagPicker({
   return (
     <div className="grid gap-3 sm:grid-cols-2">
       <div>
-        <label htmlFor="note-folder" className="mb-1 block text-xs font-medium text-muted-foreground">
+        <label htmlFor="note-folder" className="label-field">
           Folder
         </label>
         <input
@@ -56,7 +56,7 @@ export function FolderTagPicker({
           value={folder ?? ''}
           onChange={(e) => onFolderChange(e.target.value.trim() === '' ? null : e.target.value)}
           placeholder="e.g. Grammar, Vocab, General"
-          className="w-full rounded-md border border-border bg-background px-3 py-1.5 text-sm text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+          className="input-field"
         />
         <datalist id="note-folder-options">
           {folderOptions.map((f) => (
@@ -66,15 +66,12 @@ export function FolderTagPicker({
       </div>
 
       <div>
-        <label htmlFor="note-tags" className="mb-1 block text-xs font-medium text-muted-foreground">
+        <label htmlFor="note-tags" className="label-field">
           Tags
         </label>
-        <div className="flex flex-wrap items-center gap-1.5 rounded-md border border-border bg-background px-2 py-1.5 focus-within:border-primary focus-within:ring-1 focus-within:ring-primary">
+        <div className="flex min-h-10 flex-wrap items-center gap-1.5 rounded border border-border bg-background px-2 py-1.5 transition-colors focus-within:border-primary">
           {tags.map((tag) => (
-            <span
-              key={tag}
-              className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary"
-            >
+            <span key={tag} className="badge-primary">
               #{tag}
               <button
                 type="button"

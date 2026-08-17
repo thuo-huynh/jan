@@ -2,6 +2,7 @@
 
 import { useMemo, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
+import { Trash2 } from 'lucide-react';
 import { createClient } from '@/shared/supabase/client';
 import { noteSchema } from '@/shared/validation/schemas';
 import type { LinkedItemInfo, Note, TaskOption, VocabOption } from '../lib/types';
@@ -142,8 +143,10 @@ export function NoteEditor({
             type="button"
             onClick={handleDelete}
             disabled={isPending}
-            className="rounded-md border border-border px-3 py-1.5 text-sm font-medium text-danger transition-colors hover:bg-danger/10 disabled:opacity-60"
+            aria-label="Delete note"
+            className="btn-outline h-9 border-danger/40 px-3 text-xs text-danger hover:bg-danger/10"
           >
+            <Trash2 className="h-4 w-4" aria-hidden="true" />
             Delete
           </button>
         </div>
@@ -175,12 +178,12 @@ export function NoteEditor({
         server-side; in the steady state these banners simply don't render.
       */}
       {linkedTaskMissing && (
-        <p className="rounded-md border border-warning/30 bg-warning/10 px-3 py-2 text-sm text-warning">
+        <p className="rounded-lg border border-warning/30 bg-warning/10 px-3 py-2 text-sm text-warning">
           This note was linked to a task that is no longer available.
         </p>
       )}
       {linkedVocabMissing && (
-        <p className="rounded-md border border-warning/30 bg-warning/10 px-3 py-2 text-sm text-warning">
+        <p className="rounded-lg border border-warning/30 bg-warning/10 px-3 py-2 text-sm text-warning">
           This note was linked to a vocab/kanji entry that is no longer available.
         </p>
       )}
@@ -196,14 +199,14 @@ export function NoteEditor({
       )}
 
       <div>
-        <div className="mb-2 inline-flex rounded-md border border-border p-0.5">
+        <div className="mb-2 inline-flex rounded border border-border bg-muted p-1">
           <button
             type="button"
             onClick={() => setMode('edit')}
             aria-pressed={mode === 'edit'}
             className={`rounded px-3 py-1 text-sm font-medium transition-colors ${
               mode === 'edit'
-                ? 'bg-primary text-primary-foreground'
+                ? 'bg-card text-foreground shadow-sm'
                 : 'text-muted-foreground hover:text-foreground'
             }`}
           >
@@ -215,7 +218,7 @@ export function NoteEditor({
             aria-pressed={mode === 'preview'}
             className={`rounded px-3 py-1 text-sm font-medium transition-colors ${
               mode === 'preview'
-                ? 'bg-primary text-primary-foreground'
+                ? 'bg-card text-foreground shadow-sm'
                 : 'text-muted-foreground hover:text-foreground'
             }`}
           >
@@ -230,22 +233,17 @@ export function NoteEditor({
             rows={18}
             placeholder="Write in markdown… headings, lists, **bold**, `code`."
             aria-label="Note body (markdown)"
-            className="w-full rounded-md border border-border bg-card px-3 py-2 font-mono text-sm text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+            className="textarea-field font-mono"
           />
         ) : (
-          <div className="min-h-[20rem] rounded-md border border-border bg-card px-4 py-3">
+          <div className="min-h-[20rem] rounded-lg border border-border bg-card px-4 py-3">
             <MarkdownPreview markdown={bodyMarkdown} />
           </div>
         )}
       </div>
 
       <div className="flex items-center gap-3">
-        <button
-          type="button"
-          onClick={handleSave}
-          disabled={isPending || !dirty}
-          className="rounded-md bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition-colors hover:opacity-90 disabled:opacity-50"
-        >
+        <button type="button" onClick={handleSave} disabled={isPending || !dirty} className="btn-primary">
           {isPending ? 'Saving…' : 'Save'}
         </button>
         {status === 'saved' && !dirty && <span className="text-sm text-success">Saved</span>}

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { Plus, X, Pencil, Trash2 } from 'lucide-react';
 import { createClient } from '@/shared/supabase/client';
 import { VocabEntryForm, type CustomVocabEntry } from './VocabEntryForm';
 
@@ -42,13 +43,19 @@ export function CustomVocabManager({ initialEntries }: CustomVocabManagerProps) 
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-foreground">Your custom entries</h2>
-        <button
-          type="button"
-          onClick={() => setAdding((v) => !v)}
-          className="rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground transition-colors hover:opacity-90"
-        >
-          {adding ? 'Close' : 'Add word'}
+        <h2 className="text-lg font-semibold tracking-tight text-foreground">Your custom entries</h2>
+        <button type="button" onClick={() => setAdding((v) => !v)} className="btn-primary h-9 px-3 text-sm">
+          {adding ? (
+            <>
+              <X className="h-4 w-4" aria-hidden="true" />
+              Close
+            </>
+          ) : (
+            <>
+              <Plus className="h-4 w-4" aria-hidden="true" />
+              Add word
+            </>
+          )}
         </button>
       </div>
 
@@ -57,9 +64,11 @@ export function CustomVocabManager({ initialEntries }: CustomVocabManagerProps) 
       )}
 
       {entries.length === 0 ? (
-        <p className="text-sm text-muted-foreground">
-          No custom entries yet — add your own N2 vocab or kanji to blend into the review queue.
-        </p>
+        <div className="flex flex-col items-center gap-2 rounded-lg border border-dashed border-border p-8 text-center">
+          <p className="max-w-xs text-sm text-muted-foreground">
+            No custom entries yet — add your own N2 vocab or kanji to blend into the review queue.
+          </p>
+        </div>
       ) : (
         <ul className="space-y-2">
           {entries.map((entry) =>
@@ -81,10 +90,7 @@ export function CustomVocabManager({ initialEntries }: CustomVocabManagerProps) 
                 />
               </li>
             ) : (
-              <li
-                key={entry.id}
-                className="flex items-center justify-between gap-4 rounded-lg border border-border bg-card p-3"
-              >
+              <li key={entry.id} className="card flex items-center justify-between gap-4 p-3">
                 <div>
                   <p className="font-jp text-base text-foreground">
                     {entry.word}
@@ -95,22 +101,22 @@ export function CustomVocabManager({ initialEntries }: CustomVocabManagerProps) 
                   <p className="text-sm text-muted-foreground">{entry.meaning}</p>
                 </div>
                 <div className="flex shrink-0 items-center gap-2">
-                  <span className="rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground">
-                    {entry.is_kanji ? 'kanji' : 'vocab'} · custom
-                  </span>
+                  <span className="badge-neutral">{entry.is_kanji ? 'kanji' : 'vocab'} · custom</span>
                   <button
                     type="button"
                     onClick={() => setEditingId(entry.id)}
-                    className="rounded-md border border-border px-2 py-1 text-xs font-medium text-foreground transition-colors hover:bg-muted"
+                    aria-label={`Edit ${entry.word}`}
+                    className="flex h-7 w-7 items-center justify-center rounded text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
                   >
-                    Edit
+                    <Pencil className="h-3.5 w-3.5" aria-hidden="true" />
                   </button>
                   <button
                     type="button"
                     onClick={() => handleDelete(entry.id)}
-                    className="rounded-md border border-border px-2 py-1 text-xs font-medium text-danger transition-colors hover:bg-muted"
+                    aria-label={`Delete ${entry.word}`}
+                    className="flex h-7 w-7 items-center justify-center rounded text-muted-foreground transition-colors hover:bg-danger/10 hover:text-danger"
                   >
-                    Delete
+                    <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
                   </button>
                 </div>
               </li>

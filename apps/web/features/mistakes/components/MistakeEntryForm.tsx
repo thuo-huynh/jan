@@ -40,14 +40,14 @@ function LinkSelect<T extends { id: string }>({
 
   return (
     <div>
-      <label className="mb-1 block text-xs font-medium text-muted-foreground">{label}</label>
+      <label className="label-field text-xs">{label}</label>
       {selected ? (
-        <div className="flex items-center justify-between gap-2 rounded-md border border-border bg-background px-3 py-1.5 text-sm">
+        <div className="flex items-center justify-between gap-2 rounded border border-border bg-background px-3 py-1.5 text-sm">
           <span className="line-clamp-1 text-foreground">{renderLabel(selected)}</span>
           <button
             type="button"
             onClick={() => onSelect(null)}
-            className="shrink-0 text-xs font-medium text-muted-foreground hover:text-danger"
+            className="shrink-0 text-xs font-medium text-muted-foreground transition-colors hover:text-danger"
           >
             Unlink
           </button>
@@ -61,10 +61,10 @@ function LinkSelect<T extends { id: string }>({
             onFocus={() => setOpen(true)}
             onBlur={() => setTimeout(() => setOpen(false), 150)}
             placeholder={placeholder}
-            className="w-full rounded-md border border-border bg-background px-3 py-1.5 text-sm text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+            className="input-field h-9"
           />
           {open && (
-            <ul className="absolute z-10 mt-1 max-h-48 w-full overflow-auto rounded-md border border-border bg-card py-1 text-sm shadow-md">
+            <ul className="absolute z-10 mt-1 max-h-48 w-full overflow-auto rounded-lg border border-border bg-card py-1 text-sm shadow-lg">
               {filtered.length === 0 && (
                 <li className="px-3 py-1.5 text-muted-foreground">No matches</li>
               )}
@@ -155,12 +155,9 @@ export function MistakeEntryForm({
   }
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="space-y-3 rounded-lg border border-border bg-card p-4"
-    >
+    <form onSubmit={handleSubmit} className="card space-y-3 p-4">
       <div>
-        <label className="mb-1 block text-sm font-medium text-foreground" htmlFor="mistake-content">
+        <label className="label-field" htmlFor="mistake-content">
           What went wrong?
         </label>
         <textarea
@@ -170,7 +167,7 @@ export function MistakeEntryForm({
           rows={3}
           required
           placeholder="e.g. Mixed up 〜わけではない and 〜わけがない in a fill-in-the-blank"
-          className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground outline-none transition-colors focus:border-primary"
+          className="textarea-field"
         />
       </div>
       <div className="grid gap-3 sm:grid-cols-2">
@@ -192,21 +189,13 @@ export function MistakeEntryForm({
         />
       </div>
 
-      {error && <p className="text-sm text-danger">{error}</p>}
+      {error && <p className="error-text">{error}</p>}
 
       <div className="flex gap-2">
-        <button
-          type="submit"
-          disabled={submitting}
-          className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:opacity-90 disabled:opacity-60"
-        >
+        <button type="submit" disabled={submitting} className="btn-primary">
           {submitting ? 'Saving…' : 'Add mistake'}
         </button>
-        <button
-          type="button"
-          onClick={onCancel}
-          className="rounded-md border border-border px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-muted"
-        >
+        <button type="button" onClick={onCancel} className="btn-outline">
           Cancel
         </button>
       </div>

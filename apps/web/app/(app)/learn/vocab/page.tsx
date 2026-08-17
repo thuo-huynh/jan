@@ -55,8 +55,8 @@ export default async function VocabDeckPage({ searchParams }: VocabPageProps) {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-semibold text-foreground">Vocab &amp; Kanji Deck</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
+        <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">Vocab &amp; Kanji Deck</h1>
+        <p className="mt-1.5 text-sm text-muted-foreground">
           Browse the N2 reference deck and manage your own custom entries — both are blended into
           the same review queue.
         </p>
@@ -66,19 +66,16 @@ export default async function VocabDeckPage({ searchParams }: VocabPageProps) {
 
       <div className="space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-4">
-          <h2 className="text-lg font-semibold text-foreground">N2 reference deck</h2>
+          <h2 className="text-lg font-semibold tracking-tight text-foreground">N2 reference deck</h2>
           <form className="flex items-center gap-2" action="/learn/vocab" method="get">
             <input
               type="text"
               name="q"
               defaultValue={q}
               placeholder="Search word, reading, or meaning"
-              className="w-64 rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground outline-none transition-colors focus:border-primary"
+              className="input-field w-64"
             />
-            <button
-              type="submit"
-              className="rounded-md border border-border px-3 py-2 text-sm font-medium text-foreground transition-colors hover:bg-muted"
-            >
+            <button type="submit" className="btn-outline">
               Search
             </button>
           </form>
@@ -122,18 +119,12 @@ export default async function VocabDeckPage({ searchParams }: VocabPageProps) {
           </span>
           <div className="flex gap-2">
             {page > 1 && (
-              <a
-                href={`/learn/vocab?${prevParams.toString()}`}
-                className="rounded-md border border-border px-3 py-1.5 transition-colors hover:bg-muted"
-              >
+              <a href={`/learn/vocab?${prevParams.toString()}`} className="btn-outline h-9 px-3 text-sm">
                 Previous
               </a>
             )}
             {page < totalPages && (
-              <a
-                href={`/learn/vocab?${nextParams.toString()}`}
-                className="rounded-md border border-border px-3 py-1.5 transition-colors hover:bg-muted"
-              >
+              <a href={`/learn/vocab?${nextParams.toString()}`} className="btn-outline h-9 px-3 text-sm">
                 Next
               </a>
             )}

@@ -1,6 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import type { LucideIcon } from 'lucide-react';
+import { BookMarked, CheckSquare, StickyNote, TrendingUp, Users } from 'lucide-react';
 
 /**
  * T095 — Admin usage stats page. Calls T089 (`GET /api/admin/stats`),
@@ -15,10 +17,13 @@ type Stats = {
   totalVocab: number;
 };
 
-function StatTile({ label, value }: { label: string; value: number }) {
+function StatTile({ label, value, icon: Icon }: { label: string; value: number; icon: LucideIcon }) {
   return (
-    <div className="rounded-lg border border-border bg-card p-6">
-      <p className="text-sm text-muted-foreground">{label}</p>
+    <div className="card">
+      <div className="flex items-center gap-2 text-muted-foreground">
+        <Icon className="h-4 w-4" aria-hidden="true" />
+        <p className="text-sm">{label}</p>
+      </div>
       <p className="mt-2 text-3xl font-semibold text-foreground">{value.toLocaleString()}</p>
     </div>
   );
@@ -54,29 +59,40 @@ export default function AdminStatsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-xl font-semibold text-foreground">Usage stats</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
+        <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+          Usage stats
+        </h1>
+        <p className="mt-1.5 text-sm text-muted-foreground">
           Aggregate platform usage (FR-047). Active users are measured via
           `profiles.last_active_at`.
         </p>
       </div>
 
       {error && (
-        <div className="rounded-md border border-danger/30 bg-danger/10 px-4 py-2 text-sm text-danger">
+        <div className="rounded-lg border border-danger/30 bg-danger/10 px-4 py-2 text-sm text-danger">
           {error}
         </div>
       )}
 
-      {loading && <p className="text-sm text-muted-foreground">Loading…</p>}
-
-      {stats && (
+      {loading && (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          <StatTile label="Total users" value={stats.totalUsers} />
-          <StatTile label="Active users (7d)" value={stats.activeUsers7d} />
-          <StatTile label="Active users (30d)" value={stats.activeUsers30d} />
-          <StatTile label="Total tasks" value={stats.totalTasks} />
-          <StatTile label="Total notes" value={stats.totalNotes} />
-          <StatTile label="Total vocab entries" value={stats.totalVocab} />
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div key={i} className="card animate-pulse">
+              <div className="h-4 w-24 rounded bg-muted" />
+              <div className="mt-3 h-8 w-16 rounded bg-muted" />
+            </div>
+          ))}
+        </div>
+      )}
+
+      {!loading && stats && (
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <StatTile label="Total users" value={stats.totalUsers} icon={Users} />
+          <StatTile label="Active users (7d)" value={stats.activeUsers7d} icon={TrendingUp} />
+          <StatTile label="Active users (30d)" value={stats.activeUsers30d} icon={TrendingUp} />
+          <StatTile label="Total tasks" value={stats.totalTasks} icon={CheckSquare} />
+          <StatTile label="Total notes" value={stats.totalNotes} icon={StickyNote} />
+          <StatTile label="Total vocab entries" value={stats.totalVocab} icon={BookMarked} />
         </div>
       )}
     </div>
