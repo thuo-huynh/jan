@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 /**
  * Review card (T054/T055) — supports both review directions required by
@@ -8,6 +8,11 @@ import { useState } from 'react';
  * writing-recall for `is_kanji` items (user picks the mode per card before
  * revealing). Grading buttons (again/hard/good/easy) use the `srs-*` design
  * tokens (DESIGN.md) and POST to /api/reviews via the parent's `onGraded`.
+ *
+ * Keyboard shortcuts (Space/Enter to reveal, 1-4 to grade) matter more here
+ * than almost anywhere else in the app — a review session is dozens of reps
+ * of the same two actions, so forcing a mouse trip to a button every card
+ * adds up fast. Standard Anki-style bindings.
  */
 
 export type ReviewResult = 'again' | 'hard' | 'good' | 'easy';
@@ -67,6 +72,37 @@ export function ReviewCard({ item, onGraded }: ReviewCardProps) {
     }
   }
 
+  useEffect(() => {
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.metaKey || event.ctrlKey || event.altKey) return;
+
+      if (!revealed) {
+        if (event.key === ' ' || event.key === 'Enter') {
+          event.preventDefault();
+          setRevealed(true);
+        }
+        return;
+      }
+
+      if (submitting) return;
+      const GRADE_KEYS: Record<string, ReviewResult> = {
+        '1': 'again',
+        '2': 'hard',
+        '3': 'good',
+        '4': 'easy',
+      };
+      const result = GRADE_KEYS[event.key];
+      if (result) {
+        event.preventDefault();
+        grade(result);
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [revealed, submitting]);
+
   return (
     <div className="card space-y-4 p-8">
       <div className="flex items-center justify-between">
@@ -114,10 +150,11 @@ export function ReviewCard({ item, onGraded }: ReviewCardProps) {
       {!revealed ? (
         <button type="button" onClick={() => setRevealed(true)} className="btn-outline w-full">
           Show answer
+          <span className="ml-1.5 text-xs text-muted-foreground">(Space)</span>
         </button>
       ) : (
         <div className="grid grid-cols-4 gap-2">
-          {GRADE_BUTTONS.map((btn) => (
+          {GRADE_BUTTONS.map((btn, i) => (
             <button
               key={btn.result}
               type="button"
@@ -126,6 +163,7 @@ export function ReviewCard({ item, onGraded }: ReviewCardProps) {
               className={`rounded px-3 py-2 text-sm font-semibold text-white transition-colors hover:opacity-90 disabled:opacity-60 ${btn.className}`}
             >
               {btn.label}
+              <span className="ml-1 opacity-75">({i + 1})</span>
             </button>
           ))}
         </div>

@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { BookMarked, GitCompare, Palette, Pencil, PackageOpen, Trash2 } from 'lucide-react';
+import { TableSkeletonRows } from '@/shared/components/TableSkeletonRows';
 
 function EmptyTableState({ icon: Icon, message }: { icon: typeof PackageOpen; message: string }) {
   return (
@@ -314,6 +315,7 @@ function VocabTab() {
         <input
           className={`${inputClass} max-w-sm`}
           placeholder="Search word/meaning…"
+          aria-label="Search word/meaning"
           value={query}
           onChange={(e) => {
             setPage(1);
@@ -343,13 +345,7 @@ function VocabTab() {
             </tr>
           </thead>
           <tbody className="divide-y divide-border">
-            {loading && (
-              <tr>
-                <td colSpan={5} className="px-4 py-6 text-center text-muted-foreground">
-                  Loading…
-                </td>
-              </tr>
-            )}
+            {loading && <TableSkeletonRows columns={5} />}
             {!loading && items.length === 0 && (
               <tr>
                 <td colSpan={5}>
@@ -611,6 +607,7 @@ function GrammarTab() {
         <input
           className={`${inputClass} max-w-sm`}
           placeholder="Search pattern/meaning…"
+          aria-label="Search pattern/meaning"
           value={query}
           onChange={(e) => {
             setPage(1);
@@ -640,13 +637,7 @@ function GrammarTab() {
             </tr>
           </thead>
           <tbody className="divide-y divide-border">
-            {loading && (
-              <tr>
-                <td colSpan={5} className="px-4 py-6 text-center text-muted-foreground">
-                  Loading…
-                </td>
-              </tr>
-            )}
+            {loading && <TableSkeletonRows columns={5} />}
             {!loading && items.length === 0 && (
               <tr>
                 <td colSpan={5}>
@@ -892,6 +883,7 @@ function PairsTab() {
         <input
           className={`${inputClass} max-w-sm`}
           placeholder="Search comparison note…"
+          aria-label="Search comparison note"
           value={query}
           onChange={(e) => {
             setPage(1);
@@ -919,13 +911,7 @@ function PairsTab() {
             </tr>
           </thead>
           <tbody className="divide-y divide-border">
-            {loading && (
-              <tr>
-                <td colSpan={3} className="px-4 py-6 text-center text-muted-foreground">
-                  Loading…
-                </td>
-              </tr>
-            )}
+            {loading && <TableSkeletonRows columns={3} />}
             {!loading && items.length === 0 && (
               <tr>
                 <td colSpan={3}>
@@ -1230,13 +1216,7 @@ function ThemesTab() {
             </tr>
           </thead>
           <tbody className="divide-y divide-border">
-            {loading && (
-              <tr>
-                <td colSpan={5} className="px-4 py-6 text-center text-muted-foreground">
-                  Loading…
-                </td>
-              </tr>
-            )}
+            {loading && <TableSkeletonRows columns={5} />}
             {!loading && items.length === 0 && (
               <tr>
                 <td colSpan={5}>
@@ -1251,19 +1231,37 @@ function ThemesTab() {
                   <td className="px-4 py-3 text-foreground">{item.name}</td>
                   <td className="px-4 py-3 text-muted-foreground">{item.slug}</td>
                   <td className="px-4 py-3">
-                    <div className="flex gap-1">
-                      <span
-                        className="h-5 w-5 rounded-full border border-border"
-                        style={{ backgroundColor: item.primary_light }}
-                      />
-                      <span
-                        className="h-5 w-5 rounded-full border border-border"
-                        style={{ backgroundColor: item.secondary_light }}
-                      />
-                      <span
-                        className="h-5 w-5 rounded-full border border-border"
-                        style={{ backgroundColor: item.accent_light }}
-                      />
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-1">
+                        <span className="w-8 text-[10px] uppercase text-muted-foreground">Light</span>
+                        <span
+                          className="h-5 w-5 rounded-full border border-border"
+                          style={{ backgroundColor: item.primary_light }}
+                        />
+                        <span
+                          className="h-5 w-5 rounded-full border border-border"
+                          style={{ backgroundColor: item.secondary_light }}
+                        />
+                        <span
+                          className="h-5 w-5 rounded-full border border-border"
+                          style={{ backgroundColor: item.accent_light }}
+                        />
+                      </div>
+                      <div className="flex items-center gap-1 rounded bg-[#0b0b1a] px-1 py-1">
+                        <span className="w-8 text-[10px] uppercase text-white/60">Dark</span>
+                        <span
+                          className="h-5 w-5 rounded-full border border-white/20"
+                          style={{ backgroundColor: item.primary_dark }}
+                        />
+                        <span
+                          className="h-5 w-5 rounded-full border border-white/20"
+                          style={{ backgroundColor: item.secondary_dark }}
+                        />
+                        <span
+                          className="h-5 w-5 rounded-full border border-white/20"
+                          style={{ backgroundColor: item.accent_dark }}
+                        />
+                      </div>
                     </div>
                   </td>
                   <td className="px-4 py-3">

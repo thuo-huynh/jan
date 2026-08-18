@@ -1,8 +1,9 @@
 'use client';
 
 import { useMemo, useState, useTransition } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Trash2 } from 'lucide-react';
+import { ArrowLeft, Trash2 } from 'lucide-react';
 import { createClient } from '@/shared/supabase/client';
 import { noteSchema } from '@/shared/validation/schemas';
 import type { LinkedItemInfo, Note, TaskOption, VocabOption } from '../lib/types';
@@ -130,6 +131,14 @@ export function NoteEditor({
 
   return (
     <div className="flex flex-col gap-6">
+      <Link
+        href="/notes"
+        className="inline-flex w-fit items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
+      >
+        <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+        Back to notes
+      </Link>
+
       <div className="flex items-start justify-between gap-3">
         <input
           value={title}

@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { Search, Users } from 'lucide-react';
+import { TableSkeletonRows } from '@/shared/components/TableSkeletonRows';
 
 /**
  * T093 — Admin user list/search page + suspend/delete actions.
@@ -150,13 +151,7 @@ export default function AdminUsersPage() {
             </tr>
           </thead>
           <tbody className="divide-y divide-border">
-            {loading && (
-              <tr>
-                <td colSpan={6} className="px-4 py-6 text-center text-muted-foreground">
-                  Loading…
-                </td>
-              </tr>
-            )}
+            {loading && <TableSkeletonRows columns={6} />}
             {!loading && users.length === 0 && (
               <tr>
                 <td colSpan={6} className="px-4 py-12">

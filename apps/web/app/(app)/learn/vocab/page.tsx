@@ -110,6 +110,7 @@ export default async function VocabDeckPage({ searchParams }: VocabPageProps) {
               name="q"
               defaultValue={q}
               placeholder="Search word, reading, or meaning"
+              aria-label="Search word, reading, or meaning"
               className="input-field w-64"
             />
             <button type="submit" className="btn-outline">

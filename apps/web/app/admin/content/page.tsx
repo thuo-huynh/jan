@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { Inbox, Search } from 'lucide-react';
+import { TableSkeletonRows } from '@/shared/components/TableSkeletonRows';
 
 /**
  * T094 — Admin content moderation page (search/inspect/remove).
@@ -179,13 +180,7 @@ export default function AdminContentPage() {
             </tr>
           </thead>
           <tbody className="divide-y divide-border">
-            {loading && (
-              <tr>
-                <td colSpan={4} className="px-4 py-6 text-center text-muted-foreground">
-                  Loading…
-                </td>
-              </tr>
-            )}
+            {loading && <TableSkeletonRows columns={4} />}
             {!loading && items.length === 0 && (
               <tr>
                 <td colSpan={4} className="px-4 py-12">
