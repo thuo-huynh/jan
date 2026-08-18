@@ -2,17 +2,28 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import {
+  AlertTriangle,
+  BookOpen,
+  BookText,
+  CalendarClock,
+  ClipboardCheck,
+  Headphones,
+  LayoutDashboard,
+  Languages,
+  RotateCw,
+} from 'lucide-react';
 
 const LEARN_TABS = [
-  { href: '/learn/dashboard', label: 'Dashboard' },
-  { href: '/learn/vocab', label: 'Vocab' },
-  { href: '/learn/grammar', label: 'Grammar' },
-  { href: '/learn/reading', label: 'Reading' },
-  { href: '/learn/listening', label: 'Listening' },
-  { href: '/learn/review', label: 'Review' },
-  { href: '/learn/study-plan', label: 'Study Plan' },
-  { href: '/learn/mistakes', label: 'Mistakes' },
-  { href: '/learn/mock-tests', label: 'Mock Tests' },
+  { href: '/learn/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+  { href: '/learn/vocab', label: 'Vocab', icon: BookOpen },
+  { href: '/learn/grammar', label: 'Grammar', icon: Languages },
+  { href: '/learn/reading', label: 'Reading', icon: BookText },
+  { href: '/learn/listening', label: 'Listening', icon: Headphones },
+  { href: '/learn/review', label: 'Review', icon: RotateCw },
+  { href: '/learn/study-plan', label: 'Study Plan', icon: CalendarClock },
+  { href: '/learn/mistakes', label: 'Mistakes', icon: AlertTriangle },
+  { href: '/learn/mock-tests', label: 'Mock Tests', icon: ClipboardCheck },
 ];
 
 function isActive(pathname: string, href: string) {
@@ -36,17 +47,19 @@ export function LearnNav() {
       <div className="flex w-max min-w-full gap-1.5 border-b border-border pb-2 sm:w-full">
         {LEARN_TABS.map((tab) => {
           const active = isActive(pathname, tab.href);
+          const Icon = tab.icon;
           return (
             <Link
               key={tab.href}
               href={tab.href}
               aria-current={active ? 'page' : undefined}
-              className={`shrink-0 rounded-full px-3 py-1.5 text-sm font-medium transition-colors ${
+              className={`flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium transition-colors duration-200 ${
                 active
-                  ? 'bg-primary text-primary-foreground'
+                  ? 'bg-primary text-primary-foreground shadow-sm'
                   : 'text-muted-foreground hover:bg-muted hover:text-foreground'
               }`}
             >
+              <Icon className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
               {tab.label}
             </Link>
           );
