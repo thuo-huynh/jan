@@ -1,12 +1,16 @@
 'use client';
 
+import { useEffect, useRef, useState } from 'react';
 import { Check } from 'lucide-react';
 
 /**
  * Day-cell checkbox (T009) — tick/untick a single habit's completion for a
  * single day. Purely controlled: the parent (HabitGridManager) owns the
  * optimistic state + rollback-on-failure, this component just renders the
- * checkbox and reports clicks.
+ * checkbox and reports clicks. Plays a brief pop animation on the
+ * false->true transition (tracked locally via a ref so it fires once per
+ * genuine tick, not on every re-render or on mount for already-completed
+ * days when switching months).
  */
 interface HabitDayCellProps {
   habitName: string;
@@ -29,6 +33,19 @@ export function HabitDayCell({
 }: HabitDayCellProps) {
   const day = Number(date.slice(-2));
 
+  const wasCompletedRef = useRef(completed);
+  const [justCompleted, setJustCompleted] = useState(false);
+
+  useEffect(() => {
+    const was = wasCompletedRef.current;
+    wasCompletedRef.current = completed;
+    if (completed && !was) {
+      setJustCompleted(true);
+      const timer = setTimeout(() => setJustCompleted(false), 260);
+      return () => clearTimeout(timer);
+    }
+  }, [completed]);
+
   return (
     <td className={`p-0.5 text-center ${isWeekend ? 'bg-muted/60' : ''}`}>
       <button
@@ -42,7 +59,7 @@ export function HabitDayCell({
           completed
             ? 'border-primary bg-primary text-primary-foreground'
             : 'border-border bg-background hover:bg-muted'
-        } ${isToday ? 'ring-2 ring-primary/50 ring-offset-1 ring-offset-card' : ''}`}
+        } ${isToday ? 'ring-2 ring-primary/50 ring-offset-1 ring-offset-card' : ''} ${justCompleted ? 'animate-habit-pop' : ''}`}
       >
         {completed && <Check className="mx-auto h-4 w-4" strokeWidth={2.5} aria-hidden="true" />}
       </button>

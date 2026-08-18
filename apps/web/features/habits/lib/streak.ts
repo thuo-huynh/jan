@@ -33,3 +33,38 @@ export function computeHabitStreak(completionDates: IsoDate[], asOf: Date = new 
 export function countCompletions(completionDates: IsoDate[]): number {
   return new Set(completionDates).size;
 }
+
+export type StreakTier = 'spark' | 'on_fire' | 'blazing' | 'legendary';
+
+const STREAK_TIERS: { min: number; tier: StreakTier; label: string }[] = [
+  { min: 100, tier: 'legendary', label: 'Legendary' },
+  { min: 30, tier: 'blazing', label: 'Blazing' },
+  { min: 7, tier: 'on_fire', label: 'On fire' },
+  { min: 3, tier: 'spark', label: 'Spark' },
+];
+
+/**
+ * Cosmetic streak-length tier for an escalating badge treatment (spark ->
+ * on fire -> blazing -> legendary) — purely derived from the streak number
+ * each render, no persistence or backend of its own. `null` below the
+ * lowest threshold (3 days), where a plain streak count is enough.
+ */
+export function getStreakTier(streak: number): { tier: StreakTier; label: string } | null {
+  return STREAK_TIERS.find((t) => streak >= t.min) ?? null;
+}
+
+/** Streak lengths (in days) worth a one-off celebration when first reached. */
+export const STREAK_MILESTONES = [7, 30, 100] as const;
+
+/**
+ * The milestone `newStreak` just reached that `oldStreak` hadn't, or `null`
+ * if this streak change didn't cross one. Used to fire a celebration toast
+ * exactly once per milestone rather than on every render at that streak
+ * length.
+ */
+export function crossedMilestone(oldStreak: number, newStreak: number): number | null {
+  for (const milestone of STREAK_MILESTONES) {
+    if (newStreak >= milestone && oldStreak < milestone) return milestone;
+  }
+  return null;
+}

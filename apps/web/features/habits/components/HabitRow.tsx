@@ -1,9 +1,10 @@
 'use client';
 
 import { useRef, useState, type KeyboardEvent } from 'react';
-import { Flame, Trash2 } from 'lucide-react';
+import { Trash2 } from 'lucide-react';
 import { useConfirm } from '@/shared/hooks/useConfirm';
 import { HabitDayCell } from './HabitDayCell';
+import { StreakBadge } from './StreakBadge';
 import { computeHabitStreak, countCompletions } from '../lib/streak';
 import { isWeekend } from '../lib/calendar';
 import type { IsoDate } from '../lib/streak';
@@ -104,8 +105,8 @@ export function HabitRow({
             <p className="mt-0.5 flex items-center gap-1 text-xs text-muted-foreground">
               {streak > 0 ? (
                 <>
-                  <Flame className="h-3 w-3 text-success" aria-hidden="true" />
-                  <span className="font-medium text-success">{streak}-day streak</span>
+                  <StreakBadge streak={streak} className="font-medium" />
+                  <span>-day streak</span>
                 </>
               ) : (
                 `${count} this month`

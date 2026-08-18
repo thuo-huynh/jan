@@ -240,3 +240,40 @@ body {
     @apply my-4 border-border;
   }
 }
+
+/*
+ * Habit tracker micro-interactions (features/habits) — a tick-pop on
+ * completing a day cell, and a small confetti-dot fall used by the
+ * celebration banner (streak milestones / "all done today"). Plain
+ * keyframes rather than @layer utilities since @apply can't reference
+ * `animation`/`@keyframes` — see the note at the top of this file about
+ * opacity-modified utilities not being @apply-safe either.
+ */
+@keyframes habit-pop {
+  0% {
+    transform: scale(1);
+  }
+  45% {
+    transform: scale(1.35);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+.animate-habit-pop {
+  animation: habit-pop 0.26s ease-out;
+}
+
+@keyframes confetti-fall {
+  0% {
+    transform: translateY(-6px) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(48px) rotate(220deg);
+    opacity: 0;
+  }
+}
+.animate-confetti-fall {
+  animation: confetti-fall 1.1s ease-in forwards;
+}

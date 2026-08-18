@@ -7,8 +7,9 @@ import { HabitRow } from './HabitRow';
 import { AddHabitForm } from './AddHabitForm';
 import { MonthNav } from './MonthNav';
 import { TodayChecklist } from './TodayChecklist';
+import { CelebrationBanner, type CelebrationMessage } from './CelebrationBanner';
 import { todayIso, weekdayInitial, isWeekend } from '../lib/calendar';
-import { computeHabitStreak } from '../lib/streak';
+import { computeHabitStreak, crossedMilestone } from '../lib/streak';
 import type { IsoDate } from '../lib/streak';
 import type { Habit, HabitCompletion } from '../types';
 
@@ -16,7 +17,11 @@ import type { Habit, HabitCompletion } from '../types';
  * Habit grid manager (T010) — owns the month-in-view's habit list +
  * completion state, wires day-cell tick/untick to direct Supabase mutations
  * under RLS with optimistic update + rollback-on-failure (matching the
- * Kanban board's optimistic task-move pattern from 001-tasknihongo).
+ * Kanban board's optimistic task-move pattern from 001-tasknihongo). Also
+ * owns the celebration queue (streak milestones + "all done today") fired
+ * from handleToggleDay — computed inline against `today` rather than the
+ * streakByHabit memo below, since that memo only recomputes after the
+ * state update this same function triggers.
  */
 interface HabitGridManagerProps {
   year: number;
@@ -40,7 +45,16 @@ export function HabitGridManager({ year, month, days, initialHabits, initialComp
   const [habits, setHabits] = useState(initialHabits);
   const [completionsByHabit, setCompletionsByHabit] = useState(() => groupByHabit(initialCompletions));
   const [pendingByHabit, setPendingByHabit] = useState<Map<string, Set<IsoDate>>>(new Map());
+  const [celebrations, setCelebrations] = useState<CelebrationMessage[]>([]);
   const today = todayIso();
+
+  function pushCelebration(text: string) {
+    setCelebrations((prev) => [...prev, { id: `${Date.now()}-${Math.random()}`, text }]);
+  }
+
+  function dismissCelebration(id: string) {
+    setCelebrations((prev) => prev.filter((c) => c.id !== id));
+  }
 
   const isCurrentMonthView = days.includes(today);
 
@@ -127,6 +141,26 @@ export function HabitGridManager({ year, month, days, initialHabits, initialComp
 
   async function handleToggleDay(habitId: string, date: IsoDate) {
     const wasCompleted = completionsByHabit.get(habitId)?.has(date) ?? false;
+
+    // Celebrations only make sense for the act of completing *today* — a
+    // user backfilling a past day in the month grid isn't "just now"
+    // reaching a milestone, so date === today keeps this from firing on
+    // retroactive edits.
+    if (date === today && !wasCompleted) {
+      const habit = habits.find((h) => h.id === habitId);
+      const previousDates = Array.from(completionsByHabit.get(habitId) ?? []);
+      const asOf = new Date(`${today}T00:00:00`);
+      const oldStreak = computeHabitStreak(previousDates, asOf);
+      const newStreak = computeHabitStreak([...previousDates, date], asOf);
+      const milestone = crossedMilestone(oldStreak, newStreak);
+      if (milestone && habit) {
+        pushCelebration(`🔥 ${milestone}-day streak on "${habit.name}"!`);
+      }
+      if (habits.length > 0 && doneTodaySet.size + 1 >= habits.length) {
+        pushCelebration('All habits done for today! 🎉');
+      }
+    }
+
     setCompleted(habitId, date, !wasCompleted);
     setPending(habitId, date, true);
 
@@ -161,6 +195,8 @@ export function HabitGridManager({ year, month, days, initialHabits, initialComp
         <MonthNav year={year} month={month} />
         <AddHabitForm onCreated={handleCreated} />
       </div>
+
+      <CelebrationBanner messages={celebrations} onDismiss={dismissCelebration} />
 
       {habits.length > 0 && isCurrentMonthView && (
         <TodayChecklist
