@@ -3,6 +3,7 @@
 import { useState, type FormEvent } from 'react';
 import { Trash2 } from 'lucide-react';
 import { createClient } from '@/shared/supabase/client';
+import { useConfirm } from '@/shared/hooks/useConfirm';
 import { readingLogSchema } from '@/shared/validation/schemas';
 import { AttachToSrsButton } from './AttachToSrsButton';
 import { PASSAGE_TYPES, type ReadingLog } from '../types';
@@ -28,6 +29,7 @@ export function ReadingLogManager({ initialLogs }: ReadingLogManagerProps) {
   const [submitting, setSubmitting] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [deleteError, setDeleteError] = useState<string | null>(null);
+  const { confirm, confirmDialog } = useConfirm();
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -85,7 +87,11 @@ export function ReadingLogManager({ initialLogs }: ReadingLogManagerProps) {
   }
 
   async function handleDelete(id: string) {
-    if (!confirm('Delete this reading session? This cannot be undone.')) return;
+    const ok = await confirm({
+      title: 'Delete this reading session?',
+      description: 'This cannot be undone.',
+    });
+    if (!ok) return;
     setDeleteError(null);
     setDeletingId(id);
     const supabase = createClient();
@@ -100,6 +106,7 @@ export function ReadingLogManager({ initialLogs }: ReadingLogManagerProps) {
 
   return (
     <div className="space-y-4">
+      {confirmDialog}
       <form onSubmit={handleSubmit} className="card space-y-3 p-4">
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <div>

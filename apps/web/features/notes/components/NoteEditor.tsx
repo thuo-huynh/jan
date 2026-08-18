@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft, Trash2 } from 'lucide-react';
 import { createClient } from '@/shared/supabase/client';
+import { useConfirm } from '@/shared/hooks/useConfirm';
 import { noteSchema } from '@/shared/validation/schemas';
 import type { LinkedItemInfo, Note, TaskOption, VocabOption } from '../lib/types';
 import { FolderTagPicker } from './FolderTagPicker';
@@ -55,6 +56,7 @@ export function NoteEditor({
   const [status, setStatus] = useState<'idle' | 'saved' | 'error'>('idle');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
+  const { confirm, confirmDialog } = useConfirm();
 
   const dirty = useMemo(
     () =>
@@ -109,10 +111,9 @@ export function NoteEditor({
     });
   }
 
-  function handleDelete() {
-    if (typeof window !== 'undefined' && !window.confirm('Delete this note? This cannot be undone.')) {
-      return;
-    }
+  async function handleDelete() {
+    const ok = await confirm({ title: 'Delete this note?', description: 'This cannot be undone.' });
+    if (!ok) return;
 
     startTransition(async () => {
       const supabase = createClient();
@@ -131,6 +132,7 @@ export function NoteEditor({
 
   return (
     <div className="flex flex-col gap-6">
+      {confirmDialog}
       <Link
         href="/notes"
         className="inline-flex w-fit items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"

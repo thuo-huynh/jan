@@ -2,6 +2,7 @@
 
 import { useRef, useState, type KeyboardEvent } from 'react';
 import { Flame, Trash2 } from 'lucide-react';
+import { useConfirm } from '@/shared/hooks/useConfirm';
 import { HabitDayCell } from './HabitDayCell';
 import { computeHabitStreak, countCompletions } from '../lib/streak';
 import { isWeekend } from '../lib/calendar';
@@ -40,6 +41,7 @@ export function HabitRow({
   const [editing, setEditing] = useState(false);
   const [draftName, setDraftName] = useState(habitName);
   const inputRef = useRef<HTMLInputElement>(null);
+  const { confirm, confirmDialog } = useConfirm();
 
   function startEditing() {
     setDraftName(habitName);
@@ -65,15 +67,18 @@ export function HabitRow({
     }
   }
 
-  function handleDelete() {
-    if (confirm(`Delete "${habitName}"? Its completion history will be removed too.`)) {
-      onDelete();
-    }
+  async function handleDelete() {
+    const ok = await confirm({
+      title: `Delete "${habitName}"?`,
+      description: 'Its completion history will be removed too.',
+    });
+    if (ok) onDelete();
   }
 
   return (
     <tr>
       <th scope="row" className="sticky left-0 z-10 bg-background px-2 py-1.5 text-left font-normal">
+        {confirmDialog}
         <div className="flex items-center justify-between gap-2">
           <div className="min-w-0">
             {editing ? (

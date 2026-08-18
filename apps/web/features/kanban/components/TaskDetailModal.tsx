@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { X } from 'lucide-react';
 import { createClient } from '@/shared/supabase/client';
+import { useConfirm } from '@/shared/hooks/useConfirm';
 import { taskSchema } from '@/shared/validation/schemas';
 import { ChecklistEditor } from './ChecklistEditor';
 import type { BoardTask, ChecklistItem } from '../types';
@@ -24,6 +25,7 @@ export function TaskDetailModal({ task, onClose, onUpdated, onDeleted }: TaskDet
   const [checklistItems, setChecklistItems] = useState<ChecklistItem[]>(task.task_checklist_items);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { confirm, confirmDialog } = useConfirm();
 
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
@@ -92,7 +94,8 @@ export function TaskDetailModal({ task, onClose, onUpdated, onDeleted }: TaskDet
   }
 
   async function handleDelete() {
-    if (!window.confirm('Delete this task? This cannot be undone.')) return;
+    const ok = await confirm({ title: 'Delete this task?', description: 'This cannot be undone.' });
+    if (!ok) return;
     setSaving(true);
     setError(null);
     const supabase = createClient();
@@ -112,6 +115,7 @@ export function TaskDetailModal({ task, onClose, onUpdated, onDeleted }: TaskDet
       onClick={onClose}
       role="presentation"
     >
+      {confirmDialog}
       <div
         className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-lg border border-border bg-card p-5 shadow-xl"
         onClick={(e) => e.stopPropagation()}

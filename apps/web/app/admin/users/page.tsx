@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Search, Users } from 'lucide-react';
 import { TableSkeletonRows } from '@/shared/components/TableSkeletonRows';
+import { useConfirm } from '@/shared/hooks/useConfirm';
 
 /**
  * T093 — Admin user list/search page + suspend/delete actions.
@@ -31,6 +32,7 @@ export default function AdminUsersPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
+  const { confirm, confirmDialog } = useConfirm();
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -75,9 +77,10 @@ export default function AdminUsersPage() {
   }
 
   async function handleDelete(user: AdminUser) {
-    const confirmed = window.confirm(
-      `Permanently delete ${user.email} and all their content? This cannot be undone.`,
-    );
+    const confirmed = await confirm({
+      title: `Permanently delete ${user.email}?`,
+      description: 'All their content will be deleted too. This cannot be undone.',
+    });
     if (!confirmed) return;
 
     setBusyId(user.id);
@@ -103,6 +106,7 @@ export default function AdminUsersPage() {
 
   return (
     <div className="space-y-6">
+      {confirmDialog}
       <div>
         <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">Users</h1>
         <p className="mt-1.5 text-sm text-muted-foreground">

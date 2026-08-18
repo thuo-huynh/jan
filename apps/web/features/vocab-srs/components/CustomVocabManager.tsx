@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Plus, X, Pencil, Trash2 } from 'lucide-react';
 import { createClient } from '@/shared/supabase/client';
+import { useConfirm } from '@/shared/hooks/useConfirm';
 import { VocabEntryForm, type CustomVocabEntry } from './VocabEntryForm';
 
 export type { CustomVocabEntry } from './VocabEntryForm';
@@ -21,6 +22,7 @@ export function CustomVocabManager({ initialEntries }: CustomVocabManagerProps) 
   const [editingId, setEditingId] = useState<string | null>(null);
   const [adding, setAdding] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
+  const { confirm, confirmDialog } = useConfirm();
 
   function handleCreated(entry: CustomVocabEntry) {
     setEntries((prev) => [entry, ...prev]);
@@ -33,7 +35,11 @@ export function CustomVocabManager({ initialEntries }: CustomVocabManagerProps) 
   }
 
   async function handleDelete(id: string) {
-    if (!confirm('Delete this custom entry? Its review history will be removed too.')) return;
+    const ok = await confirm({
+      title: 'Delete this custom entry?',
+      description: 'Its review history will be removed too.',
+    });
+    if (!ok) return;
     setDeleteError(null);
     const supabase = createClient();
     const { error } = await supabase.from('vocab_entries').delete().eq('id', id);
@@ -46,6 +52,7 @@ export function CustomVocabManager({ initialEntries }: CustomVocabManagerProps) 
 
   return (
     <div className="space-y-4">
+      {confirmDialog}
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-semibold tracking-tight text-foreground">Your custom entries</h2>
         <button type="button" onClick={() => setAdding((v) => !v)} className="btn-primary h-9 px-3 text-sm">

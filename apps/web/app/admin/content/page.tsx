@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Inbox, Search } from 'lucide-react';
 import { TableSkeletonRows } from '@/shared/components/TableSkeletonRows';
+import { useConfirm } from '@/shared/hooks/useConfirm';
 
 /**
  * T094 — Admin content moderation page (search/inspect/remove).
@@ -63,6 +64,7 @@ export default function AdminContentPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
+  const { confirm, confirmDialog } = useConfirm();
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -88,8 +90,10 @@ export default function AdminContentPage() {
 
   async function handleRemove(item: ContentItem) {
     const isNote = type === 'grammar_notes';
-    const confirmed = window.confirm(
-      isNote ? 'Clear this personal note?' : 'Remove this content item? This cannot be undone.',
+    const confirmed = await confirm(
+      isNote
+        ? { title: 'Clear this personal note?' }
+        : { title: 'Remove this content item?', description: 'This cannot be undone.' },
     );
     if (!confirmed) return;
 
@@ -112,6 +116,7 @@ export default function AdminContentPage() {
 
   return (
     <div className="space-y-6">
+      {confirmDialog}
       <div>
         <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
           Content moderation

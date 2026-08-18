@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { BookMarked, GitCompare, Palette, Pencil, PackageOpen, Trash2 } from 'lucide-react';
 import { TableSkeletonRows } from '@/shared/components/TableSkeletonRows';
+import { useConfirm } from '@/shared/hooks/useConfirm';
 
 function EmptyTableState({ icon: Icon, message }: { icon: typeof PackageOpen; message: string }) {
   return (
@@ -164,6 +165,7 @@ function VocabTab() {
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState(emptyVocabForm);
+  const { confirm, confirmDialog } = useConfirm();
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -216,7 +218,7 @@ function VocabTab() {
   }
 
   async function handleDelete(id: string) {
-    if (!window.confirm('Delete this global vocab/kanji entry?')) return;
+    if (!(await confirm({ title: 'Delete this global vocab/kanji entry?' }))) return;
     setError(null);
     try {
       const res = await fetch(`/api/admin/reference-data/vocab?id=${id}`, { method: 'DELETE' });
@@ -230,6 +232,7 @@ function VocabTab() {
 
   return (
     <div className="space-y-6">
+      {confirmDialog}
       <div className="card">
         <h2 className="text-sm font-semibold text-foreground">
           {form.id ? 'Edit entry' : 'Add new entry'}
@@ -433,6 +436,7 @@ function GrammarTab() {
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState(emptyGrammarForm);
+  const { confirm, confirmDialog } = useConfirm();
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -490,7 +494,11 @@ function GrammarTab() {
   }
 
   async function handleDelete(id: string) {
-    if (!window.confirm('Delete this global grammar point? Any confusable pairs referencing it will also break.')) return;
+    const ok = await confirm({
+      title: 'Delete this global grammar point?',
+      description: 'Any confusable pairs referencing it will also break.',
+    });
+    if (!ok) return;
     setError(null);
     try {
       const res = await fetch(`/api/admin/reference-data/grammar?id=${id}`, { method: 'DELETE' });
@@ -504,6 +512,7 @@ function GrammarTab() {
 
   return (
     <div className="space-y-6">
+      {confirmDialog}
       <div className="card">
         <h2 className="text-sm font-semibold text-foreground">
           {form.id ? 'Edit grammar point' : 'Add new grammar point'}
@@ -735,6 +744,7 @@ function PairsTab() {
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState(emptyPairForm);
+  const { confirm, confirmDialog } = useConfirm();
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -788,7 +798,7 @@ function PairsTab() {
   }
 
   async function handleDelete(id: string) {
-    if (!window.confirm('Delete this confusable-pair comparison?')) return;
+    if (!(await confirm({ title: 'Delete this confusable-pair comparison?' }))) return;
     setError(null);
     try {
       const res = await fetch(`/api/admin/reference-data/confusable-pairs?id=${id}`, {
@@ -804,6 +814,7 @@ function PairsTab() {
 
   return (
     <div className="space-y-6">
+      {confirmDialog}
       <div className="card">
         <h2 className="text-sm font-semibold text-foreground">
           {form.id ? 'Edit confusable pair' : 'Add new confusable pair'}
@@ -1046,6 +1057,7 @@ function ThemesTab() {
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState(emptyThemeForm);
+  const { confirm, confirmDialog } = useConfirm();
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -1104,8 +1116,11 @@ function ThemesTab() {
   }
 
   async function handleDelete(id: string) {
-    if (!window.confirm('Delete this theme? Users who have it selected will fall back to the default theme.'))
-      return;
+    const ok = await confirm({
+      title: 'Delete this theme?',
+      description: 'Users who have it selected will fall back to the default theme.',
+    });
+    if (!ok) return;
     setError(null);
     try {
       const res = await fetch(`/api/admin/reference-data/themes?id=${id}`, { method: 'DELETE' });
@@ -1119,6 +1134,7 @@ function ThemesTab() {
 
   return (
     <div className="space-y-6">
+      {confirmDialog}
       <div className="card">
         <h2 className="text-sm font-semibold text-foreground">
           {form.id ? 'Edit theme' : 'Add new theme'}

@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useState, type FormEvent } from 'react';
 import { LayoutGrid, Trash2 } from 'lucide-react';
 import { createClient } from '@/shared/supabase/client';
+import { useConfirm } from '@/shared/hooks/useConfirm';
 import { boardSchema } from '@/shared/validation/schemas';
 import { DEFAULT_COLUMN_NAMES, type BoardSummary } from '../types';
 
@@ -33,6 +34,7 @@ export function BoardList({ initialBoards }: BoardListProps) {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const { confirm, confirmDialog } = useConfirm();
 
   async function handleCreate(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -89,7 +91,11 @@ export function BoardList({ initialBoards }: BoardListProps) {
   }
 
   async function handleDelete(boardId: string) {
-    if (!window.confirm('Delete this board and all of its tasks? This cannot be undone.')) return;
+    const ok = await confirm({
+      title: 'Delete this board and all of its tasks?',
+      description: 'This cannot be undone.',
+    });
+    if (!ok) return;
     setDeletingId(boardId);
     const supabase = createClient();
     const { error: deleteError } = await supabase.from('boards').delete().eq('id', boardId);
@@ -103,6 +109,7 @@ export function BoardList({ initialBoards }: BoardListProps) {
 
   return (
     <div className="space-y-6">
+      {confirmDialog}
       <div className="card">
         <h2 className="text-sm font-semibold text-foreground">Create a board</h2>
         <form className="mt-3 flex flex-col gap-3 sm:flex-row" onSubmit={handleCreate}>

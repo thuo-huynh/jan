@@ -21,6 +21,7 @@ import {
 import { useCallback, useMemo, useRef, useState, type FormEvent } from 'react';
 import { AlertTriangle, Clock, Plus, X } from 'lucide-react';
 import { createClient } from '@/shared/supabase/client';
+import { useConfirm } from '@/shared/hooks/useConfirm';
 import { Column } from './Column';
 import { TaskCard } from './TaskCard';
 import { TaskDetailModal } from './TaskDetailModal';
@@ -47,6 +48,7 @@ export function BoardView({ boardId, initialColumns }: BoardProps) {
   const [error, setError] = useState<string | null>(null);
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
   const [filters, setFilters] = useState<BoardFilterState>(EMPTY_FILTERS);
+  const { confirm, confirmDialog } = useConfirm();
   const [newColumnName, setNewColumnName] = useState('');
   const [addingColumn, setAddingColumn] = useState(false);
 
@@ -288,11 +290,14 @@ export function BoardView({ boardId, initialColumns }: BoardProps) {
   async function handleDeleteColumn(columnId: string) {
     const column = columns.find((c) => c.id === columnId);
     if (!column) return;
-    const message =
-      column.tasks.length > 0
-        ? `Delete "${column.name}" and its ${column.tasks.length} task(s)? This cannot be undone.`
-        : `Delete "${column.name}"?`;
-    if (!window.confirm(message)) return;
+    const ok = await confirm({
+      title: `Delete "${column.name}"?`,
+      description:
+        column.tasks.length > 0
+          ? `This also deletes its ${column.tasks.length} task(s). This cannot be undone.`
+          : undefined,
+    });
+    if (!ok) return;
 
     const previous = columns;
     setColumns((prev) => prev.filter((c) => c.id !== columnId));
@@ -353,6 +358,7 @@ export function BoardView({ boardId, initialColumns }: BoardProps) {
 
   return (
     <div>
+      {confirmDialog}
       {error && (
         <div className="mb-4 flex items-center justify-between rounded-lg border border-danger bg-card px-3 py-2 text-sm text-danger">
           <span>{error}</span>
