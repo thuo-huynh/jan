@@ -20,6 +20,7 @@ export function CustomVocabManager({ initialEntries }: CustomVocabManagerProps) 
   const [entries, setEntries] = useState(initialEntries);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [adding, setAdding] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   function handleCreated(entry: CustomVocabEntry) {
     setEntries((prev) => [entry, ...prev]);
@@ -33,11 +34,14 @@ export function CustomVocabManager({ initialEntries }: CustomVocabManagerProps) 
 
   async function handleDelete(id: string) {
     if (!confirm('Delete this custom entry? Its review history will be removed too.')) return;
+    setDeleteError(null);
     const supabase = createClient();
     const { error } = await supabase.from('vocab_entries').delete().eq('id', id);
-    if (!error) {
-      setEntries((prev) => prev.filter((e) => e.id !== id));
+    if (error) {
+      setDeleteError(error.message);
+      return;
     }
+    setEntries((prev) => prev.filter((e) => e.id !== id));
   }
 
   return (
@@ -62,6 +66,8 @@ export function CustomVocabManager({ initialEntries }: CustomVocabManagerProps) 
       {adding && (
         <VocabEntryForm mode="create" onSaved={handleCreated} onCancel={() => setAdding(false)} />
       )}
+
+      {deleteError && <p className="error-text">{deleteError}</p>}
 
       {entries.length === 0 ? (
         <div className="flex flex-col items-center gap-2 rounded-lg border border-dashed border-border p-8 text-center">

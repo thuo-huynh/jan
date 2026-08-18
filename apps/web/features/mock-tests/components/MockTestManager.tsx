@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, type FormEvent } from 'react';
+import { Trash2 } from 'lucide-react';
 import { createClient } from '@/shared/supabase/client';
 import { mockTestResultSchema } from '@/shared/validation/schemas';
 import type { MockTestResult } from '../types';
@@ -27,6 +28,8 @@ export function MockTestManager({ initialResults }: MockTestManagerProps) {
   const [total, setTotal] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   // If the total is left blank but at least one section score was entered,
   // auto-sum the sections instead of making the user do the arithmetic —
@@ -90,6 +93,20 @@ export function MockTestManager({ initialResults }: MockTestManagerProps) {
     setReading('');
     setListening('');
     setTotal('');
+  }
+
+  async function handleDelete(id: string) {
+    if (!confirm('Delete this mock test result? This cannot be undone.')) return;
+    setDeleteError(null);
+    setDeletingId(id);
+    const supabase = createClient();
+    const { error: dbError } = await supabase.from('mock_test_results').delete().eq('id', id);
+    setDeletingId(null);
+    if (dbError) {
+      setDeleteError(dbError.message);
+      return;
+    }
+    setResults((prev) => prev.filter((r) => r.id !== id));
   }
 
   return (
@@ -174,6 +191,8 @@ export function MockTestManager({ initialResults }: MockTestManagerProps) {
         </button>
       </form>
 
+      {deleteError && <p className="error-text">{deleteError}</p>}
+
       {results.length === 0 ? (
         <div className="flex flex-col items-center gap-2 rounded-lg border border-dashed border-border p-8 text-center">
           <p className="text-sm text-muted-foreground">No mock test results recorded yet.</p>
@@ -188,6 +207,9 @@ export function MockTestManager({ initialResults }: MockTestManagerProps) {
                 <th className="px-3 py-2 font-medium">読解</th>
                 <th className="px-3 py-2 font-medium">聴解</th>
                 <th className="px-3 py-2 font-medium">Total</th>
+                <th className="px-3 py-2 font-medium">
+                  <span className="sr-only">Actions</span>
+                </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
@@ -202,6 +224,17 @@ export function MockTestManager({ initialResults }: MockTestManagerProps) {
                     <td className="px-3 py-2 text-foreground">{r.reading_score ?? '—'}</td>
                     <td className="px-3 py-2 text-foreground">{r.listening_score ?? '—'}</td>
                     <td className="px-3 py-2 font-medium text-foreground">{r.total_score ?? '—'}</td>
+                    <td className="px-3 py-2 text-right">
+                      <button
+                        type="button"
+                        onClick={() => handleDelete(r.id)}
+                        disabled={deletingId === r.id}
+                        aria-label={`Delete result from ${new Date(r.test_date).toLocaleDateString()}`}
+                        className="inline-flex h-7 w-7 items-center justify-center rounded text-muted-foreground transition-colors hover:bg-danger/10 hover:text-danger disabled:opacity-40"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
+                      </button>
+                    </td>
                   </tr>
                 ))}
             </tbody>

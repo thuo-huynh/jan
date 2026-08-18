@@ -21,6 +21,7 @@ export function MistakeRow({ mistake, onResolvedChange }: MistakeRowProps) {
   const [srsMessage, setSrsMessage] = useState<string | null>(null);
   const [srsError, setSrsError] = useState<string | null>(null);
   const [togglingResolved, setTogglingResolved] = useState(false);
+  const [resolveError, setResolveError] = useState<string | null>(null);
 
   const hasLink = Boolean(mistake.linked_vocab_id || mistake.linked_grammar_id);
 
@@ -44,6 +45,7 @@ export function MistakeRow({ mistake, onResolvedChange }: MistakeRowProps) {
 
   async function handleToggleResolved() {
     setTogglingResolved(true);
+    setResolveError(null);
     const supabase = createClient();
     const nextResolved = !mistake.resolved;
     const { error } = await supabase
@@ -51,9 +53,11 @@ export function MistakeRow({ mistake, onResolvedChange }: MistakeRowProps) {
       .update({ resolved: nextResolved })
       .eq('id', mistake.id);
     setTogglingResolved(false);
-    if (!error) {
-      onResolvedChange(mistake.id, nextResolved);
+    if (error) {
+      setResolveError(error.message);
+      return;
     }
+    onResolvedChange(mistake.id, nextResolved);
   }
 
   return (
@@ -106,6 +110,7 @@ export function MistakeRow({ mistake, onResolvedChange }: MistakeRowProps) {
         {srsMessage && <span className="text-xs text-success">{srsMessage}</span>}
         {srsError && <span className="error-text mt-0">{srsError}</span>}
       </div>
+      {resolveError && <p className="error-text">{resolveError}</p>}
     </li>
   );
 }

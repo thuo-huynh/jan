@@ -22,7 +22,8 @@ interface BoardListProps {
  * Review/Done) as a second insert right after the board row is created.
  * This isn't wrapped in a DB transaction (no server route to host one in
  * this architecture) — if the column insert fails after the board insert
- * succeeds, the user is warned and can retry adding columns from the board
+ * succeeds, the user stays on this page (rather than being navigated into a
+ * columnless board) and is warned that they can add columns from the board
  * page itself, which never leaves them stuck.
  */
 export function BoardList({ initialBoards }: BoardListProps) {
@@ -81,6 +82,7 @@ export function BoardList({ initialBoards }: BoardListProps) {
 
     if (columnsError) {
       setError('Board created, but default columns could not be added. Add columns from the board page.');
+      return;
     }
 
     router.push(`/boards/${board.id}`);

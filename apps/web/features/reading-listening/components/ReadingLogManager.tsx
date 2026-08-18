@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, type FormEvent } from 'react';
+import { Trash2 } from 'lucide-react';
 import { createClient } from '@/shared/supabase/client';
 import { readingLogSchema } from '@/shared/validation/schemas';
 import { AttachToSrsButton } from './AttachToSrsButton';
@@ -25,6 +26,8 @@ export function ReadingLogManager({ initialLogs }: ReadingLogManagerProps) {
   const [notes, setNotes] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -79,6 +82,20 @@ export function ReadingLogManager({ initialLogs }: ReadingLogManagerProps) {
     setDurationMin('');
     setComprehensionScore('');
     setNotes('');
+  }
+
+  async function handleDelete(id: string) {
+    if (!confirm('Delete this reading session? This cannot be undone.')) return;
+    setDeleteError(null);
+    setDeletingId(id);
+    const supabase = createClient();
+    const { error: dbError } = await supabase.from('reading_logs').delete().eq('id', id);
+    setDeletingId(null);
+    if (dbError) {
+      setDeleteError(dbError.message);
+      return;
+    }
+    setLogs((prev) => prev.filter((l) => l.id !== id));
   }
 
   return (
@@ -167,6 +184,8 @@ export function ReadingLogManager({ initialLogs }: ReadingLogManagerProps) {
         </button>
       </form>
 
+      {deleteError && <p className="error-text">{deleteError}</p>}
+
       {logs.length === 0 ? (
         <div className="flex flex-col items-center gap-2 rounded-lg border border-dashed border-border p-8 text-center">
           <p className="text-sm text-muted-foreground">No reading sessions logged yet.</p>
@@ -175,7 +194,7 @@ export function ReadingLogManager({ initialLogs }: ReadingLogManagerProps) {
         <ul className="space-y-2">
           {logs.map((log) => (
             <li key={log.id} className="card p-3">
-              <div className="flex flex-wrap items-center justify-between gap-2">
+              <div className="flex flex-wrap items-start justify-between gap-2">
                 <div>
                   <p className="text-sm font-medium text-foreground">{log.source}</p>
                   <p className="text-xs text-muted-foreground">
@@ -185,6 +204,15 @@ export function ReadingLogManager({ initialLogs }: ReadingLogManagerProps) {
                   </p>
                   {log.notes && <p className="mt-1 text-sm text-muted-foreground">{log.notes}</p>}
                 </div>
+                <button
+                  type="button"
+                  onClick={() => handleDelete(log.id)}
+                  disabled={deletingId === log.id}
+                  aria-label={`Delete reading session: ${log.source}`}
+                  className="flex h-7 w-7 shrink-0 items-center justify-center rounded text-muted-foreground transition-colors hover:bg-danger/10 hover:text-danger disabled:opacity-40"
+                >
+                  <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
+                </button>
               </div>
               <div className="mt-2">
                 <AttachToSrsButton readingLogId={log.id} />

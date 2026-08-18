@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, type FormEvent } from 'react';
+import { Trash2 } from 'lucide-react';
 import { createClient } from '@/shared/supabase/client';
 import { listeningLogSchema } from '@/shared/validation/schemas';
 import type { ListeningLog } from '../types';
@@ -23,6 +24,8 @@ export function ListeningLogManager({ initialLogs }: ListeningLogManagerProps) {
   const [notes, setNotes] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -74,6 +77,20 @@ export function ListeningLogManager({ initialLogs }: ListeningLogManagerProps) {
     setDurationMin('');
     setComprehensionScore('');
     setNotes('');
+  }
+
+  async function handleDelete(id: string) {
+    if (!confirm('Delete this listening session? This cannot be undone.')) return;
+    setDeleteError(null);
+    setDeletingId(id);
+    const supabase = createClient();
+    const { error: dbError } = await supabase.from('listening_logs').delete().eq('id', id);
+    setDeletingId(null);
+    if (dbError) {
+      setDeleteError(dbError.message);
+      return;
+    }
+    setLogs((prev) => prev.filter((l) => l.id !== id));
   }
 
   return (
@@ -142,6 +159,8 @@ export function ListeningLogManager({ initialLogs }: ListeningLogManagerProps) {
         </button>
       </form>
 
+      {deleteError && <p className="error-text">{deleteError}</p>}
+
       {logs.length === 0 ? (
         <div className="flex flex-col items-center gap-2 rounded-lg border border-dashed border-border p-8 text-center">
           <p className="text-sm text-muted-foreground">No listening sessions logged yet.</p>
@@ -150,12 +169,25 @@ export function ListeningLogManager({ initialLogs }: ListeningLogManagerProps) {
         <ul className="space-y-2">
           {logs.map((log) => (
             <li key={log.id} className="card p-3">
-              <p className="text-sm font-medium text-foreground">{log.source}</p>
-              <p className="text-xs text-muted-foreground">
-                {new Date(log.practiced_at).toLocaleDateString()} · {log.duration_min} min
-                {log.comprehension_score !== null && <> · {log.comprehension_score}% comprehension</>}
-              </p>
-              {log.notes && <p className="mt-1 text-sm text-muted-foreground">{log.notes}</p>}
+              <div className="flex flex-wrap items-start justify-between gap-2">
+                <div>
+                  <p className="text-sm font-medium text-foreground">{log.source}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {new Date(log.practiced_at).toLocaleDateString()} · {log.duration_min} min
+                    {log.comprehension_score !== null && <> · {log.comprehension_score}% comprehension</>}
+                  </p>
+                  {log.notes && <p className="mt-1 text-sm text-muted-foreground">{log.notes}</p>}
+                </div>
+                <button
+                  type="button"
+                  onClick={() => handleDelete(log.id)}
+                  disabled={deletingId === log.id}
+                  aria-label={`Delete listening session: ${log.source}`}
+                  className="flex h-7 w-7 shrink-0 items-center justify-center rounded text-muted-foreground transition-colors hover:bg-danger/10 hover:text-danger disabled:opacity-40"
+                >
+                  <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
+                </button>
+              </div>
             </li>
           ))}
         </ul>
