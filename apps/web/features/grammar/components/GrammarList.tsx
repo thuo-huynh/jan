@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
+import { ArrowLeftRight, Search, SearchX, X } from 'lucide-react';
 import type { GrammarPointWithProgress, GrammarStatus } from '../types';
 import { GrammarPointRow } from './GrammarPointRow';
 
@@ -11,14 +12,21 @@ interface GrammarListProps {
 
 /**
  * Client-side list wrapper for the grammar tracker page (T041): owns the
- * N3-level-diff filter toggle (T045) and the "lifted" copy of each point's
- * status/note so the mastery-progress summary stays in sync when a row
- * mutates without a full page reload. Filtering happens client-side over
- * the already-fetched (~96-row) dataset rather than a route round-trip.
+ * N3-level-diff filter toggle (T045), a pattern/meaning text search (needed
+ * once the catalog is ~100-200 points — status/level filters alone don't
+ * get you to a specific point like として quickly), an "only confusable
+ * pairs" toggle so that first-class feature is discoverable from the list
+ * itself rather than only stumbled into row-by-row, and the "lifted" copy
+ * of each point's status/note so the mastery-progress summary stays in
+ * sync when a row mutates without a full page reload. Filtering happens
+ * client-side over the already-fetched (~96-row) dataset rather than a
+ * route round-trip.
  */
 export function GrammarList({ points: initialPoints, userId }: GrammarListProps) {
   const [points, setPoints] = useState(initialPoints);
   const [hideN3Overlap, setHideN3Overlap] = useState(false);
+  const [onlyConfusable, setOnlyConfusable] = useState(false);
+  const [query, setQuery] = useState('');
 
   const counts = useMemo(() => {
     return points.reduce(
@@ -30,10 +38,21 @@ export function GrammarList({ points: initialPoints, userId }: GrammarListProps)
     );
   }, [points]);
 
-  const visiblePoints = useMemo(
-    () => (hideN3Overlap ? points.filter((p) => !p.n3Overlap) : points),
-    [points, hideN3Overlap],
+  const confusablePairCount = useMemo(
+    () => new Set(points.flatMap((p) => p.confusablePairs.map((cp) => cp.pairId))).size,
+    [points],
   );
+
+  const visiblePoints = useMemo(() => {
+    let list = points;
+    if (hideN3Overlap) list = list.filter((p) => !p.n3Overlap);
+    if (onlyConfusable) list = list.filter((p) => p.confusablePairs.length > 0);
+    const q = query.trim().toLowerCase();
+    if (q) list = list.filter((p) => p.pattern.toLowerCase().includes(q) || p.meaning.toLowerCase().includes(q));
+    return list;
+  }, [points, hideN3Overlap, onlyConfusable, query]);
+
+  const hasActiveFilter = hideN3Overlap || onlyConfusable || query.trim().length > 0;
 
   function handleStatusChange(pointId: string, status: GrammarStatus) {
     setPoints((prev) => prev.map((p) => (p.id === pointId ? { ...p, status } : p)));
@@ -45,27 +64,75 @@ export function GrammarList({ points: initialPoints, userId }: GrammarListProps)
 
   return (
     <div className="space-y-4">
-      <div className="card flex flex-wrap items-center justify-between gap-3 p-4">
+      <div className="card space-y-3 p-4">
         <div className="flex flex-wrap items-center gap-2 text-sm">
           <span className="font-medium text-foreground">{points.length} grammar points</span>
           <span className="badge-success">{counts.mastered} mastered</span>
           <span className="badge-warning">{counts.learning} learning</span>
           <span className="badge-neutral">{counts.not_started} not started</span>
+          {confusablePairCount > 0 && (
+            <button
+              type="button"
+              onClick={() => setOnlyConfusable((v) => !v)}
+              aria-pressed={onlyConfusable}
+              title="Show only points that are part of a confusable pair"
+              className={`badge-primary transition-colors ${onlyConfusable ? 'ring-1 ring-primary' : 'hover:opacity-80'}`}
+            >
+              <ArrowLeftRight className="h-3 w-3" aria-hidden="true" />
+              {confusablePairCount} confusable pairs
+            </button>
+          )}
         </div>
-        <label className="flex cursor-pointer select-none items-center gap-2 text-sm text-foreground">
-          <input
-            type="checkbox"
-            checked={hideN3Overlap}
-            onChange={(e) => setHideN3Overlap(e.target.checked)}
-            className="h-4 w-4 rounded border-border text-primary focus:ring-primary"
-          />
-          Hide N3-level material
-        </label>
+
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="relative min-w-[12rem] flex-1">
+            <Search
+              className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground"
+              aria-hidden="true"
+            />
+            <input
+              type="search"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search by pattern or meaning (e.g. として)…"
+              aria-label="Search grammar points"
+              className="input-field h-9 pl-8"
+            />
+          </div>
+          <label className="flex cursor-pointer select-none items-center gap-2 text-sm text-foreground">
+            <input
+              type="checkbox"
+              checked={hideN3Overlap}
+              onChange={(e) => setHideN3Overlap(e.target.checked)}
+              className="h-4 w-4 rounded border-border text-primary focus:ring-primary"
+            />
+            Hide N3-level material
+          </label>
+          {hasActiveFilter && (
+            <button
+              type="button"
+              onClick={() => {
+                setQuery('');
+                setHideN3Overlap(false);
+                setOnlyConfusable(false);
+              }}
+              className="btn-ghost h-9 px-2.5 text-xs"
+            >
+              <X className="h-3.5 w-3.5" aria-hidden="true" />
+              Clear filters
+            </button>
+          )}
+        </div>
       </div>
 
       {visiblePoints.length === 0 ? (
-        <div className="card p-8 text-center text-sm text-muted-foreground">
-          No grammar points match the current filter.
+        <div className="flex flex-col items-center gap-3 rounded-lg border border-dashed border-border p-10 text-center">
+          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
+            <SearchX className="h-6 w-6 text-primary" aria-hidden="true" />
+          </div>
+          <p className="max-w-xs text-sm text-muted-foreground">
+            No grammar points match your search or filters. Try clearing them above.
+          </p>
         </div>
       ) : (
         <ul className="space-y-3">

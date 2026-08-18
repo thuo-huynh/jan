@@ -1,4 +1,5 @@
 import { redirect } from 'next/navigation';
+import { BookOpen } from 'lucide-react';
 import { createClient, getAuthedUser } from '@/shared/supabase/server';
 import { GrammarList } from '@/features/grammar/components/GrammarList';
 import { mapGrammarPoint, type GrammarPointRecord, type UserGrammarStatusRecord } from '@/features/grammar/lib/mapGrammarPoint';
@@ -69,8 +70,13 @@ export default async function GrammarListPage() {
       </div>
 
       {combined.length === 0 ? (
-        <div className="card p-8 text-center text-sm text-muted-foreground">
-          No grammar points are available yet.
+        <div className="flex flex-col items-center gap-3 rounded-lg border border-dashed border-border p-10 text-center">
+          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
+            <BookOpen className="h-6 w-6 text-primary" aria-hidden="true" />
+          </div>
+          <p className="max-w-xs text-sm text-muted-foreground">
+            No grammar points are available yet. Check back once the N2 catalog has been seeded.
+          </p>
         </div>
       ) : (
         <GrammarList points={combined} userId={user.id} />

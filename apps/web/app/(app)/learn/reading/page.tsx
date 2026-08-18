@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation';
 import { createClient, getAuthedUser } from '@/shared/supabase/server';
 import { ReadingLogManager } from '@/features/reading-listening/components/ReadingLogManager';
 import { PassageTypeBreakdown } from '@/features/reading-listening/components/PassageTypeBreakdown';
+import { SessionStats } from '@/features/reading-listening/components/SessionStats';
 import type { ReadingLog } from '@/features/reading-listening/types';
 
 /**
@@ -34,6 +35,8 @@ export default async function ReadingLogPage() {
           Log reading practice sessions and attach unknown words straight to your SRS queue.
         </p>
       </div>
+
+      <SessionStats logs={readingLogs} />
 
       <PassageTypeBreakdown logs={readingLogs} />
 

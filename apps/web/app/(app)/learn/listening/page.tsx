@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation';
 import { createClient, getAuthedUser } from '@/shared/supabase/server';
 import { ListeningLogManager } from '@/features/reading-listening/components/ListeningLogManager';
+import { SessionStats } from '@/features/reading-listening/components/SessionStats';
 import type { ListeningLog } from '@/features/reading-listening/types';
 
 /**
@@ -29,6 +30,8 @@ export default async function ListeningLogPage() {
           Log listening/shadowing practice sessions and track comprehension over time.
         </p>
       </div>
+
+      <SessionStats logs={(logs ?? []) as ListeningLog[]} />
 
       <ListeningLogManager initialLogs={(logs ?? []) as ListeningLog[]} />
     </div>

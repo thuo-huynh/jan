@@ -13,15 +13,24 @@ interface HabitDayCellProps {
   date: string;
   completed: boolean;
   isToday: boolean;
+  isWeekend: boolean;
   disabled?: boolean;
   onToggle: () => void;
 }
 
-export function HabitDayCell({ habitName, date, completed, isToday, disabled, onToggle }: HabitDayCellProps) {
+export function HabitDayCell({
+  habitName,
+  date,
+  completed,
+  isToday,
+  isWeekend,
+  disabled,
+  onToggle,
+}: HabitDayCellProps) {
   const day = Number(date.slice(-2));
 
   return (
-    <td className={`p-0.5 text-center ${isToday ? 'bg-primary/5' : ''}`}>
+    <td className={`p-0.5 text-center ${isWeekend ? 'bg-muted/60' : ''}`}>
       <button
         type="button"
         role="checkbox"
@@ -29,11 +38,11 @@ export function HabitDayCell({ habitName, date, completed, isToday, disabled, on
         aria-label={`${habitName} — day ${day}${completed ? ', done' : ', not done'}`}
         disabled={disabled}
         onClick={onToggle}
-        className={`h-6 w-6 rounded border transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
+        className={`h-7 w-7 rounded border transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
           completed
             ? 'border-primary bg-primary text-primary-foreground'
             : 'border-border bg-background hover:bg-muted'
-        }`}
+        } ${isToday ? 'ring-2 ring-primary/50 ring-offset-1 ring-offset-card' : ''}`}
       >
         {completed && <Check className="mx-auto h-4 w-4" strokeWidth={2.5} aria-hidden="true" />}
       </button>

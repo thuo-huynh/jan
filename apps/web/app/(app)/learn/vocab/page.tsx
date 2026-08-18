@@ -1,8 +1,11 @@
+import Link from 'next/link';
+import { Flame, Layers } from 'lucide-react';
 import { createClient, getAuthedUser } from '@/shared/supabase/server';
 import {
   CustomVocabManager,
   type CustomVocabEntry,
 } from '@/features/vocab-srs/components/CustomVocabManager';
+import { loadDueReviewQueue } from '@/features/vocab-srs/lib/queue';
 
 /**
  * Vocab/kanji deck management page (T051) — browse the global N2 reference
@@ -47,6 +50,13 @@ export default async function VocabDeckPage({ searchParams }: VocabPageProps) {
         .order('created_at', { ascending: false })
     : { data: [] as CustomVocabEntry[] };
 
+  // "X due today" summary (below) reuses the same due/weak logic the review
+  // session's API route runs, so this count never drifts from what actually
+  // shows up when the user clicks through — see features/vocab-srs/lib/queue.ts.
+  const dueQueue = user ? await loadDueReviewQueue(supabase, user.id) : [];
+  const dueCount = dueQueue.length;
+  const weakCount = dueQueue.filter((s) => s.item.isWeak).length;
+
   const totalPages = count ? Math.max(1, Math.ceil(count / GLOBAL_PAGE_SIZE)) : 1;
 
   const prevParams = new URLSearchParams({ ...(q ? { q } : {}), page: String(page - 1) });
@@ -61,6 +71,33 @@ export default async function VocabDeckPage({ searchParams }: VocabPageProps) {
           the same review queue.
         </p>
       </div>
+
+      {user && (
+        <div className="card flex flex-wrap items-center justify-between gap-4 p-4 sm:p-5">
+          <div className="flex items-center gap-4">
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary/10">
+              <Layers className="h-5 w-5 text-primary" aria-hidden="true" />
+            </div>
+            <div>
+              <p className="text-2xl font-bold tracking-tight text-foreground">
+                {dueCount}
+                <span className="ml-1.5 text-sm font-normal text-muted-foreground">
+                  {dueCount === 1 ? 'card due today' : 'cards due today'}
+                </span>
+              </p>
+              {weakCount > 0 && (
+                <p className="mt-0.5 flex items-center gap-1 text-xs text-danger">
+                  <Flame className="h-3 w-3" aria-hidden="true" />
+                  {weakCount} weak {weakCount === 1 ? 'item needs' : 'items need'} extra practice
+                </p>
+              )}
+            </div>
+          </div>
+          <Link href="/learn/review" className={dueCount > 0 ? 'btn-primary' : 'btn-outline'}>
+            {dueCount > 0 ? 'Start review' : 'Review queue'}
+          </Link>
+        </div>
+      )}
 
       <CustomVocabManager initialEntries={(customEntries ?? []) as CustomVocabEntry[]} />
 

@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { Pin } from 'lucide-react';
 import { createClient } from '@/shared/supabase/client';
 import type { Note } from '../lib/types';
-import { markdownExcerpt } from '../lib/utils';
+import { formatRelativeTime, markdownExcerpt } from '../lib/utils';
 
 /**
  * Pin toggle wired directly to `notes.pinned` (T081). Exported so the note
@@ -97,6 +97,8 @@ export function NoteCard({ note }: { note: Note }) {
           ))}
         </div>
       )}
+
+      <p className="text-xs text-muted-foreground">Edited {formatRelativeTime(note.updated_at)}</p>
     </div>
   );
 }

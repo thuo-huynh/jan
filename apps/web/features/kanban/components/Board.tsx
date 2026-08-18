@@ -19,12 +19,13 @@ import {
   sortableKeyboardCoordinates,
 } from '@dnd-kit/sortable';
 import { useCallback, useMemo, useRef, useState, type FormEvent } from 'react';
-import { Plus, X } from 'lucide-react';
+import { AlertTriangle, Clock, Plus, X } from 'lucide-react';
 import { createClient } from '@/shared/supabase/client';
 import { Column } from './Column';
 import { TaskCard } from './TaskCard';
 import { TaskDetailModal } from './TaskDetailModal';
 import { BoardFilters, EMPTY_FILTERS, type BoardFilterState } from './BoardFilters';
+import { getDueUrgency } from '../lib/urgency';
 import type { BoardColumn, BoardTask } from '../types';
 
 interface BoardProps {
@@ -69,6 +70,7 @@ export function BoardView({ boardId, initialColumns }: BoardProps) {
           if (filters.columnId && filters.columnId !== c.id) return false;
           if (filters.tag && !t.tags.includes(filters.tag)) return false;
           if (filters.dueBefore && (!t.due_date || t.due_date > filters.dueBefore)) return false;
+          if (filters.urgency && getDueUrgency(t.due_date) !== filters.urgency) return false;
           if (filters.query) {
             const q = filters.query.toLowerCase();
             const haystack = `${t.title} ${t.description ?? ''}`.toLowerCase();
@@ -79,6 +81,27 @@ export function BoardView({ boardId, initialColumns }: BoardProps) {
       })),
     [columns, filters],
   );
+
+  // Board-wide "what's overdue / due today" counts (T039 polish) — computed
+  // over *all* tasks, not `filteredColumns`, so the pills stay a stable
+  // at-a-glance total regardless of whatever filter is currently applied,
+  // and clicking one sets `filters.urgency` to scope the board down to it.
+  const dueSummary = useMemo(() => {
+    let overdue = 0;
+    let dueToday = 0;
+    for (const column of columns) {
+      for (const task of column.tasks) {
+        const urgency = getDueUrgency(task.due_date);
+        if (urgency === 'overdue') overdue += 1;
+        else if (urgency === 'today') dueToday += 1;
+      }
+    }
+    return { overdue, dueToday };
+  }, [columns]);
+
+  function toggleUrgencyFilter(urgency: 'overdue' | 'today') {
+    setFilters((prev) => ({ ...prev, urgency: prev.urgency === urgency ? null : urgency }));
+  }
 
   const selectedTask = selectedTaskId
     ? columns.flatMap((c) => c.tasks).find((t) => t.id === selectedTaskId) ?? null
@@ -336,6 +359,41 @@ export function BoardView({ boardId, initialColumns }: BoardProps) {
           <button type="button" onClick={() => setError(null)} className="font-medium hover:opacity-80">
             Dismiss
           </button>
+        </div>
+      )}
+
+      {(dueSummary.overdue > 0 || dueSummary.dueToday > 0) && (
+        <div className="mb-3 flex flex-wrap gap-2">
+          {dueSummary.overdue > 0 && (
+            <button
+              type="button"
+              onClick={() => toggleUrgencyFilter('overdue')}
+              aria-pressed={filters.urgency === 'overdue'}
+              className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors ${
+                filters.urgency === 'overdue'
+                  ? 'border-danger bg-danger text-white'
+                  : 'border-danger/30 bg-danger/10 text-danger hover:bg-danger/20'
+              }`}
+            >
+              <AlertTriangle className="h-3.5 w-3.5" aria-hidden="true" />
+              {dueSummary.overdue} overdue
+            </button>
+          )}
+          {dueSummary.dueToday > 0 && (
+            <button
+              type="button"
+              onClick={() => toggleUrgencyFilter('today')}
+              aria-pressed={filters.urgency === 'today'}
+              className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors ${
+                filters.urgency === 'today'
+                  ? 'border-accent bg-accent text-accent-foreground'
+                  : 'border-accent/30 bg-accent/10 text-accent hover:bg-accent/20'
+              }`}
+            >
+              <Clock className="h-3.5 w-3.5" aria-hidden="true" />
+              {dueSummary.dueToday} due today
+            </button>
+          )}
         </div>
       )}
 

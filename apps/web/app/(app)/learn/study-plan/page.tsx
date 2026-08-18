@@ -3,6 +3,7 @@ import { createClient, getAuthedUser } from '@/shared/supabase/server';
 import { StudyGoalSettings } from '@/features/study-plan/components/StudyGoalSettings';
 import { StreakHeatmap } from '@/features/study-plan/components/StreakHeatmap';
 import { StudyTimeChart } from '@/features/study-plan/components/StudyTimeChart';
+import { TodayProgress } from '@/features/study-plan/components/TodayProgress';
 import { aggregateDailyActivity, computeStreak, fillTrailingDays } from '@/features/study-plan/lib/heatmap';
 
 const TRAILING_DAYS = 371; // ~53 weeks, so the heatmap grid always fills full Sun-Sat columns
@@ -46,6 +47,9 @@ export default async function StudyPlanPage() {
   });
   const days = fillTrailingDays(activityByDay, TRAILING_DAYS);
   const streak = computeStreak(activityByDay);
+  // fillTrailingDays' window is inclusive of "today" as its last entry, so
+  // this is today's activity without a second aggregation pass.
+  const todayActivity = days[days.length - 1];
 
   const sessions = [
     ...(readingLogs ?? []).map((r: { practiced_at: string; duration_min: number }) => ({
@@ -72,6 +76,13 @@ export default async function StudyPlanPage() {
           {streak === 1 ? 'day' : 'days'}
         </p>
       </div>
+
+      <TodayProgress
+        vocabDone={todayActivity.vocabCount}
+        vocabTarget={dailyVocabTarget}
+        grammarDone={todayActivity.grammarCount}
+        grammarTarget={dailyGrammarTarget}
+      />
 
       <StudyGoalSettings initialGrammarTarget={dailyGrammarTarget} initialVocabTarget={dailyVocabTarget} />
 

@@ -15,3 +15,16 @@ export function getMonthDays(year: number, month: number): IsoDate[] {
 export function todayIso(): IsoDate {
   return new Date().toISOString().slice(0, 10);
 }
+
+const WEEKDAY_INITIALS = ['S', 'M', 'T', 'W', 'T', 'F', 'S'] as const;
+
+/** Single-letter weekday label (S M T W T F S) for a `YYYY-MM-DD` date, for grid headers. */
+export function weekdayInitial(date: IsoDate): string {
+  return WEEKDAY_INITIALS[new Date(`${date}T00:00:00`).getDay()];
+}
+
+/** Whether the given `YYYY-MM-DD` date falls on a Saturday or Sunday. */
+export function isWeekend(date: IsoDate): boolean {
+  const day = new Date(`${date}T00:00:00`).getDay();
+  return day === 0 || day === 6;
+}

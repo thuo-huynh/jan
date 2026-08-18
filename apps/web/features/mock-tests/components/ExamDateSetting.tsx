@@ -15,11 +15,24 @@ interface ExamDateSettingProps {
   initialExamDate: string | null;
 }
 
+function daysUntil(dateStr: string): number {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const target = new Date(`${dateStr}T00:00:00`);
+  return Math.round((target.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+}
+
 export function ExamDateSetting({ initialExamDate }: ExamDateSettingProps) {
   const [examDate, setExamDate] = useState(initialExamDate ?? '');
   const [saved, setSaved] = useState(initialExamDate);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+
+  // The countdown is meant to be a dashboard-level motivational widget, so
+  // once the exam is genuinely close it earns a visually distinct card
+  // (accent border/tint) instead of blending in with every other card on
+  // the page at the same weight.
+  const urgent = saved ? daysUntil(saved) >= 0 && daysUntil(saved) <= 14 : false;
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -60,7 +73,7 @@ export function ExamDateSetting({ initialExamDate }: ExamDateSettingProps) {
   }
 
   return (
-    <div className="card space-y-3 p-4">
+    <div className={`card space-y-3 p-4 ${urgent ? 'border-accent/40 bg-accent/5' : ''}`}>
       <h2 className="text-sm font-semibold tracking-tight text-foreground">Exam date</h2>
       <form onSubmit={handleSubmit} className="flex flex-wrap items-end gap-2">
         <div>

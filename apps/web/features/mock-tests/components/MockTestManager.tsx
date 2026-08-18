@@ -28,6 +28,14 @@ export function MockTestManager({ initialResults }: MockTestManagerProps) {
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
+  // If the total is left blank but at least one section score was entered,
+  // auto-sum the sections instead of making the user do the arithmetic —
+  // matches how most JLPT practice-book answer keys report a combined score.
+  const autoTotal =
+    total === '' && (vocabGrammar !== '' || reading !== '' || listening !== '')
+      ? [vocabGrammar, reading, listening].reduce((sum, v) => sum + (v === '' ? 0 : Number(v)), 0)
+      : null;
+
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError(null);
@@ -37,7 +45,7 @@ export function MockTestManager({ initialResults }: MockTestManagerProps) {
       vocabGrammarScore: toNumberOrNull(vocabGrammar),
       readingScore: toNumberOrNull(reading),
       listeningScore: toNumberOrNull(listening),
-      totalScore: toNumberOrNull(total),
+      totalScore: total === '' ? autoTotal : toNumberOrNull(total),
     });
     if (!parsed.success) {
       setError(parsed.error.issues[0]?.message ?? 'Invalid entry');
@@ -150,10 +158,14 @@ export function MockTestManager({ initialResults }: MockTestManagerProps) {
               min={0}
               value={total}
               onChange={(e) => setTotal(e.target.value)}
+              placeholder={autoTotal !== null ? String(autoTotal) : undefined}
               className="input-field"
             />
           </div>
         </div>
+        {autoTotal !== null && (
+          <p className="helper-text">Leave Total blank to auto-sum the sections above ({autoTotal}).</p>
+        )}
 
         {error && <p className="error-text">{error}</p>}
 

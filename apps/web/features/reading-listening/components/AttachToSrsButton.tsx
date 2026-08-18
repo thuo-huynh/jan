@@ -85,7 +85,7 @@ export function AttachToSrsButton({ readingLogId }: AttachToSrsButtonProps) {
         ) : (
           <>
             <Plus className="h-3 w-3" aria-hidden="true" />
-            Unknown word
+            Add unknown word to SRS
           </>
         )}
       </button>

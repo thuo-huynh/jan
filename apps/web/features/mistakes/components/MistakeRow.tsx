@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { BookPlus, CheckCircle2, RotateCcw } from 'lucide-react';
 import { createClient } from '@/shared/supabase/client';
 import type { MistakeEntry } from '../types';
 
@@ -71,9 +72,23 @@ export function MistakeRow({ mistake, onResolvedChange }: MistakeRowProps) {
           type="button"
           onClick={handleToggleResolved}
           disabled={togglingResolved}
-          className="btn-outline h-7 shrink-0 px-2 text-xs"
+          className={`btn-outline h-7 shrink-0 px-2 text-xs ${
+            mistake.resolved
+              ? 'hover:border-warning hover:text-warning'
+              : 'hover:border-success hover:text-success'
+          }`}
         >
-          {mistake.resolved ? 'Reopen' : 'Mark resolved'}
+          {mistake.resolved ? (
+            <>
+              <RotateCcw className="h-3.5 w-3.5" aria-hidden="true" />
+              Reopen
+            </>
+          ) : (
+            <>
+              <CheckCircle2 className="h-3.5 w-3.5" aria-hidden="true" />
+              Mark resolved
+            </>
+          )}
         </button>
       </div>
 
@@ -83,8 +98,9 @@ export function MistakeRow({ mistake, onResolvedChange }: MistakeRowProps) {
           onClick={handleAddToSrs}
           disabled={!hasLink || addingToSrs}
           title={hasLink ? undefined : 'Link a vocab or grammar item to add this to the SRS queue'}
-          className="btn-outline h-7 px-2 text-xs disabled:cursor-not-allowed"
+          className="btn-outline h-7 px-2 text-xs hover:border-primary hover:text-primary disabled:cursor-not-allowed disabled:hover:border-border disabled:hover:text-muted-foreground"
         >
+          <BookPlus className="h-3.5 w-3.5" aria-hidden="true" />
           {addingToSrs ? 'Adding…' : 'Add to SRS queue'}
         </button>
         {srsMessage && <span className="text-xs text-success">{srsMessage}</span>}

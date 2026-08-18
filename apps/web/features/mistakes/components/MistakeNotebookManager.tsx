@@ -12,6 +12,7 @@ import type { GrammarLinkOption, MistakeEntry, VocabLinkOption } from '../types'
  * server-fetched initial data, same shape as CustomVocabManager/NoteFilters.
  */
 type FilterTab = 'open' | 'resolved' | 'all';
+type SourceFilter = 'all' | 'manual' | 'mock_test';
 
 interface MistakeNotebookManagerProps {
   initialMistakes: MistakeEntry[];
@@ -27,11 +28,16 @@ export function MistakeNotebookManager({
   const [mistakes, setMistakes] = useState(initialMistakes);
   const [adding, setAdding] = useState(false);
   const [filter, setFilter] = useState<FilterTab>('open');
+  const [sourceFilter, setSourceFilter] = useState<SourceFilter>('all');
+
+  const openCount = useMemo(() => mistakes.filter((m) => !m.resolved).length, [mistakes]);
+  const resolvedCount = mistakes.length - openCount;
 
   const filtered = useMemo(() => {
-    if (filter === 'all') return mistakes;
-    return mistakes.filter((m) => (filter === 'resolved' ? m.resolved : !m.resolved));
-  }, [mistakes, filter]);
+    return mistakes
+      .filter((m) => (filter === 'all' ? true : filter === 'resolved' ? m.resolved : !m.resolved))
+      .filter((m) => (sourceFilter === 'all' ? true : m.source === sourceFilter));
+  }, [mistakes, filter, sourceFilter]);
 
   function handleCreated(entry: MistakeEntry) {
     setMistakes((prev) => [entry, ...prev]);
@@ -42,30 +48,42 @@ export function MistakeNotebookManager({
     setMistakes((prev) => prev.map((m) => (m.id === id ? { ...m, resolved } : m)));
   }
 
-  const tabs: { key: FilterTab; label: string }[] = [
-    { key: 'open', label: 'Open' },
-    { key: 'resolved', label: 'Resolved' },
-    { key: 'all', label: 'All' },
+  const tabs: { key: FilterTab; label: string; count: number }[] = [
+    { key: 'open', label: 'Open', count: openCount },
+    { key: 'resolved', label: 'Resolved', count: resolvedCount },
+    { key: 'all', label: 'All', count: mistakes.length },
   ];
 
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex gap-1 rounded border border-border bg-muted p-1">
-          {tabs.map((tab) => (
-            <button
-              key={tab.key}
-              type="button"
-              onClick={() => setFilter(tab.key)}
-              className={`rounded px-3 py-1 text-sm font-medium transition-colors ${
-                filter === tab.key
-                  ? 'bg-card text-foreground shadow-sm'
-                  : 'text-muted-foreground hover:text-foreground'
-              }`}
-            >
-              {tab.label}
-            </button>
-          ))}
+        <div className="flex flex-wrap items-center gap-2">
+          <div className="flex gap-1 rounded border border-border bg-muted p-1">
+            {tabs.map((tab) => (
+              <button
+                key={tab.key}
+                type="button"
+                onClick={() => setFilter(tab.key)}
+                className={`rounded px-3 py-1 text-sm font-medium transition-colors ${
+                  filter === tab.key
+                    ? 'bg-card text-foreground shadow-sm'
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                {tab.label} <span className="text-xs">({tab.count})</span>
+              </button>
+            ))}
+          </div>
+          <select
+            value={sourceFilter}
+            onChange={(e) => setSourceFilter(e.target.value as SourceFilter)}
+            aria-label="Filter by source"
+            className="input-field h-9 w-auto text-sm"
+          >
+            <option value="all">All sources</option>
+            <option value="manual">Manual</option>
+            <option value="mock_test">Mock test</option>
+          </select>
         </div>
         <button type="button" onClick={() => setAdding((v) => !v)} className="btn-primary h-9 px-3 text-sm">
           {adding ? (
@@ -94,7 +112,11 @@ export function MistakeNotebookManager({
       {filtered.length === 0 ? (
         <div className="flex flex-col items-center gap-2 rounded-lg border border-dashed border-border p-8 text-center">
           <p className="text-sm text-muted-foreground">
-            {filter === 'open' ? 'No open mistakes — nice work.' : 'No entries here yet.'}
+            {mistakes.length === 0
+              ? 'No mistakes logged yet.'
+              : filter === 'open' && sourceFilter === 'all'
+                ? 'No open mistakes — nice work.'
+                : 'No entries match this filter.'}
           </p>
         </div>
       ) : (

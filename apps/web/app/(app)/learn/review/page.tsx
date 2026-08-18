@@ -1,8 +1,9 @@
 'use client';
 
-import { Suspense, useCallback, useEffect, useState } from 'react';
+import { Suspense, useCallback, useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { CheckCircle2, Inbox } from 'lucide-react';
 import {
   ReviewCard,
   type ReviewQueueItem,
@@ -22,6 +23,8 @@ interface ReviewQueueResponse {
   items: ReviewQueueItem[];
 }
 
+const EMPTY_GRADE_COUNTS: Record<ReviewResult, number> = { again: 0, hard: 0, good: 0, easy: 0 };
+
 export default function ReviewQueuePage() {
   return (
     <Suspense fallback={<p className="text-sm text-muted-foreground">Loading review queue…</p>}>
@@ -35,31 +38,51 @@ function ReviewSession() {
   const searchParams = useSearchParams();
   const weakOnly = searchParams.get('weakOnly') === 'true';
 
-  const [items, setItems] = useState<ReviewQueueItem[] | null>(null);
+  // The full due-today queue (every due item, each flagged `isWeak`) is
+  // fetched once; the "weak items only" toggle just filters it client-side
+  // instead of re-hitting the API, which also means the weak-item *count* is
+  // always visible (badge below) even before the toggle is switched on —
+  // previously the only way to see it was to flip the toggle and look at the
+  // resulting queue length.
+  const [allItems, setAllItems] = useState<ReviewQueueItem[] | null>(null);
   const [index, setIndex] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [reviewedCount, setReviewedCount] = useState(0);
+  const [gradeCounts, setGradeCounts] = useState<Record<ReviewResult, number>>(EMPTY_GRADE_COUNTS);
 
   const loadQueue = useCallback(async () => {
-    setItems(null);
+    setAllItems(null);
     setIndex(0);
     setReviewedCount(0);
+    setGradeCounts(EMPTY_GRADE_COUNTS);
     setError(null);
     try {
-      const res = await fetch(`/api/review-queue?weakOnly=${weakOnly}`, { cache: 'no-store' });
+      const res = await fetch('/api/review-queue?weakOnly=false', { cache: 'no-store' });
       if (!res.ok) {
         throw new Error('Failed to load review queue');
       }
       const data: ReviewQueueResponse = await res.json();
-      setItems(data.items);
+      setAllItems(data.items);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load review queue');
     }
-  }, [weakOnly]);
+  }, []);
 
   useEffect(() => {
     loadQueue();
   }, [loadQueue]);
+
+  const weakCount = useMemo(() => allItems?.filter((i) => i.isWeak).length ?? 0, [allItems]);
+  const items = useMemo(() => {
+    if (!allItems) return null;
+    return weakOnly ? allItems.filter((i) => i.isWeak) : allItems;
+  }, [allItems, weakOnly]);
+
+  // Switching the toggle mid-session swaps to a differently-sized queue —
+  // reset position so `index` can't point past the end of the new list.
+  useEffect(() => {
+    setIndex(0);
+  }, [weakOnly]);
 
   function toggleWeakOnly(next: boolean) {
     const params = new URLSearchParams(searchParams.toString());
@@ -87,8 +110,12 @@ function ReviewSession() {
       throw new Error(body.error ?? 'Failed to submit review');
     }
     setReviewedCount((n) => n + 1);
+    setGradeCounts((prev) => ({ ...prev, [result]: prev[result] + 1 }));
     setIndex((i) => i + 1);
   }
+
+  const accuracy =
+    reviewedCount > 0 ? Math.round(((gradeCounts.good + gradeCounts.easy) / reviewedCount) * 100) : 0;
 
   return (
     <div className="mx-auto max-w-2xl space-y-6">
@@ -96,7 +123,8 @@ function ReviewSession() {
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">Review Queue</h1>
           <p className="mt-1.5 text-sm text-muted-foreground">
-            Blended N2 vocab, kanji, and grammar due today.
+            Blended N2 vocab, kanji, and grammar due today
+            {allItems !== null && ` — ${allItems.length} due`}.
           </p>
         </div>
         <label className="flex items-center gap-2 text-sm text-foreground">
@@ -107,6 +135,7 @@ function ReviewSession() {
             className="h-4 w-4 rounded border-border text-primary focus:ring-primary"
           />
           Weak items only
+          {allItems !== null && <span className="text-muted-foreground">({weakCount})</span>}
         </label>
       </div>
 
@@ -115,11 +144,14 @@ function ReviewSession() {
       {items === null && !error && <p className="text-sm text-muted-foreground">Loading queue…</p>}
 
       {items !== null && items.length === 0 && (
-        <div className="card p-8 text-center">
-          <p className="text-foreground">
+        <div className="flex flex-col items-center gap-3 rounded-lg border border-dashed border-border p-10 text-center">
+          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
+            <Inbox className="h-6 w-6 text-primary" aria-hidden="true" />
+          </div>
+          <p className="max-w-xs text-sm text-foreground">
             {weakOnly ? 'No weak items right now — nice work.' : 'Nothing due for review right now.'}
           </p>
-          <Link href="/learn/vocab" className="mt-3 inline-block text-sm font-medium text-primary hover:opacity-80">
+          <Link href="/learn/vocab" className="text-sm font-medium text-primary hover:opacity-80">
             Browse the deck
           </Link>
         </div>
@@ -140,9 +172,42 @@ function ReviewSession() {
       )}
 
       {items !== null && items.length > 0 && index >= items.length && (
-        <div className="card p-8 text-center">
-          <p className="text-foreground">Session complete — {reviewedCount} card(s) reviewed.</p>
-          <button type="button" onClick={loadQueue} className="btn-primary mt-3">
+        <div className="card space-y-4 p-8 text-center">
+          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-success/10">
+            <CheckCircle2 className="h-6 w-6 text-success" aria-hidden="true" />
+          </div>
+          <div>
+            <p className="text-lg font-semibold text-foreground">Session complete</p>
+            <p className="mt-1 text-sm text-muted-foreground">
+              {reviewedCount} card{reviewedCount === 1 ? '' : 's'} reviewed · {accuracy}% accuracy
+            </p>
+          </div>
+          <div className="flex flex-wrap justify-center gap-2 text-xs">
+            {/* Literal class names (not template-constructed) so Tailwind's
+                JIT scanner picks them up — see DESIGN.md's "SRS review
+                grading" tokens. */}
+            {gradeCounts.again > 0 && (
+              <span className="rounded-full bg-srs-again px-2.5 py-1 font-medium text-white">
+                Again · {gradeCounts.again}
+              </span>
+            )}
+            {gradeCounts.hard > 0 && (
+              <span className="rounded-full bg-srs-hard px-2.5 py-1 font-medium text-white">
+                Hard · {gradeCounts.hard}
+              </span>
+            )}
+            {gradeCounts.good > 0 && (
+              <span className="rounded-full bg-srs-good px-2.5 py-1 font-medium text-white">
+                Good · {gradeCounts.good}
+              </span>
+            )}
+            {gradeCounts.easy > 0 && (
+              <span className="rounded-full bg-srs-easy px-2.5 py-1 font-medium text-white">
+                Easy · {gradeCounts.easy}
+              </span>
+            )}
+          </div>
+          <button type="button" onClick={loadQueue} className="btn-primary">
             Check for more due items
           </button>
         </div>

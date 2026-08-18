@@ -10,7 +10,20 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
+import { Minus, TrendingDown, TrendingUp } from 'lucide-react';
 import type { MockTestResult } from '../types';
+
+/** Falls back to summing the three section scores when `total_score` wasn't
+ * entered directly, so the delta indicator below still works either way. */
+function totalFor(r: MockTestResult): number {
+  return (
+    r.total_score ??
+    [r.vocab_grammar_score, r.reading_score, r.listening_score].reduce(
+      (sum: number, v) => sum + (v ?? 0),
+      0,
+    )
+  );
+}
 
 /**
  * Score trend chart (T062) — per-section, chronological (US5 acceptance
@@ -47,20 +60,32 @@ export function ScoreTrendChart({ results }: ScoreTrendChartProps) {
     );
   }
 
-  const data = [...results]
-    .sort((a, b) => a.test_date.localeCompare(b.test_date))
-    .map((r) => ({
-      testDate: r.test_date,
-      vocab_grammar_score: r.vocab_grammar_score,
-      reading_score: r.reading_score,
-      listening_score: r.listening_score,
-    }));
+  const sorted = [...results].sort((a, b) => a.test_date.localeCompare(b.test_date));
+  const data = sorted.map((r) => ({
+    testDate: r.test_date,
+    vocab_grammar_score: r.vocab_grammar_score,
+    reading_score: r.reading_score,
+    listening_score: r.listening_score,
+  }));
+
+  const latest = sorted[sorted.length - 1];
+  const previous = sorted[sorted.length - 2];
+  const delta = totalFor(latest) - totalFor(previous);
+  const TrendIcon = delta > 0 ? TrendingUp : delta < 0 ? TrendingDown : Minus;
+  const trendColor = delta > 0 ? 'text-success' : delta < 0 ? 'text-warning' : 'text-muted-foreground';
 
   const ringColor = 'var(--card)';
 
   return (
     <div className="card space-y-2 p-4">
-      <h2 className="text-sm font-semibold text-foreground">Score trend</h2>
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <h2 className="text-sm font-semibold text-foreground">Score trend</h2>
+        <div className={`flex items-center gap-1.5 text-sm font-medium ${trendColor}`}>
+          <TrendIcon className="h-4 w-4" aria-hidden="true" />
+          {delta === 0 ? 'No change' : `${delta > 0 ? '+' : ''}${delta} total`}
+          <span className="font-normal text-muted-foreground">vs previous test</span>
+        </div>
+      </div>
       <ResponsiveContainer width="100%" height={260}>
         <LineChart data={data} margin={{ top: 8, right: 16, bottom: 0, left: -16 }}>
           <CartesianGrid stroke="var(--border)" vertical={false} />

@@ -2,7 +2,8 @@
 
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { Paperclip } from 'lucide-react';
+import { AlertTriangle, Clock, Paperclip } from 'lucide-react';
+import { getDueUrgency } from '../lib/urgency';
 import type { BoardTask } from '../types';
 
 interface TaskCardProps {
@@ -12,12 +13,19 @@ interface TaskCardProps {
   overlay?: boolean;
 }
 
-function isOverdue(dueDate: string | null): boolean {
-  if (!dueDate) return false;
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  return new Date(`${dueDate}T00:00:00`) < today;
-}
+/**
+ * Due-date badge styling per urgency (T034 polish): overdue is `danger`
+ * (destructive/needs-fixing per DESIGN.md), due-today is `accent`
+ * (DESIGN.md explicitly calls out "due/urgent badges" as the sanctioned
+ * `accent` use case — this is the one place on the board that color should
+ * appear), due-soon (next 2 days) is `warning`, everything else is neutral.
+ */
+const DUE_BADGE_CLASS: Record<'overdue' | 'today' | 'soon' | 'none', string> = {
+  overdue: 'badge-danger',
+  today: 'badge-accent',
+  soon: 'badge-warning',
+  none: 'badge-neutral',
+};
 
 function initials(assigneeId: string | null): string {
   if (!assigneeId) return '';
@@ -44,7 +52,7 @@ export function TaskCard({ task, onClick, overlay }: TaskCardProps) {
   const checklist = task.task_checklist_items;
   const checklistTotal = checklist.length;
   const checklistDone = checklist.filter((item) => item.completed).length;
-  const overdue = isOverdue(task.due_date);
+  const urgency = getDueUrgency(task.due_date);
 
   return (
     <div
@@ -93,11 +101,18 @@ export function TaskCard({ task, onClick, overlay }: TaskCardProps) {
 
       <div className="mt-2 flex flex-wrap items-center gap-2 text-[11px] text-muted-foreground">
         {task.due_date && (
-          <span className={overdue ? 'badge-danger' : 'badge-neutral'}>
-            {new Date(`${task.due_date}T00:00:00`).toLocaleDateString(undefined, {
-              month: 'short',
-              day: 'numeric',
-            })}
+          <span className={DUE_BADGE_CLASS[urgency ?? 'none']}>
+            {urgency === 'overdue' ? (
+              <AlertTriangle className="h-3 w-3" aria-hidden="true" />
+            ) : urgency === 'today' ? (
+              <Clock className="h-3 w-3" aria-hidden="true" />
+            ) : null}
+            {urgency === 'today'
+              ? 'Due today'
+              : new Date(`${task.due_date}T00:00:00`).toLocaleDateString(undefined, {
+                  month: 'short',
+                  day: 'numeric',
+                })}
           </span>
         )}
         {checklistTotal > 0 && (

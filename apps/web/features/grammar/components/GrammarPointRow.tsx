@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { ArrowLeftRight } from 'lucide-react';
 import { createClient } from '@/shared/supabase/client';
 import type { GrammarPointWithProgress, GrammarStatus } from '../types';
 import { GrammarNoteEditor } from './GrammarNoteEditor';
@@ -102,6 +103,7 @@ export function GrammarPointRow({ point, userId, onStatusChange, onNoteChange }:
                   href={`/learn/grammar/confusables/${pair.pairId}`}
                   className="inline-flex items-center gap-1 rounded-full border border-primary/40 bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary transition-colors hover:bg-primary/20"
                 >
+                  <ArrowLeftRight className="h-3 w-3" aria-hidden="true" />
                   Confusable{pair.partnerPattern ? ` — vs. ${pair.partnerPattern}` : ''}
                 </Link>
               ))}

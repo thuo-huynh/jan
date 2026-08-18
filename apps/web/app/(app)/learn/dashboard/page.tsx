@@ -1,4 +1,6 @@
+import Link from 'next/link';
 import { redirect } from 'next/navigation';
+import { ArrowRight } from 'lucide-react';
 import { createClient, getAuthedUser } from '@/shared/supabase/server';
 import { loadDashboardData } from '@/features/dashboard/lib/aggregate';
 import { aggregateDailyActivity, fillTrailingDays } from '@/features/study-plan/lib/heatmap';
@@ -127,15 +129,26 @@ export default async function DashboardPage() {
             Not enough activity yet to identify a weak area.
           </p>
         ) : (
-          <ul className="space-y-2">
+          <ul className="space-y-1">
             {dashboard.weakAreas.map((area, i) => (
-              <li key={`${area.type}-${area.label}`} className="flex items-center justify-between gap-2 text-sm">
-                <span className="flex items-center gap-2 text-foreground">
-                  <span className="font-jp text-xs text-muted-foreground">{WEAK_AREA_ICON[area.type]}</span>
-                  {area.label}
-                  {i === 0 && <span className="badge-warning">Needs attention</span>}
-                </span>
-                <span className="text-muted-foreground">{Math.round(area.score * 100)}%</span>
+              <li key={`${area.type}-${area.label}`}>
+                <Link
+                  href={area.href}
+                  className="flex items-center justify-between gap-2 rounded px-1.5 py-1.5 text-sm transition-colors hover:bg-muted"
+                >
+                  <span className="flex min-w-0 items-center gap-2 text-foreground">
+                    <span className="font-jp text-xs text-muted-foreground">{WEAK_AREA_ICON[area.type]}</span>
+                    <span className="truncate">{area.label}</span>
+                    {i === 0 && <span className="badge-warning shrink-0">Needs attention</span>}
+                  </span>
+                  <span className="flex shrink-0 items-center gap-2">
+                    <span className="text-muted-foreground">{Math.round(area.score * 100)}%</span>
+                    <span className="flex items-center gap-0.5 text-xs font-medium text-primary">
+                      Review
+                      <ArrowRight className="h-3 w-3" aria-hidden="true" />
+                    </span>
+                  </span>
+                </Link>
               </li>
             ))}
           </ul>

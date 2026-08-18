@@ -175,6 +175,10 @@ body {
     @apply badge text-danger;
     background-color: color-mix(in srgb, var(--danger) 12%, transparent);
   }
+  .badge-accent {
+    @apply badge text-accent;
+    background-color: color-mix(in srgb, var(--accent) 15%, transparent);
+  }
   .badge-neutral {
     @apply badge bg-muted text-muted-foreground;
   }

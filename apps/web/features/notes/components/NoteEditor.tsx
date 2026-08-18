@@ -10,6 +10,7 @@ import { FolderTagPicker } from './FolderTagPicker';
 import { NoteLinkPicker } from './NoteLinkPicker';
 import { MarkdownPreview } from './MarkdownPreview';
 import { PinButton } from './NoteCard';
+import { formatRelativeTime } from '../lib/utils';
 
 /**
  * Note detail/editor page content (T079): markdown source editing (via an
@@ -137,7 +138,10 @@ export function NoteEditor({
           aria-label="Note title"
           className="w-full border-none bg-transparent text-2xl font-semibold text-foreground focus:outline-none"
         />
-        <div className="flex shrink-0 items-center gap-2">
+        <div className="flex shrink-0 items-center gap-3">
+          <span className="hidden text-xs text-muted-foreground sm:inline">
+            Edited {formatRelativeTime(note.updated_at)}
+          </span>
           <PinButton noteId={note.id} pinned={note.pinned} />
           <button
             type="button"
@@ -199,31 +203,41 @@ export function NoteEditor({
       )}
 
       <div>
-        <div className="mb-2 inline-flex rounded border border-border bg-muted p-1">
-          <button
-            type="button"
-            onClick={() => setMode('edit')}
-            aria-pressed={mode === 'edit'}
-            className={`rounded px-3 py-1 text-sm font-medium transition-colors ${
-              mode === 'edit'
-                ? 'bg-card text-foreground shadow-sm'
-                : 'text-muted-foreground hover:text-foreground'
-            }`}
-          >
-            Edit
-          </button>
-          <button
-            type="button"
-            onClick={() => setMode('preview')}
-            aria-pressed={mode === 'preview'}
-            className={`rounded px-3 py-1 text-sm font-medium transition-colors ${
-              mode === 'preview'
-                ? 'bg-card text-foreground shadow-sm'
-                : 'text-muted-foreground hover:text-foreground'
-            }`}
-          >
-            Preview
-          </button>
+        <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+          <div className="inline-flex rounded border border-border bg-muted p-1">
+            <button
+              type="button"
+              onClick={() => setMode('edit')}
+              aria-pressed={mode === 'edit'}
+              className={`rounded px-3 py-1 text-sm font-medium transition-colors ${
+                mode === 'edit'
+                  ? 'bg-card text-foreground shadow-sm'
+                  : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              Edit
+            </button>
+            <button
+              type="button"
+              onClick={() => setMode('preview')}
+              aria-pressed={mode === 'preview'}
+              className={`rounded px-3 py-1 text-sm font-medium transition-colors ${
+                mode === 'preview'
+                  ? 'bg-card text-foreground shadow-sm'
+                  : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              Preview
+            </button>
+          </div>
+          {mode === 'edit' && (
+            <p className="helper-text">
+              Supports <span className="font-mono"># headings</span>,{' '}
+              <span className="font-mono">**bold**</span>, <span className="font-mono">- lists</span>,{' '}
+              <span className="font-mono">`code`</span>, <span className="font-mono">[links](url)</span>, and
+              GFM tables.
+            </p>
+          )}
         </div>
 
         {mode === 'edit' ? (

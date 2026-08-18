@@ -1,6 +1,7 @@
 'use client';
 
 import { Search, X } from 'lucide-react';
+import type { DueUrgency } from '../lib/urgency';
 import type { BoardColumn } from '../types';
 
 export interface BoardFilterState {
@@ -8,6 +9,8 @@ export interface BoardFilterState {
   tag: string | null;
   dueBefore: string | null;
   columnId: string | null;
+  /** Set by the "N overdue" / "N due today" quick-filter pills above this bar. */
+  urgency: DueUrgency | null;
 }
 
 export const EMPTY_FILTERS: BoardFilterState = {
@@ -15,6 +18,7 @@ export const EMPTY_FILTERS: BoardFilterState = {
   tag: null,
   dueBefore: null,
   columnId: null,
+  urgency: null,
 };
 
 interface BoardFiltersProps {
@@ -27,7 +31,9 @@ interface BoardFiltersProps {
 export function BoardFilters({ columns, filters, onChange }: BoardFiltersProps) {
   const allTags = Array.from(new Set(columns.flatMap((c) => c.tasks.flatMap((t) => t.tags)))).sort();
 
-  const hasActiveFilters = Boolean(filters.query || filters.tag || filters.dueBefore || filters.columnId);
+  const hasActiveFilters = Boolean(
+    filters.query || filters.tag || filters.dueBefore || filters.columnId || filters.urgency,
+  );
 
   return (
     <div className="card mb-4 flex flex-wrap items-center gap-2 p-3">

@@ -14,6 +14,56 @@ function EmptyTableState({ icon: Icon, message }: { icon: typeof PackageOpen; me
   );
 }
 
+const REFERENCE_PAGE_SIZE = 50;
+
+/**
+ * Previous/Next pager matching AdminUsersPage/AdminContentPage's pattern
+ * (app/admin/users/page.tsx, app/admin/content/page.tsx). The reference-data
+ * routes already paginate server-side at 50 rows/page (see PAGE_SIZE in
+ * app/api/admin/reference-data/{vocab,grammar,confusable-pairs}/route.ts)
+ * but until this, none of these tabs sent a `page` param or exposed a way to
+ * reach it — at the catalog's real scale (hundreds of vocab/grammar rows)
+ * everything past row 50 was silently unreachable.
+ */
+function PaginationBar({
+  page,
+  total,
+  itemLabel,
+  onPageChange,
+}: {
+  page: number;
+  total: number;
+  itemLabel: string;
+  onPageChange: (page: number) => void;
+}) {
+  const totalPages = Math.max(1, Math.ceil(total / REFERENCE_PAGE_SIZE));
+  return (
+    <div className="flex items-center justify-between text-sm text-muted-foreground">
+      <span>
+        Page {page} of {totalPages} ({total} {itemLabel})
+      </span>
+      <div className="flex gap-2">
+        <button
+          type="button"
+          disabled={page <= 1}
+          onClick={() => onPageChange(Math.max(1, page - 1))}
+          className="btn-outline h-8 px-3 text-xs disabled:opacity-40"
+        >
+          Previous
+        </button>
+        <button
+          type="button"
+          disabled={page >= totalPages}
+          onClick={() => onPageChange(Math.min(totalPages, page + 1))}
+          className="btn-outline h-8 px-3 text-xs disabled:opacity-40"
+        >
+          Next
+        </button>
+      </div>
+    </div>
+  );
+}
+
 /**
  * T096 — Admin reference-data management page (vocab/grammar/confusable
  * pairs CRUD UI). Calls T090 (`/api/admin/reference-data/vocab`), T091
@@ -106,6 +156,7 @@ const emptyVocabForm = {
 
 function VocabTab() {
   const [query, setQuery] = useState('');
+  const [page, setPage] = useState(1);
   const [items, setItems] = useState<VocabEntry[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -117,7 +168,7 @@ function VocabTab() {
     setLoading(true);
     setError(null);
     try {
-      const params = new URLSearchParams();
+      const params = new URLSearchParams({ page: String(page) });
       if (query.trim()) params.set('query', query.trim());
       const res = await fetch(`/api/admin/reference-data/vocab?${params.toString()}`);
       const json = await res.json();
@@ -129,7 +180,7 @@ function VocabTab() {
     } finally {
       setLoading(false);
     }
-  }, [query]);
+  }, [query, page]);
 
   useEffect(() => {
     load();
@@ -255,6 +306,7 @@ function VocabTab() {
       <form
         onSubmit={(e) => {
           e.preventDefault();
+          setPage(1);
           load();
         }}
         className="flex gap-2"
@@ -263,7 +315,10 @@ function VocabTab() {
           className={`${inputClass} max-w-sm`}
           placeholder="Search word/meaning…"
           value={query}
-          onChange={(e) => setQuery(e.target.value)}
+          onChange={(e) => {
+            setPage(1);
+            setQuery(e.target.value);
+          }}
         />
         <button type="submit" className={secondaryButtonClass}>
           Search
@@ -340,7 +395,7 @@ function VocabTab() {
           </tbody>
         </table>
       </div>
-      <p className="text-xs text-muted-foreground">{total} total global entries.</p>
+      <PaginationBar page={page} total={total} itemLabel="global entries" onPageChange={setPage} />
     </div>
   );
 }
@@ -375,6 +430,7 @@ const emptyGrammarForm = {
 
 function GrammarTab() {
   const [query, setQuery] = useState('');
+  const [page, setPage] = useState(1);
   const [items, setItems] = useState<GrammarPoint[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -386,7 +442,7 @@ function GrammarTab() {
     setLoading(true);
     setError(null);
     try {
-      const params = new URLSearchParams();
+      const params = new URLSearchParams({ page: String(page) });
       if (query.trim()) params.set('query', query.trim());
       const res = await fetch(`/api/admin/reference-data/grammar?${params.toString()}`);
       const json = await res.json();
@@ -398,7 +454,7 @@ function GrammarTab() {
     } finally {
       setLoading(false);
     }
-  }, [query]);
+  }, [query, page]);
 
   useEffect(() => {
     load();
@@ -547,6 +603,7 @@ function GrammarTab() {
       <form
         onSubmit={(e) => {
           e.preventDefault();
+          setPage(1);
           load();
         }}
         className="flex gap-2"
@@ -555,7 +612,10 @@ function GrammarTab() {
           className={`${inputClass} max-w-sm`}
           placeholder="Search pattern/meaning…"
           value={query}
-          onChange={(e) => setQuery(e.target.value)}
+          onChange={(e) => {
+            setPage(1);
+            setQuery(e.target.value);
+          }}
         />
         <button type="submit" className={secondaryButtonClass}>
           Search
@@ -634,7 +694,7 @@ function GrammarTab() {
           </tbody>
         </table>
       </div>
-      <p className="text-xs text-muted-foreground">{total} total grammar points.</p>
+      <PaginationBar page={page} total={total} itemLabel="grammar points" onPageChange={setPage} />
     </div>
   );
 }
@@ -675,6 +735,8 @@ async function fetchAllGrammarOptions(): Promise<GrammarOption[]> {
 }
 
 function PairsTab() {
+  const [query, setQuery] = useState('');
+  const [page, setPage] = useState(1);
   const [items, setItems] = useState<ConfusablePair[]>([]);
   const [grammarOptions, setGrammarOptions] = useState<GrammarOption[]>([]);
   const [total, setTotal] = useState(0);
@@ -687,8 +749,10 @@ function PairsTab() {
     setLoading(true);
     setError(null);
     try {
+      const params = new URLSearchParams({ page: String(page) });
+      if (query.trim()) params.set('query', query.trim());
       const [pairsRes, options] = await Promise.all([
-        fetch('/api/admin/reference-data/confusable-pairs'),
+        fetch(`/api/admin/reference-data/confusable-pairs?${params.toString()}`),
         fetchAllGrammarOptions(),
       ]);
       const json = await pairsRes.json();
@@ -701,7 +765,7 @@ function PairsTab() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [query, page]);
 
   useEffect(() => {
     load();
@@ -817,6 +881,28 @@ function PairsTab() {
         </div>
       </div>
 
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          setPage(1);
+          load();
+        }}
+        className="flex gap-2"
+      >
+        <input
+          className={`${inputClass} max-w-sm`}
+          placeholder="Search comparison note…"
+          value={query}
+          onChange={(e) => {
+            setPage(1);
+            setQuery(e.target.value);
+          }}
+        />
+        <button type="submit" className={secondaryButtonClass}>
+          Search
+        </button>
+      </form>
+
       {error && (
         <div className="rounded-lg border border-danger/30 bg-danger/10 px-4 py-2 text-sm text-danger">
           {error}
@@ -884,7 +970,7 @@ function PairsTab() {
           </tbody>
         </table>
       </div>
-      <p className="text-xs text-muted-foreground">{total} total confusable pairs.</p>
+      <PaginationBar page={page} total={total} itemLabel="confusable pairs" onPageChange={setPage} />
     </div>
   );
 }

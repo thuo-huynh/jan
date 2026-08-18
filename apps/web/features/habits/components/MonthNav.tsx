@@ -31,6 +31,8 @@ const MONTH_LABELS = [
 
 export function MonthNav({ year, month }: MonthNavProps) {
   const router = useRouter();
+  const now = new Date();
+  const isCurrentMonth = year === now.getFullYear() && month === now.getMonth() + 1;
 
   function go(deltaMonths: number) {
     const date = new Date(year, month - 1 + deltaMonths, 1);
@@ -39,6 +41,10 @@ export function MonthNav({ year, month }: MonthNavProps) {
       month: String(date.getMonth() + 1),
     });
     router.push(`/habits?${params.toString()}`);
+  }
+
+  function goToday() {
+    router.push('/habits');
   }
 
   return (
@@ -62,6 +68,11 @@ export function MonthNav({ year, month }: MonthNavProps) {
       >
         <ChevronRight className="h-4 w-4" aria-hidden="true" />
       </button>
+      {!isCurrentMonth && (
+        <button type="button" onClick={goToday} className="btn-outline h-9 px-3 text-sm">
+          Today
+        </button>
+      )}
     </div>
   );
 }

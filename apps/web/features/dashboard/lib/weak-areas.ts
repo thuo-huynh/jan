@@ -17,6 +17,13 @@ export interface WeakArea {
   type: WeakAreaType;
   label: string;
   score: number;
+  /**
+   * Direct link into the surface that would let the user act on this
+   * insight right away (the relevant review queue / log page / confusable-
+   * pair comparison) — turning "here's your weak area" into a one-click
+   * next step instead of leaving the user to go find it themselves.
+   */
+  href: string;
 }
 
 export interface ReadingLogLite {
@@ -62,7 +69,7 @@ export function weakestReadingPassageType(logs: ReadingLogLite[]): WeakArea | nu
   for (const [label, { total, count }] of Array.from(byType.entries())) {
     const score = total / count / 100;
     if (!weakest || score < weakest.score) {
-      weakest = { type: 'reading_passage_type', label, score };
+      weakest = { type: 'reading_passage_type', label, score, href: '/learn/reading' };
     }
   }
   return weakest;
@@ -92,7 +99,12 @@ export function weakestConfusablePair(
     if (!weakest || score < weakest.score) {
       const patternA = patternById.get(pair.grammar_point_id_a) ?? '?';
       const patternB = patternById.get(pair.grammar_point_id_b) ?? '?';
-      weakest = { type: 'grammar_confusable', label: `${patternA} vs ${patternB}`, score };
+      weakest = {
+        type: 'grammar_confusable',
+        label: `${patternA} vs ${patternB}`,
+        score,
+        href: `/learn/grammar/confusables/${pair.id}`,
+      };
     }
   }
   return weakest;
@@ -102,14 +114,14 @@ export function listeningWeakArea(logs: ListeningLogLite[]): WeakArea | null {
   const scored = logs.filter((l): l is { comprehension_score: number } => l.comprehension_score !== null);
   if (scored.length === 0) return null;
   const avg = scored.reduce((sum, l) => sum + l.comprehension_score, 0) / scored.length;
-  return { type: 'listening', label: 'Listening comprehension', score: avg / 100 };
+  return { type: 'listening', label: 'Listening comprehension', score: avg / 100, href: '/learn/listening' };
 }
 
 export function vocabWeakArea(reviewLogs: ReviewLogLite[]): WeakArea | null {
   const vocabLogs = reviewLogs.filter((l) => l.vocab_id);
   const score = accuracyOf(vocabLogs);
   if (score === null) return null;
-  return { type: 'vocab', label: 'Vocab/kanji review accuracy', score };
+  return { type: 'vocab', label: 'Vocab/kanji review accuracy', score, href: '/learn/review?weakOnly=true' };
 }
 
 /** Filters out domains with no data yet and returns the weakest first (lowest score = weakest). */
