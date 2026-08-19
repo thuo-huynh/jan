@@ -277,3 +277,38 @@ body {
 .animate-confetti-fall {
   animation: confetti-fall 1.1s ease-in forwards;
 }
+
+/*
+ * Vocab flashcard flip (features/vocab-srs/components/FlashcardDeck.tsx) — a
+ * click-triggered 3D flip contained entirely inside a fixed-size card, never
+ * shifting surrounding layout. DESIGN.md's "no hover transforms" rule is
+ * about hover specifically (the Kanban drag surface); this is a deliberate
+ * click action, same exception class as habit-pop above.
+ */
+.flashcard-perspective {
+  perspective: 1500px;
+}
+.flashcard-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transition: transform 0.5s;
+  transform-style: preserve-3d;
+}
+.flashcard-inner.is-flipped {
+  transform: rotateY(180deg);
+}
+.flashcard-face {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+.flashcard-face-back {
+  transform: rotateY(180deg);
+}
+@media (prefers-reduced-motion: reduce) {
+  .flashcard-inner {
+    transition: none;
+  }
+}

@@ -93,9 +93,14 @@ export default async function VocabDeckPage({ searchParams }: VocabPageProps) {
               )}
             </div>
           </div>
-          <Link href="/learn/review" className={dueCount > 0 ? 'btn-primary' : 'btn-outline'}>
-            {dueCount > 0 ? 'Start review' : 'Review queue'}
-          </Link>
+          <div className="flex gap-2">
+            <Link href="/learn/vocab/flashcards" className="btn-outline">
+              Study flashcards
+            </Link>
+            <Link href="/learn/review" className={dueCount > 0 ? 'btn-primary' : 'btn-outline'}>
+              {dueCount > 0 ? 'Start review' : 'Review queue'}
+            </Link>
+          </div>
         </div>
       )}
 

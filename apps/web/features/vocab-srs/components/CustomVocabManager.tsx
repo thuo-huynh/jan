@@ -1,10 +1,11 @@
 'use client';
 
 import { useState } from 'react';
-import { Plus, X, Pencil, Trash2 } from 'lucide-react';
+import { ListPlus, Plus, X, Pencil, Trash2 } from 'lucide-react';
 import { createClient } from '@/shared/supabase/client';
 import { useConfirm } from '@/shared/hooks/useConfirm';
 import { VocabEntryForm, type CustomVocabEntry } from './VocabEntryForm';
+import { BulkVocabAddForm } from './BulkVocabAddForm';
 
 export type { CustomVocabEntry } from './VocabEntryForm';
 
@@ -20,13 +21,17 @@ interface CustomVocabManagerProps {
 export function CustomVocabManager({ initialEntries }: CustomVocabManagerProps) {
   const [entries, setEntries] = useState(initialEntries);
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [adding, setAdding] = useState(false);
+  const [addMode, setAddMode] = useState<'none' | 'single' | 'bulk'>('none');
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const { confirm, confirmDialog } = useConfirm();
 
   function handleCreated(entry: CustomVocabEntry) {
     setEntries((prev) => [entry, ...prev]);
-    setAdding(false);
+    setAddMode('none');
+  }
+
+  function handleBulkImported(imported: CustomVocabEntry[]) {
+    setEntries((prev) => [...imported, ...prev]);
   }
 
   function handleUpdated(entry: CustomVocabEntry) {
@@ -53,25 +58,51 @@ export function CustomVocabManager({ initialEntries }: CustomVocabManagerProps) 
   return (
     <div className="space-y-4">
       {confirmDialog}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-2">
         <h2 className="text-lg font-semibold tracking-tight text-foreground">Your custom entries</h2>
-        <button type="button" onClick={() => setAdding((v) => !v)} className="btn-primary h-9 px-3 text-sm">
-          {adding ? (
-            <>
-              <X className="h-4 w-4" aria-hidden="true" />
-              Close
-            </>
-          ) : (
-            <>
-              <Plus className="h-4 w-4" aria-hidden="true" />
-              Add word
-            </>
-          )}
-        </button>
+        <div className="flex gap-2">
+          <button
+            type="button"
+            onClick={() => setAddMode((m) => (m === 'bulk' ? 'none' : 'bulk'))}
+            className="btn-outline h-9 px-3 text-sm"
+          >
+            {addMode === 'bulk' ? (
+              <>
+                <X className="h-4 w-4" aria-hidden="true" />
+                Close
+              </>
+            ) : (
+              <>
+                <ListPlus className="h-4 w-4" aria-hidden="true" />
+                Bulk add
+              </>
+            )}
+          </button>
+          <button
+            type="button"
+            onClick={() => setAddMode((m) => (m === 'single' ? 'none' : 'single'))}
+            className="btn-primary h-9 px-3 text-sm"
+          >
+            {addMode === 'single' ? (
+              <>
+                <X className="h-4 w-4" aria-hidden="true" />
+                Close
+              </>
+            ) : (
+              <>
+                <Plus className="h-4 w-4" aria-hidden="true" />
+                Add word
+              </>
+            )}
+          </button>
+        </div>
       </div>
 
-      {adding && (
-        <VocabEntryForm mode="create" onSaved={handleCreated} onCancel={() => setAdding(false)} />
+      {addMode === 'single' && (
+        <VocabEntryForm mode="create" onSaved={handleCreated} onCancel={() => setAddMode('none')} />
+      )}
+      {addMode === 'bulk' && (
+        <BulkVocabAddForm onImported={handleBulkImported} onCancel={() => setAddMode('none')} />
       )}
 
       {deleteError && <p className="error-text">{deleteError}</p>}
