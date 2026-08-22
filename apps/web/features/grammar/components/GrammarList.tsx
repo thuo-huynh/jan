@@ -1,7 +1,20 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { ArrowLeftRight, BookOpen, FileCode2, Pencil, Plus, Search, SearchX, Trash2, X } from 'lucide-react';
+import {
+  ArrowLeftRight,
+  BookOpen,
+  ChevronDown,
+  ChevronRight,
+  FileCode2,
+  FolderOpen,
+  Pencil,
+  Plus,
+  Search,
+  SearchX,
+  Trash2,
+  X,
+} from 'lucide-react';
 import { createClient } from '@/shared/supabase/client';
 import { useConfirm } from '@/shared/hooks/useConfirm';
 import { mapGrammarPoint, type GrammarPointRecord } from '../lib/mapGrammarPoint';
@@ -16,33 +29,41 @@ interface GrammarListProps {
   initialSets: GrammarSet[];
 }
 
+const GLOBAL_GROUP_KEY = '__global__';
+const UNSET_GROUP_KEY = '__unset__';
+
+interface Group {
+  key: string;
+  name: string;
+  /** Only true for the caller's own grammar_sets — the global catalog and "no set" bucket can't be renamed/deleted. */
+  canManage: boolean;
+  points: GrammarPointWithProgress[];
+}
+
 /**
- * Client-side list wrapper for the grammar tracker page (T041): owns the
- * level filter, a set filter (grammar_sets, 0025_grammar_sets.sql — only
- * ever matches the caller's own custom points, since global catalog points
- * never belong to a set), a pattern/meaning text search (needed once the
- * catalog is ~100-200 points — status/level filters alone don't get you to
- * a specific point like として quickly), an "only confusable pairs" toggle
- * so that first-class feature is discoverable from the list itself rather
- * than only stumbled into row-by-row, the "lifted" copy of each point's
- * status/note so the mastery-progress summary stays in sync when a row
- * mutates without a full page reload, and the caller's own custom-point
- * add/edit/delete flow (GrammarPointForm + GrammarHtmlImportForm).
- * Filtering happens client-side over the already-fetched (~96-row) dataset
- * rather than a route round-trip.
+ * Client-side list wrapper for the grammar tracker page (T041). Points are
+ * grouped into collapsed set cards (grammar_sets, 0025_grammar_sets.sql) —
+ * same collapsed-by-default shape as CustomVocabManager — instead of one
+ * long flat scroll, since that's exactly what got harder to use the more
+ * custom points a caller added. The global N2 catalog always renders as its
+ * own trailing, non-manageable group. Search/level/confusable-pair filters
+ * still apply across every group at once (filtering happens before
+ * grouping); a group with an active filter match auto-expands so results
+ * are never hidden behind a collapsed header. Filtering happens client-side
+ * over the already-fetched (~96-row) dataset rather than a route round-trip.
  */
 export function GrammarList({ points: initialPoints, userId, initialSets }: GrammarListProps) {
   const [points, setPoints] = useState(initialPoints);
   const [sets, setSets] = useState(initialSets);
   const [levelFilter, setLevelFilter] = useState('');
-  const [setFilter, setSetFilter] = useState('');
   const [onlyConfusable, setOnlyConfusable] = useState(false);
   const [query, setQuery] = useState('');
   const [addMode, setAddMode] = useState<'none' | 'single' | 'html'>('none');
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [renamingSet, setRenamingSet] = useState(false);
+  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
+  const [renamingGroup, setRenamingGroup] = useState<string | null>(null);
   const [renameDraft, setRenameDraft] = useState('');
-  const [setError, setSetError] = useState<string | null>(null);
+  const [groupError, setGroupError] = useState<string | null>(null);
   const { confirm, confirmDialog } = useConfirm();
 
   const counts = useMemo(() => {
@@ -62,20 +83,50 @@ export function GrammarList({ points: initialPoints, userId, initialSets }: Gram
 
   const levelOptions = useMemo(() => Array.from(new Set(points.map((p) => p.jlptLevel))).sort(), [points]);
 
-  const setNameById = useMemo(() => new Map(sets.map((s) => [s.id, s.name])), [sets]);
-
   const visiblePoints = useMemo(() => {
     let list = points;
     if (levelFilter) list = list.filter((p) => p.jlptLevel === levelFilter);
-    if (setFilter) list = list.filter((p) => p.setId === setFilter);
     if (onlyConfusable) list = list.filter((p) => p.confusablePairs.length > 0);
     const q = query.trim().toLowerCase();
     if (q) list = list.filter((p) => p.pattern.toLowerCase().includes(q) || p.meaning.toLowerCase().includes(q));
     return list;
-  }, [points, levelFilter, setFilter, onlyConfusable, query]);
+  }, [points, levelFilter, onlyConfusable, query]);
 
-  const hasActiveFilter = levelFilter !== '' || setFilter !== '' || onlyConfusable || query.trim().length > 0;
-  const selectedSet = setFilter ? sets.find((s) => s.id === setFilter) : undefined;
+  const hasActiveFilter = levelFilter !== '' || onlyConfusable || query.trim().length > 0;
+
+  const groups = useMemo<Group[]>(() => {
+    const byKey = new Map<string, GrammarPointWithProgress[]>();
+    for (const p of visiblePoints) {
+      const key = !p.isCustom ? GLOBAL_GROUP_KEY : (p.setId ?? UNSET_GROUP_KEY);
+      const list = byKey.get(key) ?? [];
+      list.push(p);
+      byKey.set(key, list);
+    }
+
+    const ordered: Group[] = [];
+    for (const set of sets) {
+      const list = byKey.get(set.id);
+      if (list) ordered.push({ key: set.id, name: set.name, canManage: true, points: list });
+    }
+    const unset = byKey.get(UNSET_GROUP_KEY);
+    if (unset) ordered.push({ key: UNSET_GROUP_KEY, name: 'Chưa thuộc set nào', canManage: false, points: unset });
+    const global = byKey.get(GLOBAL_GROUP_KEY);
+    if (global) ordered.push({ key: GLOBAL_GROUP_KEY, name: 'Kho ngữ pháp N2 chuẩn', canManage: false, points: global });
+    return ordered;
+  }, [visiblePoints, sets]);
+
+  function toggleGroup(key: string) {
+    setExpandedGroups((prev) => {
+      const next = new Set(prev);
+      if (next.has(key)) next.delete(key);
+      else next.add(key);
+      return next;
+    });
+  }
+
+  function expandGroup(key: string) {
+    setExpandedGroups((prev) => new Set(prev).add(key));
+  }
 
   function handleStatusChange(pointId: string, status: GrammarStatus) {
     setPoints((prev) => prev.map((p) => (p.id === pointId ? { ...p, status } : p)));
@@ -90,12 +141,20 @@ export function GrammarList({ points: initialPoints, userId, initialSets }: Gram
   }
 
   function handleCreated(row: GrammarPointRecord) {
-    setPoints((prev) => [mapGrammarPoint(row, undefined, []), ...prev]);
+    const mapped = mapGrammarPoint(row, undefined, []);
+    setPoints((prev) => [mapped, ...prev]);
     setAddMode('none');
+    if (mapped.setId) expandGroup(mapped.setId);
   }
 
   function handleImported(rows: GrammarPointRecord[]) {
-    setPoints((prev) => [...rows.map((row) => mapGrammarPoint(row, undefined, [])), ...prev]);
+    const mapped = rows.map((row) => mapGrammarPoint(row, undefined, []));
+    setPoints((prev) => [...mapped, ...prev]);
+    setExpandedGroups((prev) => {
+      const next = new Set(prev);
+      for (const m of mapped) if (m.setId) next.add(m.setId);
+      return next;
+    });
   }
 
   function handleUpdated(row: GrammarPointRecord) {
@@ -103,48 +162,43 @@ export function GrammarList({ points: initialPoints, userId, initialSets }: Gram
       prev.map((p) => (p.id === row.id ? mapGrammarPoint(row, toStatusRecord(p), p.confusablePairs) : p)),
     );
     setEditingId(null);
+    if (row.set_id) expandGroup(row.set_id);
   }
 
   function handleDeleted(pointId: string) {
     setPoints((prev) => prev.filter((p) => p.id !== pointId));
   }
 
-  async function handleRenameSet() {
+  async function handleRenameGroup(key: string, currentName: string) {
     const name = renameDraft.trim();
-    if (!name || !selectedSet) {
-      setRenamingSet(false);
+    setRenamingGroup(null);
+    if (!name || name === currentName) return;
+    const supabase = createClient();
+    const { error } = await supabase.from('grammar_sets').update({ name }).eq('id', key);
+    if (error) {
+      setGroupError(error.message);
       return;
     }
-    const supabase = createClient();
-    const { error } = await supabase.from('grammar_sets').update({ name }).eq('id', selectedSet.id);
-    if (!error) {
-      setSets((prev) => prev.map((s) => (s.id === selectedSet.id ? { ...s, name } : s)));
-    } else {
-      setSetError(error.message);
-    }
-    setRenamingSet(false);
+    setSets((prev) => prev.map((s) => (s.id === key ? { ...s, name } : s)));
   }
 
-  async function handleDeleteSet() {
-    if (!selectedSet) return;
-    const count = points.filter((p) => p.setId === selectedSet.id).length;
+  async function handleDeleteGroup(group: Group) {
     const ok = await confirm({
-      title: `Xóa set "${selectedSet.name}"?`,
+      title: `Xóa set "${group.name}"?`,
       description:
-        count > 0
-          ? `${count} điểm ngữ pháp trong set sẽ không bị xóa, chỉ mất nhóm (chuyển vào không thuộc set nào).`
+        group.points.length > 0
+          ? `${group.points.length} điểm ngữ pháp trong set sẽ không bị xóa, chỉ mất nhóm (chuyển vào "Chưa thuộc set nào").`
           : undefined,
     });
     if (!ok) return;
     const supabase = createClient();
-    const { error } = await supabase.from('grammar_sets').delete().eq('id', selectedSet.id);
+    const { error } = await supabase.from('grammar_sets').delete().eq('id', group.key);
     if (error) {
-      setSetError(error.message);
+      setGroupError(error.message);
       return;
     }
-    setSets((prev) => prev.filter((s) => s.id !== selectedSet.id));
-    setPoints((prev) => prev.map((p) => (p.setId === selectedSet.id ? { ...p, setId: null } : p)));
-    setSetFilter('');
+    setSets((prev) => prev.filter((s) => s.id !== group.key));
+    setPoints((prev) => prev.map((p) => (p.setId === group.key ? { ...p, setId: null } : p)));
   }
 
   return (
@@ -236,64 +290,12 @@ export function GrammarList({ points: initialPoints, userId, initialSets }: Gram
               </option>
             ))}
           </select>
-          {sets.length > 0 && (
-            <select
-              value={setFilter}
-              onChange={(e) => setSetFilter(e.target.value)}
-              aria-label="Lọc theo set"
-              className="input-field h-9 w-auto"
-            >
-              <option value="">Tất cả set</option>
-              {sets.map((set) => (
-                <option key={set.id} value={set.id}>
-                  {set.name}
-                </option>
-              ))}
-            </select>
-          )}
-          {selectedSet &&
-            (renamingSet ? (
-              <input
-                autoFocus
-                value={renameDraft}
-                onChange={(e) => setRenameDraft(e.target.value)}
-                onBlur={handleRenameSet}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') handleRenameSet();
-                  if (e.key === 'Escape') setRenamingSet(false);
-                }}
-                className="input-field h-9 w-40"
-              />
-            ) : (
-              <div className="flex items-center gap-1">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setRenamingSet(true);
-                    setRenameDraft(selectedSet.name);
-                  }}
-                  aria-label={`Đổi tên set ${selectedSet.name}`}
-                  className="flex h-9 w-9 items-center justify-center rounded text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-                >
-                  <Pencil className="h-3.5 w-3.5" aria-hidden="true" />
-                </button>
-                <button
-                  type="button"
-                  onClick={handleDeleteSet}
-                  aria-label={`Xóa set ${selectedSet.name}`}
-                  className="flex h-9 w-9 items-center justify-center rounded text-muted-foreground transition-colors hover:bg-danger/10 hover:text-danger"
-                >
-                  <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
-                </button>
-              </div>
-            ))}
           {hasActiveFilter && (
             <button
               type="button"
               onClick={() => {
                 setQuery('');
                 setLevelFilter('');
-                setSetFilter('');
                 setOnlyConfusable(false);
               }}
               className="btn-ghost h-9 px-2.5 text-xs"
@@ -303,7 +305,7 @@ export function GrammarList({ points: initialPoints, userId, initialSets }: Gram
             </button>
           )}
         </div>
-        {setError && <p className="error-text">{setError}</p>}
+        {groupError && <p className="error-text">{groupError}</p>}
       </div>
 
       {addMode === 'single' && (
@@ -341,34 +343,96 @@ export function GrammarList({ points: initialPoints, userId, initialSets }: Gram
           </p>
         </div>
       ) : (
-        <ul className="space-y-3">
-          {visiblePoints.map((point) =>
-            editingId === point.id ? (
-              <li key={point.id}>
-                <GrammarPointForm
-                  mode="edit"
-                  pointId={point.id}
-                  initialValues={toFormValues(point)}
-                  sets={sets}
-                  onSetCreated={handleSetCreated}
-                  onSaved={handleUpdated}
-                  onCancel={() => setEditingId(null)}
-                />
+        <ul className="space-y-2">
+          {groups.map((group) => {
+            const expanded = hasActiveFilter || expandedGroups.has(group.key);
+            return (
+              <li key={group.key} className="card p-0">
+                <div className="flex items-center justify-between gap-2 p-3">
+                  <button
+                    type="button"
+                    onClick={() => toggleGroup(group.key)}
+                    className="flex min-w-0 flex-1 items-center gap-2 text-left"
+                  >
+                    {expanded ? (
+                      <ChevronDown className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden="true" />
+                    ) : (
+                      <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden="true" />
+                    )}
+                    <FolderOpen className="h-4 w-4 shrink-0 text-primary" aria-hidden="true" />
+                    {renamingGroup === group.key ? (
+                      <input
+                        autoFocus
+                        value={renameDraft}
+                        onClick={(e) => e.stopPropagation()}
+                        onChange={(e) => setRenameDraft(e.target.value)}
+                        onBlur={() => handleRenameGroup(group.key, group.name)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') handleRenameGroup(group.key, group.name);
+                          if (e.key === 'Escape') setRenamingGroup(null);
+                        }}
+                        className="input-field h-8 flex-1"
+                      />
+                    ) : (
+                      <span className="truncate text-sm font-semibold text-foreground">{group.name}</span>
+                    )}
+                    <span className="shrink-0 text-xs text-muted-foreground">{group.points.length} điểm</span>
+                  </button>
+                  {group.canManage && (
+                    <div className="flex shrink-0 items-center gap-1">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setRenamingGroup(group.key);
+                          setRenameDraft(group.name);
+                        }}
+                        aria-label={`Đổi tên set ${group.name}`}
+                        className="flex h-7 w-7 items-center justify-center rounded text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                      >
+                        <Pencil className="h-3.5 w-3.5" aria-hidden="true" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleDeleteGroup(group)}
+                        aria-label={`Xóa set ${group.name}`}
+                        className="flex h-7 w-7 items-center justify-center rounded text-muted-foreground transition-colors hover:bg-danger/10 hover:text-danger"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
+                      </button>
+                    </div>
+                  )}
+                </div>
+                {expanded && (
+                  <div className="space-y-3 border-t border-border p-3">
+                    {group.points.map((point) =>
+                      editingId === point.id ? (
+                        <GrammarPointForm
+                          key={point.id}
+                          mode="edit"
+                          pointId={point.id}
+                          initialValues={toFormValues(point)}
+                          sets={sets}
+                          onSetCreated={handleSetCreated}
+                          onSaved={handleUpdated}
+                          onCancel={() => setEditingId(null)}
+                        />
+                      ) : (
+                        <GrammarPointRow
+                          key={point.id}
+                          point={point}
+                          userId={userId}
+                          onStatusChange={handleStatusChange}
+                          onNoteChange={handleNoteChange}
+                          onEdit={point.isCustom ? setEditingId : undefined}
+                          onDeleted={point.isCustom ? handleDeleted : undefined}
+                        />
+                      ),
+                    )}
+                  </div>
+                )}
               </li>
-            ) : (
-              <li key={point.id}>
-                <GrammarPointRow
-                  point={point}
-                  userId={userId}
-                  setName={point.setId ? (setNameById.get(point.setId) ?? null) : null}
-                  onStatusChange={handleStatusChange}
-                  onNoteChange={handleNoteChange}
-                  onEdit={point.isCustom ? setEditingId : undefined}
-                  onDeleted={point.isCustom ? handleDeleted : undefined}
-                />
-              </li>
-            ),
-          )}
+            );
+          })}
         </ul>
       )}
     </div>

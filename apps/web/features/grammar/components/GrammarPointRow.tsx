@@ -11,8 +11,6 @@ import { GrammarNoteEditor } from './GrammarNoteEditor';
 interface GrammarPointRowProps {
   point: GrammarPointWithProgress;
   userId: string;
-  /** Resolved display name for `point.setId`, looked up by the parent (which already holds the sets list) — null if the point has no set. */
-  setName?: string | null;
   onStatusChange: (pointId: string, status: GrammarStatus) => void;
   onNoteChange: (pointId: string, notesUser: string | null) => void;
   /** Only meaningful for `point.isCustom` rows — global catalog points aren't editable/deletable here. */
@@ -44,7 +42,6 @@ const STATUS_ACTIVE_STYLES: Record<GrammarStatus, string> = {
 export function GrammarPointRow({
   point,
   userId,
-  setName,
   onStatusChange,
   onNoteChange,
   onEdit,
@@ -111,7 +108,6 @@ export function GrammarPointRow({
             {point.frequencyTag && <span className="badge-neutral">{point.frequencyTag}</span>}
             {point.n3Overlap && <span className="badge-neutral">Trùng N3</span>}
             {point.isCustom && <span className="badge-neutral">Tự thêm</span>}
-            {setName && <span className="badge-neutral">{setName}</span>}
           </div>
 
           <p className="mt-1 text-sm text-foreground">{point.meaning}</p>
