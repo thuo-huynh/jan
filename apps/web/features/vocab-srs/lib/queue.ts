@@ -153,9 +153,9 @@ export async function loadDueReviewQueue(
   const { data: grammarPoints, error: grammarError } = await supabase
     .from('grammar_points')
     .select(
-      'id, pattern, meaning, connection_form, formality_nuance, example_sentences, frequency_tag, user_grammar_status(srs_due_date, srs_interval, srs_ease, srs_repetitions, fail_count)',
+      'id, user_id, pattern, meaning, connection_form, formality_nuance, example_sentences, frequency_tag, user_grammar_status(srs_due_date, srs_interval, srs_ease, srs_repetitions, fail_count)',
     )
-    .is('user_id', null);
+    .or(`user_id.is.null,user_id.eq.${userId}`);
   if (grammarError) throw new Error(grammarError.message);
 
   for (const row of grammarPoints ?? []) {
@@ -190,6 +190,7 @@ export async function loadDueReviewQueue(
         itemType: 'grammar',
         itemId: row.id,
         dueDate: status?.srs_due_date ?? today,
+        isCustom: row.user_id !== null,
         isWeak: weak,
         pattern: row.pattern,
         meaning: row.meaning,

@@ -44,7 +44,10 @@ export async function loadDashboardData(
     { data: grammarPatterns },
     { data: goals },
   ] = await Promise.all([
-    supabase.from('grammar_points').select('id', { count: 'exact', head: true }).is('user_id', null),
+    supabase
+      .from('grammar_points')
+      .select('id', { count: 'exact', head: true })
+      .or(`user_id.is.null,user_id.eq.${userId}`),
     supabase
       .from('user_grammar_status')
       .select('id', { count: 'exact', head: true })

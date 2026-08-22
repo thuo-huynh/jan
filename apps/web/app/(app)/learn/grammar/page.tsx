@@ -7,6 +7,8 @@ import type { ConfusablePairRef, GrammarPointWithProgress } from '@/features/gra
 
 /**
  * Grammar list page (T041): browses the global N2 `grammar_points` catalog
+ * plus the caller's own custom points (`user_id = caller`, same
+ * global-or-own shape as vocab_entries — see 0012_rls_reference_data.sql),
  * joined against the current user's `user_grammar_status` (two queries,
  * combined in-memory — no row exists yet for points never touched, which
  * maps to the implicit "not_started" status per data-model.md). Also
@@ -25,9 +27,9 @@ export default async function GrammarListPage() {
     supabase
       .from('grammar_points')
       .select(
-        'id, pattern, meaning, connection_form, formality_nuance, example_sentences, jlpt_level, frequency_tag, n3_overlap',
+        'id, user_id, pattern, meaning, connection_form, formality_nuance, example_sentences, jlpt_level, frequency_tag, n3_overlap',
       )
-      .is('user_id', null)
+      .or(`user_id.is.null,user_id.eq.${user.id}`)
       .order('pattern', { ascending: true }),
     supabase.from('user_grammar_status').select('grammar_point_id, status, notes_user').eq('user_id', user.id),
     supabase.from('grammar_confusable_pairs').select('id, grammar_point_id_a, grammar_point_id_b'),

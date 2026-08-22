@@ -108,7 +108,7 @@ export function ReviewCard({ item, onGraded }: ReviewCardProps) {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <span className="badge-neutral">
-            {item.itemType === 'vocab' ? (item.isCustom ? 'tự thêm' : 'N2') : 'ngữ pháp'}
+            {item.isCustom ? 'tự thêm' : item.itemType === 'vocab' ? 'N2' : 'ngữ pháp'}
             {item.itemType === 'vocab' && item.isKanji ? ' · hán tự' : ''}
           </span>
           {item.isWeak && <span className="badge-danger">yếu</span>}

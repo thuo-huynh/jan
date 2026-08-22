@@ -28,4 +28,6 @@ export interface GrammarPointWithProgress {
   status: GrammarStatus;
   notesUser: string | null;
   confusablePairs: ConfusablePairRef[];
+  /** True for a point the caller added themselves (`grammar_points.user_id` = caller) — editable/deletable, unlike the global admin-curated catalog. */
+  isCustom: boolean;
 }

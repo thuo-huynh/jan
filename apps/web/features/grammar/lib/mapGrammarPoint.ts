@@ -3,6 +3,7 @@ import type { ConfusablePairRef, GrammarPointWithProgress, GrammarStatus } from 
 /** Shape of a row selected from `grammar_points` (snake_case, as returned by Supabase). */
 export interface GrammarPointRecord {
   id: string;
+  user_id: string | null;
   pattern: string;
   meaning: string;
   connection_form: string | null;
@@ -44,5 +45,6 @@ export function mapGrammarPoint(
     status: (status?.status as GrammarStatus | undefined) ?? 'not_started',
     notesUser: status?.notes_user ?? null,
     confusablePairs,
+    isCustom: point.user_id !== null,
   };
 }

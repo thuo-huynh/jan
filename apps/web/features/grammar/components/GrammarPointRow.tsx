@@ -2,8 +2,9 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { ArrowLeftRight } from 'lucide-react';
+import { ArrowLeftRight, Pencil, Trash2 } from 'lucide-react';
 import { createClient } from '@/shared/supabase/client';
+import { useConfirm } from '@/shared/hooks/useConfirm';
 import type { GrammarPointWithProgress, GrammarStatus } from '../types';
 import { GrammarNoteEditor } from './GrammarNoteEditor';
 
@@ -12,6 +13,9 @@ interface GrammarPointRowProps {
   userId: string;
   onStatusChange: (pointId: string, status: GrammarStatus) => void;
   onNoteChange: (pointId: string, notesUser: string | null) => void;
+  /** Only meaningful for `point.isCustom` rows — global catalog points aren't editable/deletable here. */
+  onEdit?: (pointId: string) => void;
+  onDeleted?: (pointId: string) => void;
 }
 
 const STATUS_OPTIONS: { value: GrammarStatus; label: string; title: string }[] = [
@@ -35,10 +39,37 @@ const STATUS_ACTIVE_STYLES: Record<GrammarStatus, string> = {
  * mutates straight from the browser client with optimistic UI + rollback on
  * failure, no route handler.
  */
-export function GrammarPointRow({ point, userId, onStatusChange, onNoteChange }: GrammarPointRowProps) {
+export function GrammarPointRow({
+  point,
+  userId,
+  onStatusChange,
+  onNoteChange,
+  onEdit,
+  onDeleted,
+}: GrammarPointRowProps) {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [notesOpen, setNotesOpen] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const { confirm, confirmDialog } = useConfirm();
+
+  async function handleDelete() {
+    const ok = await confirm({
+      title: `Xóa điểm ngữ pháp "${point.pattern}"?`,
+      description: 'Trạng thái và ghi chú của bạn cho điểm này cũng sẽ bị xóa.',
+    });
+    if (!ok) return;
+    setDeleting(true);
+    setError(null);
+    const supabase = createClient();
+    const { error: deleteError } = await supabase.from('grammar_points').delete().eq('id', point.id);
+    setDeleting(false);
+    if (deleteError) {
+      setError(deleteError.message);
+      return;
+    }
+    onDeleted?.(point.id);
+  }
 
   async function handleStatusClick(newStatus: GrammarStatus) {
     if (newStatus === point.status || saving) return;
@@ -68,12 +99,15 @@ export function GrammarPointRow({ point, userId, onStatusChange, onNoteChange }:
 
   return (
     <div className="card p-4">
+      {confirmDialog}
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
             <h3 className="font-jp text-lg font-semibold text-foreground">{point.pattern}</h3>
+            <span className="badge-primary">{point.jlptLevel}</span>
             {point.frequencyTag && <span className="badge-neutral">{point.frequencyTag}</span>}
             {point.n3Overlap && <span className="badge-neutral">Trùng N3</span>}
+            {point.isCustom && <span className="badge-neutral">Tự thêm</span>}
           </div>
 
           <p className="mt-1 text-sm text-foreground">{point.meaning}</p>
@@ -143,6 +177,31 @@ export function GrammarPointRow({ point, userId, onStatusChange, onNoteChange }:
           >
             {notesOpen ? 'Ẩn ghi chú' : point.notesUser ? 'Sửa ghi chú' : 'Thêm ghi chú'}
           </button>
+          {point.isCustom && (onEdit || onDeleted) && (
+            <div className="flex items-center gap-1">
+              {onEdit && (
+                <button
+                  type="button"
+                  onClick={() => onEdit(point.id)}
+                  aria-label={`Sửa ${point.pattern}`}
+                  className="flex h-7 w-7 items-center justify-center rounded text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                >
+                  <Pencil className="h-3.5 w-3.5" aria-hidden="true" />
+                </button>
+              )}
+              {onDeleted && (
+                <button
+                  type="button"
+                  onClick={handleDelete}
+                  disabled={deleting}
+                  aria-label={`Xóa ${point.pattern}`}
+                  className="flex h-7 w-7 items-center justify-center rounded text-muted-foreground transition-colors hover:bg-danger/10 hover:text-danger disabled:opacity-40"
+                >
+                  <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
+                </button>
+              )}
+            </div>
+          )}
         </div>
       </div>
 
