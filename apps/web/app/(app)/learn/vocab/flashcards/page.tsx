@@ -18,9 +18,9 @@ interface FlashcardsPageProps {
 }
 
 const SOURCE_TABS: { value: Source; label: string }[] = [
-  { value: 'all', label: 'All' },
-  { value: 'custom', label: 'My words' },
-  { value: 'global', label: 'N2 deck' },
+  { value: 'all', label: 'Tất cả' },
+  { value: 'custom', label: 'Từ của tôi' },
+  { value: 'global', label: 'Kho N2' },
 ];
 
 export default async function FlashcardsPage({ searchParams }: FlashcardsPageProps) {
@@ -91,11 +91,11 @@ export default async function FlashcardsPage({ searchParams }: FlashcardsPagePro
           className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
         >
           <ArrowLeft className="h-3.5 w-3.5" aria-hidden="true" />
-          Back to vocab deck
+          Về kho từ vựng
         </Link>
-        <h1 className="mt-2 text-2xl font-bold tracking-tight text-foreground sm:text-3xl">Flashcards</h1>
+        <h1 className="mt-2 text-2xl font-bold tracking-tight text-foreground sm:text-3xl">Flashcard</h1>
         <p className="mt-1.5 text-sm text-muted-foreground">
-          Flip through your deck at your own pace — no grading, just practice.
+          Lật thẻ theo tốc độ của riêng bạn — không chấm điểm, chỉ luyện tập.
         </p>
       </div>
 
@@ -121,12 +121,12 @@ export default async function FlashcardsPage({ searchParams }: FlashcardsPagePro
             type="text"
             name="q"
             defaultValue={q}
-            placeholder="Filter by word, reading, or meaning"
-            aria-label="Filter by word, reading, or meaning"
+            placeholder="Lọc theo từ, cách đọc, hoặc nghĩa"
+            aria-label="Lọc theo từ, cách đọc, hoặc nghĩa"
             className="input-field h-9 max-w-xs flex-1 text-sm"
           />
           <button type="submit" className="btn-outline h-9 px-3 text-sm">
-            Apply
+            Áp dụng
           </button>
         </form>
       </div>

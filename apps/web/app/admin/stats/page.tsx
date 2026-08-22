@@ -42,10 +42,10 @@ export default function AdminStatsPage() {
       try {
         const res = await fetch('/api/admin/stats');
         const json = await res.json();
-        if (!res.ok) throw new Error(json.error ?? 'Failed to load stats');
+        if (!res.ok) throw new Error(json.error ?? 'Không tải được số liệu thống kê');
         if (!cancelled) setStats(json);
       } catch (err) {
-        if (!cancelled) setError(err instanceof Error ? err.message : 'Failed to load stats');
+        if (!cancelled) setError(err instanceof Error ? err.message : 'Không tải được số liệu thống kê');
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -60,10 +60,10 @@ export default function AdminStatsPage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
-          Usage stats
+          Số liệu sử dụng
         </h1>
         <p className="mt-1.5 text-sm text-muted-foreground">
-          Aggregate platform usage (FR-047). Active users are measured via
+          Tổng hợp số liệu sử dụng nền tảng. Người dùng hoạt động được đo qua
           `profiles.last_active_at`.
         </p>
       </div>
@@ -87,12 +87,12 @@ export default function AdminStatsPage() {
 
       {!loading && stats && (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          <StatTile label="Total users" value={stats.totalUsers} icon={Users} />
-          <StatTile label="Active users (7d)" value={stats.activeUsers7d} icon={TrendingUp} />
-          <StatTile label="Active users (30d)" value={stats.activeUsers30d} icon={TrendingUp} />
-          <StatTile label="Total tasks" value={stats.totalTasks} icon={CheckSquare} />
-          <StatTile label="Total notes" value={stats.totalNotes} icon={StickyNote} />
-          <StatTile label="Total vocab entries" value={stats.totalVocab} icon={BookMarked} />
+          <StatTile label="Tổng người dùng" value={stats.totalUsers} icon={Users} />
+          <StatTile label="Người dùng hoạt động (7 ngày)" value={stats.activeUsers7d} icon={TrendingUp} />
+          <StatTile label="Người dùng hoạt động (30 ngày)" value={stats.activeUsers30d} icon={TrendingUp} />
+          <StatTile label="Tổng công việc" value={stats.totalTasks} icon={CheckSquare} />
+          <StatTile label="Tổng ghi chú" value={stats.totalNotes} icon={StickyNote} />
+          <StatTile label="Tổng mục từ vựng" value={stats.totalVocab} icon={BookMarked} />
         </div>
       )}
     </div>

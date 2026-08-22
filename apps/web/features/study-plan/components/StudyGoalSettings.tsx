@@ -43,7 +43,7 @@ export function StudyGoalSettings({
       dailyVocabTarget: Number(vocabTarget),
     });
     if (!parsed.success) {
-      setError(parsed.error.issues[0]?.message ?? 'Invalid target');
+      setError(parsed.error.issues[0]?.message ?? 'Mục tiêu không hợp lệ');
       return;
     }
 
@@ -54,7 +54,7 @@ export function StudyGoalSettings({
     } = await supabase.auth.getUser();
     if (!user) {
       setSubmitting(false);
-      setError('You must be signed in.');
+      setError('Bạn cần đăng nhập.');
       return;
     }
 
@@ -84,7 +84,7 @@ export function StudyGoalSettings({
     <form onSubmit={handleSubmit} className="card flex flex-wrap items-end gap-3 p-4">
       <div>
         <label className="label-field" htmlFor="goal-grammar">
-          Daily grammar reviews
+          Số lượt ôn ngữ pháp mỗi ngày
         </label>
         <input
           id="goal-grammar"
@@ -97,7 +97,7 @@ export function StudyGoalSettings({
       </div>
       <div>
         <label className="label-field" htmlFor="goal-vocab">
-          Daily vocab/kanji reviews
+          Số lượt ôn từ vựng/Hán tự mỗi ngày
         </label>
         <input
           id="goal-vocab"
@@ -109,9 +109,9 @@ export function StudyGoalSettings({
         />
       </div>
       <button type="submit" disabled={submitting} className="btn-primary">
-        {submitting ? 'Saving…' : 'Save goal'}
+        {submitting ? 'Đang lưu…' : 'Lưu mục tiêu'}
       </button>
-      {saved && <span className="text-sm text-success">Saved.</span>}
+      {saved && <span className="text-sm text-success">Đã lưu.</span>}
       {error && <span className="error-text">{error}</span>}
     </form>
   );

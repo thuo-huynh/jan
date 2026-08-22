@@ -24,7 +24,7 @@ export function PassageTypeBreakdown({ logs }: PassageTypeBreakdownProps) {
     return (
       <div className="card p-4">
         <p className="text-sm text-muted-foreground">
-          Log a reading session with a comprehension score to see a breakdown by passage type.
+          Ghi lại một buổi đọc kèm điểm hiểu bài để xem phân tích theo loại bài đọc.
         </p>
       </div>
     );
@@ -32,7 +32,7 @@ export function PassageTypeBreakdown({ logs }: PassageTypeBreakdownProps) {
 
   const byType = new Map<string, { total: number; count: number }>();
   for (const log of scored) {
-    const key = log.passage_type?.trim() || 'Unspecified';
+    const key = log.passage_type?.trim() || 'Chưa xác định';
     const bucket = byType.get(key) ?? { total: 0, count: 0 };
     bucket.total += log.comprehension_score;
     bucket.count += 1;
@@ -51,7 +51,7 @@ export function PassageTypeBreakdown({ logs }: PassageTypeBreakdownProps) {
 
   return (
     <div className="card space-y-3 p-4">
-      <h2 className="text-sm font-semibold text-foreground">Comprehension by passage type</h2>
+      <h2 className="text-sm font-semibold text-foreground">Độ hiểu bài theo loại bài đọc</h2>
       <ul className="space-y-2">
         {rows.map((row) => {
           const isWeakest = row.passageType === weakestType && rows.length > 1;
@@ -60,7 +60,7 @@ export function PassageTypeBreakdown({ logs }: PassageTypeBreakdownProps) {
               <div className="flex items-center justify-between text-sm">
                 <span className="flex items-center gap-2 text-foreground">
                   <span className="font-jp">{row.passageType}</span>
-                  {isWeakest && <span className="badge-warning">Weakest</span>}
+                  {isWeakest && <span className="badge-warning">Yếu nhất</span>}
                 </span>
                 <span className="text-muted-foreground">
                   {row.average}% <span className="text-xs">({row.count})</span>

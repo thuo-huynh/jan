@@ -58,7 +58,7 @@ export function ChecklistEditor({ taskId, items, onChange }: ChecklistEditorProp
 
     setBusy(false);
     if (insertError || !data) {
-      setError(insertError?.message ?? 'Could not add checklist item.');
+      setError(insertError?.message ?? 'Không thể thêm mục checklist.');
       return;
     }
     setDraft('');
@@ -155,7 +155,7 @@ export function ChecklistEditor({ taskId, items, onChange }: ChecklistEditorProp
               <button
                 type="button"
                 onClick={() => handleDelete(item)}
-                aria-label="Delete checklist item"
+                aria-label="Xóa mục checklist"
                 className="flex h-6 w-6 shrink-0 items-center justify-center rounded text-muted-foreground transition-colors hover:bg-danger/10 hover:text-danger"
               >
                 <X className="h-3.5 w-3.5" aria-hidden="true" />
@@ -168,11 +168,11 @@ export function ChecklistEditor({ taskId, items, onChange }: ChecklistEditorProp
         <input
           value={draft}
           onChange={(e) => setDraft(e.target.value)}
-          placeholder="Add checklist item"
+          placeholder="Thêm mục checklist"
           className="input-field h-9 flex-1"
         />
         <button type="submit" disabled={busy} className="btn-outline h-9 px-3 text-sm">
-          Add
+          Thêm
         </button>
       </form>
 

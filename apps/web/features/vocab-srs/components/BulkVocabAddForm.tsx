@@ -39,7 +39,7 @@ export function BulkVocabAddForm({ onImported, onCancel }: BulkVocabAddFormProps
     } = await supabase.auth.getUser();
     if (!user) {
       setSubmitting(false);
-      setSubmitError('You must be signed in.');
+      setSubmitError('Bạn cần đăng nhập.');
       return;
     }
 
@@ -50,7 +50,7 @@ export function BulkVocabAddForm({ onImported, onCancel }: BulkVocabAddFormProps
 
     setSubmitting(false);
     if (error || !data) {
-      setSubmitError(error?.message ?? 'Failed to import words');
+      setSubmitError(error?.message ?? 'Nhập từ thất bại');
       return;
     }
 
@@ -62,7 +62,7 @@ export function BulkVocabAddForm({ onImported, onCancel }: BulkVocabAddFormProps
     <div className="card space-y-3 p-4">
       <div>
         <label className="label-field" htmlFor="bulk-vocab-input">
-          Paste your words
+          Dán danh sách từ vào đây
         </label>
         <textarea
           id="bulk-vocab-input"
@@ -73,8 +73,8 @@ export function BulkVocabAddForm({ onImported, onCancel }: BulkVocabAddFormProps
           className="textarea-field font-jp"
         />
         <p className="helper-text">
-          One word per line: <span className="font-jp">word</span> + reading (optional) + meaning,
-          separated by a tab, or <span className="font-jp">word</span> - meaning.
+          Mỗi dòng một từ: <span className="font-jp">từ</span> + cách đọc (không bắt buộc) + nghĩa,
+          cách nhau bằng tab, hoặc <span className="font-jp">từ</span> - nghĩa.
         </p>
       </div>
 
@@ -83,7 +83,7 @@ export function BulkVocabAddForm({ onImported, onCancel }: BulkVocabAddFormProps
           {entries.length > 0 && (
             <div className="flex items-center gap-1.5 text-sm text-success">
               <CheckCircle2 className="h-4 w-4 shrink-0" aria-hidden="true" />
-              {entries.length} {entries.length === 1 ? 'word' : 'words'} ready to import
+              {entries.length} từ sẵn sàng để nhập
             </div>
           )}
           {entries.length > 0 && (
@@ -101,12 +101,12 @@ export function BulkVocabAddForm({ onImported, onCancel }: BulkVocabAddFormProps
             <div className="space-y-1 border-t border-border pt-2">
               <div className="flex items-center gap-1.5 text-sm text-danger">
                 <AlertCircle className="h-4 w-4 shrink-0" aria-hidden="true" />
-                {errors.length} {errors.length === 1 ? 'line' : 'lines'} couldn&apos;t be parsed
+                {errors.length} dòng không thể phân tích
               </div>
               <ul className="max-h-24 space-y-0.5 overflow-y-auto text-xs text-muted-foreground">
                 {errors.map((e) => (
                   <li key={e.line} className="truncate">
-                    Line {e.line}: &quot;{e.raw}&quot; — {e.message}
+                    Dòng {e.line}: &quot;{e.raw}&quot; — {e.message}
                   </li>
                 ))}
               </ul>
@@ -125,13 +125,13 @@ export function BulkVocabAddForm({ onImported, onCancel }: BulkVocabAddFormProps
           className="btn-primary"
         >
           {submitting
-            ? 'Importing…'
+            ? 'Đang nhập…'
             : entries.length > 0
-              ? `Import ${entries.length} ${entries.length === 1 ? 'word' : 'words'}`
-              : 'Import words'}
+              ? `Nhập ${entries.length} từ`
+              : 'Nhập từ'}
         </button>
         <button type="button" onClick={onCancel} className="btn-outline">
-          Cancel
+          Hủy
         </button>
       </div>
     </div>

@@ -10,7 +10,32 @@ the page) and subtle micro-interactions (150–300ms color/opacity/shadow transi
 layout-shifting hover transforms** — important around the Kanban drag-and-drop surface). SVG
 icons only, one library (Lucide) — no emoji, no hand-rolled icon paths.
 
-## Why this palette (redesign rationale)
+## Why this palette v2 (2026-08, "Chàm & Son")
+
+The "Japan Blue" pass (below) fixed the *hue* problem (generic teal/orange → indigo grounded in
+aizome dyeing) but not the *composition* problem: every page was still a flat grid of
+same-size rounded cards with no hierarchy or memorable moment — technically correct tokens
+arranged in the same generic SaaS-dashboard layout as before, which is why a second look still
+read as "ugly"/templated. Per the `frontend-design` skill's process (pick one real signature,
+spend the "boldness budget" there, keep everything else disciplined), this pass:
+
+- Deepens indigo `primary` from `#4f46e5` to a more ink-like, less "generic SaaS purple-blue"
+  `#3b4a8c`.
+- Replaces `secondary` sky-blue with a bamboo/tea teal `#0f766e` — a supporting hue that reads
+  as "Japanese garden," not "corporate dashboard blue."
+- Replaces `accent` amber with **shuiro** (朱色) vermillion `#c0392e` — the red of a hanko
+  (印, name-seal) ink stamp — and gives it exactly one job: the `.hanko-stamp` badge (see
+  "Signature element" below). Amber had no specific reason to be amber; vermillion does.
+- Adds the one deliberate signature: a genkouyoushi (原稿用紙, kanji-practice manuscript-paper)
+  grid texture (`.grid-paper`) reserved for the dashboard hero band, and the hanko stamp badge
+  for streaks/exam countdown. Both are drawn from the app's actual subject matter (a JLPT
+  kanji/vocab tracker), not generic decoration — see "Signature element."
+
+`background`/`foreground`/`card`/`border`/`muted` are unchanged from v1 — they were never the
+problem and changing them would be churn (see "Why this palette (Japan Blue, 2026-08)" below for
+the original teal→indigo rationale, which still holds for those tokens).
+
+## Why this palette (Japan Blue, 2026-08)
 
 The previous pass (teal primary `#0d9488` + orange accent `#f97316`) was a safe, generic
 SaaS-dashboard combination — it didn't look broken, but it also didn't look like *anything in
@@ -43,9 +68,9 @@ Tailwind in `tailwind.config.ts`. **Do not add new color roles without updating 
 | `card` | `#FFFFFF` | `#14142B` | cards, panels, modals, popovers |
 | `border` | `#DCDCEE` | `#23234A` | dividers, card/input borders |
 | `muted` / `muted-foreground` | `#EFEFF8` / `#5B5B7D` | `#1E1E3D` / `#9A9AC0` | secondary surfaces, helper text, disabled fills |
-| `primary` / `primary-foreground` | `#4F46E5` / `#F5F3FF` | `#818CF8` / `#1E1B4B` | primary actions, active nav, focus ring, kanban accents |
-| `secondary` / `secondary-foreground` | `#0369A1` / `#F0F9FF` | `#38BDF8` / `#082F49` | supporting accent, secondary buttons |
-| `accent` / `accent-foreground` | `#D97706` / `#451A03` | `#FBBF24` / `#451A03` | CTA emphasis, due/urgent badges, exam countdown |
+| `primary` / `primary-foreground` | `#3B4A8C` / `#F5F3FF` | `#8C97E3` / `#1E1B4B` | primary actions, active nav, focus ring, kanban accents |
+| `secondary` / `secondary-foreground` | `#0F766E` / `#F0FDFA` | `#2DD4BF` / `#042F2B` | supporting accent, secondary buttons |
+| `accent` / `accent-foreground` | `#C0392E` / `#FDF3F0` | `#F0836F` / `#3A0E0A` | hanko-stamp badge, CTA emphasis, due/urgent badges, exam countdown |
 | `success` | `#15803D` | `#4ADE80` | mastery/streak-met, positive states |
 | `warning` | `#C2410C` | `#FB923C` | due-soon, needs-attention |
 | `danger` | `#DC2626` | `#F87171` | overdue/mistake, destructive actions, errors |
@@ -59,9 +84,12 @@ scale" without colliding with generic CTA/status meaning elsewhere on the page.
 ### Contrast (WCAG AA, verified)
 
 All body-text and foreground-on-color pairs are ≥ 4.5:1 (large-text/UI pairs ≥ 3:1). Selected
-ratios: `foreground`/`background` 16.6:1 light, 16.8:1 dark · `primary-foreground`/`primary`
-5.7:1 light, 5.4:1 dark · `accent-foreground`/`accent` 4.7:1 light, 9.0:1 dark ·
-`muted-foreground`/`background` 6.1:1 light, 7.2:1 dark. `border` is a decorative divider
+ratios (v2 "Chàm & Son" palette): `foreground`/`background` 16.6:1 light, 16.8:1 dark ·
+`primary-foreground`/`primary` 8.3:1 light, 5.8:1 dark · `secondary-foreground`/`secondary`
+5.3:1 light, 7.8:1 dark · `accent-foreground`/`accent` 5.2:1 light, 7.4:1 dark ·
+`muted-foreground`/`background` 6.1:1 light, 7.2:1 dark. Note `accent-foreground` flips from
+dark-on-light (v1 amber, a light color) to light-on-dark (v2 vermillion, a mid-dark color) — the
+foreground hex changed accordingly, not just the accent hex. `border` is a decorative divider
 (~1.3:1 against `background`/`card`), which is standard practice for hairline dividers and not
 subject to the 4.5:1 text-contrast rule (WCAG 1.4.11 governs *required* UI-component
 boundaries like input outlines, which additionally get a visible `focus` ring here, not passive
@@ -90,11 +118,34 @@ any color token:
 **Consequence:** the six brand-accent variable *names* (`--primary`, `--primary-foreground`,
 `--secondary`, `--secondary-foreground`, `--accent`, `--accent-foreground`) and the `.dark`
 class + `[data-theme]` attribute mechanism are load-bearing — do not rename or remove them.
-This redesign's new hex values were applied in two places to stay consistent: `globals.css`
-(fallback/logged-out) **and** a migration (`0020_update_default_theme_colors.sql`) updating the
-`themes` row that was previously "Teal Sunrise" (now "Japan Blue", same row id — existing user
-preferences pointing at it upgrade automatically). The other three preset themes (Indigo Berry,
-Forest Clay, Slate Rose) are untouched and remain valid alternate picks in Settings.
+Each redesign's new hex values were applied in two places to stay consistent: `globals.css`
+(fallback/logged-out) **and** a migration updating the same `themes` row in place — first
+`0020_update_default_theme_colors.sql` (Teal Sunrise → Japan Blue), then
+`0021_update_default_theme_colors_v2.sql` (Japan Blue → **Aizome Vermillion**, the current
+default, same row id both times — existing user preferences pointing at it upgrade
+automatically). The other three preset themes keep their original palettes but got Vietnamese
+display names in `0022_localize_theme_names.sql` — **Chàm Dâu** (was Indigo Berry), **Rừng Đất
+Nung** (was Forest Clay), **Xám Hồng** (was Slate Rose) — `slug` is unchanged for all three since
+nothing keys off the old English `name`.
+
+## Signature element
+
+Two deliberately restrained motifs (`app/globals.css` `@layer components`), both drawn from the
+app's actual subject — hand-practicing Japanese for the JLPT — rather than generic decoration.
+Per the `frontend-design` skill's "spend boldness in one place": these are the *only* two, and
+each has exactly one home; don't spread them onto every card.
+
+- **`.grid-paper`** — a faint square grid built from `--border` at 70% via `color-mix`, sized to
+  echo genkouyoushi (原稿用紙), the squared manuscript paper used to hand-write one kanji per
+  box. Reserved for the `/learn/dashboard` hero band only.
+- **`.hanko-stamp`** — a solid-`accent`, rotated (`-6deg`) circle with an inset ring standing in
+  for a carved seal edge, modeled on a hanko (印) ink stamp. Reserved for the streak count in the
+  same hero band. Don't reuse it as a generic circular badge elsewhere — it means "the number
+  that matters right now."
+
+Both currently ship only on `/learn/dashboard`; extending either to another page should be a
+deliberate call (does *this* page have a number/moment as central as the dashboard's streak?),
+not a default.
 
 ## Typography
 
@@ -206,3 +257,11 @@ that shift layout (breaks the Kanban drag surface's spatial consistency) — ele
   `primary`.
 - When adding a new color usage, run it through the contrast check above (or recompute) before
   shipping — don't eyeball it.
+- **Language**: the app is being localized to Vietnamese (user-facing copy only — code,
+  comments, and doc-comments stay English). Translate labels, headings, empty states, and
+  `aria-label`s directly in-place; this is a solo-user app for a Vietnamese audience, not a
+  multi-locale product, so there's no i18n library/string-catalog layer — see root `CLAUDE.md`.
+  Japanese vocab/grammar/kanji content itself is never translated (it's the subject being
+  studied). The whole app (main nav, all `/learn/*` pages, Habits, Notes, Kanban, Settings,
+  auth, Admin, shared validation error messages, and API route error responses) is Vietnamese
+  as of this pass — new UI copy should be written in Vietnamese from the start.

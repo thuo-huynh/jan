@@ -37,7 +37,7 @@ export async function requireAdmin(): Promise<AdminGuardResult> {
   if (!user) {
     return {
       ok: false,
-      response: NextResponse.json({ error: 'Unauthorized' }, { status: 401 }),
+      response: NextResponse.json({ error: 'Chưa đăng nhập' }, { status: 401 }),
     };
   }
 
@@ -50,7 +50,7 @@ export async function requireAdmin(): Promise<AdminGuardResult> {
   if (profile?.role !== 'admin') {
     return {
       ok: false,
-      response: NextResponse.json({ error: 'Forbidden' }, { status: 403 }),
+      response: NextResponse.json({ error: 'Không có quyền truy cập' }, { status: 403 }),
     };
   }
 

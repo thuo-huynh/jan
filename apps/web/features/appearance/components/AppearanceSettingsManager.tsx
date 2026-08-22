@@ -69,11 +69,11 @@ export function AppearanceSettingsManager({
         body: JSON.stringify(body),
       });
       if (!res.ok) {
-        throw new Error('Failed to save appearance preference');
+        throw new Error('Không thể lưu tùy chọn giao diện');
       }
       return true;
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to save appearance preference');
+      setError(err instanceof Error ? err.message : 'Không thể lưu tùy chọn giao diện');
       return false;
     } finally {
       setSubmitting(false);
@@ -107,11 +107,11 @@ export function AppearanceSettingsManager({
   return (
     <div className="card space-y-6">
       <div>
-        <h2 className="mb-2 text-sm font-semibold text-foreground">Mode</h2>
+        <h2 className="mb-2 text-sm font-semibold text-foreground">Chế độ sáng/tối</h2>
         <ModeToggle mode={mode} disabled={submitting} onChange={handleModeChange} />
       </div>
       <div>
-        <h2 className="mb-2 text-sm font-semibold text-foreground">Color theme</h2>
+        <h2 className="mb-2 text-sm font-semibold text-foreground">Bảng màu</h2>
         <ThemePicker
           themes={themes}
           selectedThemeId={themeId}

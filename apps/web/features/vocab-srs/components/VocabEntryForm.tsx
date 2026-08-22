@@ -64,7 +64,7 @@ export function VocabEntryForm({
       isKanji,
     });
     if (!parsed.success) {
-      setError(parsed.error.issues[0]?.message ?? 'Invalid entry');
+      setError(parsed.error.issues[0]?.message ?? 'Mục không hợp lệ');
       return;
     }
 
@@ -75,7 +75,7 @@ export function VocabEntryForm({
     } = await supabase.auth.getUser();
     if (!user) {
       setSubmitting(false);
-      setError('You must be signed in.');
+      setError('Bạn cần đăng nhập.');
       return;
     }
 
@@ -106,7 +106,7 @@ export function VocabEntryForm({
     setSubmitting(false);
 
     if (dbError || !data) {
-      setError(dbError?.message ?? 'Failed to save entry');
+      setError(dbError?.message ?? 'Lưu thất bại');
       return;
     }
 
@@ -125,7 +125,7 @@ export function VocabEntryForm({
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <div>
           <label className="label-field" htmlFor="vocab-word">
-            Word
+            Từ
           </label>
           <input
             id="vocab-word"
@@ -137,7 +137,7 @@ export function VocabEntryForm({
         </div>
         <div>
           <label className="label-field" htmlFor="vocab-reading">
-            Reading
+            Cách đọc
           </label>
           <input
             id="vocab-reading"
@@ -149,7 +149,7 @@ export function VocabEntryForm({
       </div>
       <div>
         <label className="label-field" htmlFor="vocab-meaning">
-          Meaning
+          Nghĩa
         </label>
         <input
           id="vocab-meaning"
@@ -161,7 +161,7 @@ export function VocabEntryForm({
       </div>
       <div>
         <label className="label-field" htmlFor="vocab-example">
-          Example sentence
+          Câu ví dụ
         </label>
         <textarea
           id="vocab-example"
@@ -174,7 +174,7 @@ export function VocabEntryForm({
       <div className="flex flex-wrap items-end gap-4">
         <div>
           <label className="label-field" htmlFor="vocab-level">
-            JLPT level
+            Cấp độ JLPT
           </label>
           <input
             id="vocab-level"
@@ -190,7 +190,7 @@ export function VocabEntryForm({
             onChange={(e) => setIsKanji(e.target.checked)}
             className="h-4 w-4 rounded border-border text-primary focus:ring-primary"
           />
-          This is a kanji entry
+          Đây là mục Hán tự
         </label>
       </div>
 
@@ -198,11 +198,11 @@ export function VocabEntryForm({
 
       <div className="flex gap-2">
         <button type="submit" disabled={submitting} className="btn-primary">
-          {submitting ? 'Saving…' : mode === 'create' ? 'Add word' : 'Save changes'}
+          {submitting ? 'Đang lưu…' : mode === 'create' ? 'Thêm từ' : 'Lưu thay đổi'}
         </button>
         {onCancel && (
           <button type="button" onClick={onCancel} className="btn-outline">
-            Cancel
+            Hủy
           </button>
         )}
       </div>

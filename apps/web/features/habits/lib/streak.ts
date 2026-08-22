@@ -37,10 +37,10 @@ export function countCompletions(completionDates: IsoDate[]): number {
 export type StreakTier = 'spark' | 'on_fire' | 'blazing' | 'legendary';
 
 const STREAK_TIERS: { min: number; tier: StreakTier; label: string }[] = [
-  { min: 100, tier: 'legendary', label: 'Legendary' },
-  { min: 30, tier: 'blazing', label: 'Blazing' },
-  { min: 7, tier: 'on_fire', label: 'On fire' },
-  { min: 3, tier: 'spark', label: 'Spark' },
+  { min: 100, tier: 'legendary', label: 'Huyền thoại' },
+  { min: 30, tier: 'blazing', label: 'Bùng cháy' },
+  { min: 7, tier: 'on_fire', label: 'Đang nóng' },
+  { min: 3, tier: 'spark', label: 'Khởi động' },
 ];
 
 /**

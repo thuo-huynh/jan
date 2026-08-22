@@ -43,10 +43,10 @@ interface ReviewCardProps {
 }
 
 const GRADE_BUTTONS: { result: ReviewResult; label: string; className: string }[] = [
-  { result: 'again', label: 'Again', className: 'bg-srs-again' },
-  { result: 'hard', label: 'Hard', className: 'bg-srs-hard' },
-  { result: 'good', label: 'Good', className: 'bg-srs-good' },
-  { result: 'easy', label: 'Easy', className: 'bg-srs-easy' },
+  { result: 'again', label: 'Lại', className: 'bg-srs-again' },
+  { result: 'hard', label: 'Khó', className: 'bg-srs-hard' },
+  { result: 'good', label: 'Tốt', className: 'bg-srs-good' },
+  { result: 'easy', label: 'Dễ', className: 'bg-srs-easy' },
 ];
 
 export function ReviewCard({ item, onGraded }: ReviewCardProps) {
@@ -67,7 +67,7 @@ export function ReviewCard({ item, onGraded }: ReviewCardProps) {
       // this component's `key` and remounts it with fresh state — no local
       // reset needed here.
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to submit review');
+      setError(err instanceof Error ? err.message : 'Không thể gửi kết quả ôn tập');
       setSubmitting(false);
     }
   }
@@ -108,10 +108,10 @@ export function ReviewCard({ item, onGraded }: ReviewCardProps) {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <span className="badge-neutral">
-            {item.itemType === 'vocab' ? (item.isCustom ? 'custom' : 'N2') : 'grammar'}
-            {item.itemType === 'vocab' && item.isKanji ? ' · kanji' : ''}
+            {item.itemType === 'vocab' ? (item.isCustom ? 'tự thêm' : 'N2') : 'ngữ pháp'}
+            {item.itemType === 'vocab' && item.isKanji ? ' · hán tự' : ''}
           </span>
-          {item.isWeak && <span className="badge-danger">weak</span>}
+          {item.isWeak && <span className="badge-danger">yếu</span>}
         </div>
         {item.itemType === 'vocab' && item.isKanji && !revealed && (
           <div className="flex gap-1 text-xs">
@@ -124,7 +124,7 @@ export function ReviewCard({ item, onGraded }: ReviewCardProps) {
                   : 'border border-border text-muted-foreground hover:bg-muted'
               }`}
             >
-              Recognition
+              Nhận mặt chữ
             </button>
             <button
               type="button"
@@ -135,7 +135,7 @@ export function ReviewCard({ item, onGraded }: ReviewCardProps) {
                   : 'border border-border text-muted-foreground hover:bg-muted'
               }`}
             >
-              Writing recall
+              Nhớ cách viết
             </button>
           </div>
         )}
@@ -149,7 +149,7 @@ export function ReviewCard({ item, onGraded }: ReviewCardProps) {
 
       {!revealed ? (
         <button type="button" onClick={() => setRevealed(true)} className="btn-outline w-full">
-          Show answer
+          Xem đáp án
           <span className="ml-1.5 text-xs text-muted-foreground">(Space)</span>
         </button>
       ) : (
@@ -201,7 +201,7 @@ function CardFace({
             ))}
           </div>
         ) : (
-          <p className="text-sm text-muted-foreground">Recall the meaning and connection form.</p>
+          <p className="text-sm text-muted-foreground">Nhớ lại nghĩa và thể chia.</p>
         )}
       </div>
     );
@@ -221,7 +221,7 @@ function CardFace({
                 <p className="text-foreground">{item.meaning}</p>
               </div>
             ) : (
-              <p className="text-sm text-muted-foreground">Recall the reading and meaning.</p>
+              <p className="text-sm text-muted-foreground">Nhớ lại cách đọc và nghĩa.</p>
             )}
           </>
         ) : (
@@ -233,7 +233,7 @@ function CardFace({
             {revealed ? (
               <p className="font-jp text-6xl text-foreground">{item.word}</p>
             ) : (
-              <p className="text-sm text-muted-foreground">Recall the kanji form.</p>
+              <p className="text-sm text-muted-foreground">Nhớ lại mặt chữ Hán.</p>
             )}
           </>
         )}
@@ -251,7 +251,7 @@ function CardFace({
           {item.example && <p className="font-jp text-sm text-muted-foreground">{item.example}</p>}
         </div>
       ) : (
-        <p className="text-sm text-muted-foreground">Recall the meaning.</p>
+        <p className="text-sm text-muted-foreground">Nhớ lại nghĩa.</p>
       )}
     </div>
   );

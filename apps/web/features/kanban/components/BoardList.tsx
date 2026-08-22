@@ -42,7 +42,7 @@ export function BoardList({ initialBoards }: BoardListProps) {
 
     const parsed = boardSchema.safeParse({ name });
     if (!parsed.success) {
-      setError(parsed.error.issues[0]?.message ?? 'Invalid board name.');
+      setError(parsed.error.issues[0]?.message ?? 'Tên bảng không hợp lệ.');
       return;
     }
 
@@ -54,7 +54,7 @@ export function BoardList({ initialBoards }: BoardListProps) {
     } = await supabase.auth.getUser();
     if (!user) {
       setSubmitting(false);
-      setError('You must be signed in to create a board.');
+      setError('Bạn cần đăng nhập để tạo bảng.');
       return;
     }
 
@@ -66,7 +66,7 @@ export function BoardList({ initialBoards }: BoardListProps) {
 
     if (boardError || !board) {
       setSubmitting(false);
-      setError(boardError?.message ?? 'Could not create board.');
+      setError(boardError?.message ?? 'Không thể tạo bảng.');
       return;
     }
 
@@ -83,7 +83,7 @@ export function BoardList({ initialBoards }: BoardListProps) {
     setBoards((prev) => [board, ...prev]);
 
     if (columnsError) {
-      setError('Board created, but default columns could not be added. Add columns from the board page.');
+      setError('Đã tạo bảng, nhưng không thể thêm các cột mặc định. Hãy thêm cột từ trang bảng.');
       return;
     }
 
@@ -92,8 +92,8 @@ export function BoardList({ initialBoards }: BoardListProps) {
 
   async function handleDelete(boardId: string) {
     const ok = await confirm({
-      title: 'Delete this board and all of its tasks?',
-      description: 'This cannot be undone.',
+      title: 'Xóa bảng này và toàn bộ công việc trong đó?',
+      description: 'Không thể hoàn tác thao tác này.',
     });
     if (!ok) return;
     setDeletingId(boardId);
@@ -111,18 +111,18 @@ export function BoardList({ initialBoards }: BoardListProps) {
     <div className="space-y-6">
       {confirmDialog}
       <div className="card">
-        <h2 className="text-sm font-semibold text-foreground">Create a board</h2>
+        <h2 className="text-sm font-semibold text-foreground">Tạo bảng mới</h2>
         <form className="mt-3 flex flex-col gap-3 sm:flex-row" onSubmit={handleCreate}>
           <input
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            placeholder="e.g. N2 Study Sprint"
-            aria-label="Board name"
+            placeholder="vd: Chiến dịch ôn N2"
+            aria-label="Tên bảng"
             className="input-field flex-1"
           />
           <button type="submit" disabled={submitting} className="btn-primary whitespace-nowrap">
-            {submitting ? 'Creating…' : 'Create board'}
+            {submitting ? 'Đang tạo…' : 'Tạo bảng'}
           </button>
         </form>
         {error && <p className="error-text">{error}</p>}
@@ -134,7 +134,7 @@ export function BoardList({ initialBoards }: BoardListProps) {
             <LayoutGrid className="h-6 w-6 text-primary" aria-hidden="true" />
           </div>
           <p className="max-w-xs text-sm text-muted-foreground">
-            No boards yet. Create your first board above to start tracking tasks.
+            Chưa có bảng nào. Tạo bảng đầu tiên ở trên để bắt đầu theo dõi công việc.
           </p>
         </div>
       ) : (
@@ -144,14 +144,14 @@ export function BoardList({ initialBoards }: BoardListProps) {
               <Link href={`/boards/${board.id}`} className="block">
                 <h3 className="truncate pr-6 text-sm font-semibold text-foreground">{board.name}</h3>
                 <p className="mt-1 text-xs text-muted-foreground">
-                  Created {new Date(board.created_at).toLocaleDateString()}
+                  Đã tạo {new Date(board.created_at).toLocaleDateString('vi-VN')}
                 </p>
               </Link>
               <button
                 type="button"
                 onClick={() => handleDelete(board.id)}
                 disabled={deletingId === board.id}
-                aria-label={`Delete board ${board.name}`}
+                aria-label={`Xóa bảng ${board.name}`}
                 className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded text-muted-foreground opacity-0 transition-opacity hover:bg-danger/10 hover:text-danger focus-visible:opacity-100 group-hover:opacity-100 disabled:opacity-40"
               >
                 <Trash2 className="h-4 w-4" aria-hidden="true" />

@@ -35,12 +35,12 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   }
 
   const navLinks: NavLinkItem[] = [
-    { href: '/boards', label: 'Boards' },
-    { href: '/learn/dashboard', label: 'Learn' },
-    { href: '/habits', label: 'Habits' },
-    { href: '/settings', label: 'Settings' },
-    { href: '/notes', label: 'Notes' },
-    ...(profile?.role === 'admin' ? [{ href: '/admin/users', label: 'Admin' }] : []),
+    { href: '/boards', label: 'Bảng công việc' },
+    { href: '/learn/dashboard', label: 'Học tập' },
+    { href: '/habits', label: 'Thói quen' },
+    { href: '/settings', label: 'Cài đặt' },
+    { href: '/notes', label: 'Ghi chú' },
+    ...(profile?.role === 'admin' ? [{ href: '/admin/users', label: 'Quản trị' }] : []),
   ];
 
   return (
@@ -59,9 +59,9 @@ export default async function AppLayout({ children }: { children: React.ReactNod
               {profile?.email ?? user.email}
             </span>
             <form action={signOut}>
-              <button type="submit" aria-label="Sign out" className="btn-outline">
+              <button type="submit" aria-label="Đăng xuất" className="btn-outline">
                 <LogOut className="h-4 w-4" aria-hidden="true" />
-                <span className="hidden sm:inline">Sign out</span>
+                <span className="hidden sm:inline">Đăng xuất</span>
               </button>
             </form>
           </div>

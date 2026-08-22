@@ -45,8 +45,8 @@ function LoginForm() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold tracking-tight text-foreground">Sign in</h1>
-      <p className="mt-1.5 text-sm text-muted-foreground">Welcome back to JanGo.</p>
+      <h1 className="text-2xl font-bold tracking-tight text-foreground">Đăng nhập</h1>
+      <p className="mt-1.5 text-sm text-muted-foreground">Chào mừng bạn quay lại JanGo.</p>
 
       <form className="mt-8 space-y-4" onSubmit={handleSubmit}>
         <div>
@@ -65,7 +65,7 @@ function LoginForm() {
         </div>
         <div>
           <label htmlFor="password" className="label-field">
-            Password
+            Mật khẩu
           </label>
           <input
             id="password"
@@ -81,14 +81,14 @@ function LoginForm() {
         {error && <p className="error-text">{error}</p>}
 
         <button type="submit" disabled={submitting} className="btn-primary w-full">
-          {submitting ? 'Signing in…' : 'Sign in'}
+          {submitting ? 'Đang đăng nhập…' : 'Đăng nhập'}
         </button>
       </form>
 
       <p className="mt-6 text-center text-sm text-muted-foreground">
-        Don&apos;t have an account?{' '}
+        Chưa có tài khoản?{' '}
         <Link href="/signup" className="font-medium text-primary hover:underline">
-          Sign up
+          Đăng ký
         </Link>
       </p>
     </div>

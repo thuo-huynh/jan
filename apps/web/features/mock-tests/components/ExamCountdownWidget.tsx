@@ -19,7 +19,7 @@ interface ExamCountdownWidgetProps {
 export function ExamCountdownWidget({ examDate }: ExamCountdownWidgetProps) {
   if (!examDate) {
     return (
-      <p className="text-sm text-muted-foreground">Set your exam date to see a countdown.</p>
+      <p className="text-sm text-muted-foreground">Đặt ngày thi để xem đếm ngược.</p>
     );
   }
 
@@ -29,7 +29,7 @@ export function ExamCountdownWidget({ examDate }: ExamCountdownWidgetProps) {
   const daysRemaining = Math.round((target.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
 
   if (daysRemaining < 0) {
-    return <p className="text-sm text-muted-foreground">Exam date has passed.</p>;
+    return <p className="text-sm text-muted-foreground">Ngày thi đã qua.</p>;
   }
 
   const urgent = daysRemaining <= 14;
@@ -42,12 +42,12 @@ export function ExamCountdownWidget({ examDate }: ExamCountdownWidgetProps) {
         {daysRemaining}
       </span>
       <span className="text-sm text-muted-foreground">
-        {daysRemaining === 1 ? 'day' : 'days'} until the exam ({target.toLocaleDateString()})
+        ngày nữa đến kỳ thi ({target.toLocaleDateString('vi-VN')})
       </span>
       {urgent && (
         <span className="badge-accent flex items-center gap-1">
           <AlertTriangle className="h-3 w-3" aria-hidden="true" />
-          Exam soon
+          Sắp thi
         </span>
       )}
     </div>

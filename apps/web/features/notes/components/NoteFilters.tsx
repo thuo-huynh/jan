@@ -56,12 +56,12 @@ export function NoteFilters({
           type="search"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="Search notes…"
-          aria-label="Search notes"
+          placeholder="Tìm ghi chú…"
+          aria-label="Tìm ghi chú"
           className="input-field h-9"
         />
         <button type="submit" className="btn-outline h-9 shrink-0 px-3 text-xs">
-          Search
+          Tìm
         </button>
       </form>
 
@@ -69,10 +69,10 @@ export function NoteFilters({
         <select
           value={folder}
           onChange={(e) => pushParams({ folder: e.target.value || null })}
-          aria-label="Filter by folder"
+          aria-label="Lọc theo thư mục"
           className="h-9 rounded border border-border bg-card px-2 text-sm text-foreground focus:border-primary focus:outline-none"
         >
-          <option value="">All folders</option>
+          <option value="">Tất cả thư mục</option>
           {folderOptions.map((f) => (
             <option key={f} value={f}>
               {f}
@@ -83,10 +83,10 @@ export function NoteFilters({
         <select
           value={tag}
           onChange={(e) => pushParams({ tag: e.target.value || null })}
-          aria-label="Filter by tag"
+          aria-label="Lọc theo thẻ"
           className="h-9 rounded border border-border bg-card px-2 text-sm text-foreground focus:border-primary focus:outline-none"
         >
-          <option value="">All tags</option>
+          <option value="">Tất cả thẻ</option>
           {tagOptions.map((t) => (
             <option key={t} value={t}>
               #{t}
@@ -104,7 +104,7 @@ export function NoteFilters({
               : 'border-border text-muted-foreground hover:text-foreground'
           }`}
         >
-          Pinned only
+          Chỉ ghim
         </button>
 
         {hasActiveFilters && (
@@ -116,7 +116,7 @@ export function NoteFilters({
             }}
             className="text-sm font-medium text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"
           >
-            Clear filters
+            Xóa bộ lọc
           </button>
         )}
       </div>

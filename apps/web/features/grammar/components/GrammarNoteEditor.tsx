@@ -43,7 +43,7 @@ export function GrammarNoteEditor({
       notesUser: draft.trim().length > 0 ? draft : null,
     });
     if (!parsed.success) {
-      setError(parsed.error.issues[0]?.message ?? 'Invalid note.');
+      setError(parsed.error.issues[0]?.message ?? 'Ghi chú không hợp lệ.');
       return;
     }
 
@@ -62,7 +62,7 @@ export function GrammarNoteEditor({
     setSaving(false);
 
     if (upsertError) {
-      setError('Could not save note. Please try again.');
+      setError('Không thể lưu ghi chú. Vui lòng thử lại.');
       return;
     }
 
@@ -74,7 +74,7 @@ export function GrammarNoteEditor({
     <div className="space-y-2">
       <div className="flex items-center justify-between">
         <span className="text-xs font-medium text-muted-foreground">
-          Personal note (markdown, visible only to you)
+          Ghi chú cá nhân (markdown, chỉ bạn thấy được)
         </span>
         <div className="flex gap-2 text-xs">
           <button
@@ -82,14 +82,14 @@ export function GrammarNoteEditor({
             onClick={() => setMode('edit')}
             className={mode === 'edit' ? 'font-semibold text-foreground' : 'text-muted-foreground'}
           >
-            Edit
+            Sửa
           </button>
           <button
             type="button"
             onClick={() => setMode('preview')}
             className={mode === 'preview' ? 'font-semibold text-foreground' : 'text-muted-foreground'}
           >
-            Preview
+            Xem trước
           </button>
         </div>
       </div>
@@ -103,7 +103,7 @@ export function GrammarNoteEditor({
           }}
           rows={4}
           maxLength={10_000}
-          placeholder="Write a mnemonic or usage note in markdown..."
+          placeholder="Viết mẹo ghi nhớ hoặc ghi chú cách dùng bằng markdown..."
           className="textarea-field"
         />
       ) : (
@@ -111,17 +111,17 @@ export function GrammarNoteEditor({
           {draft.trim() ? (
             <GrammarMarkdown>{draft}</GrammarMarkdown>
           ) : (
-            <span className="text-sm text-muted-foreground">Nothing to preview yet.</span>
+            <span className="text-sm text-muted-foreground">Chưa có gì để xem trước.</span>
           )}
         </div>
       )}
 
       <div className="flex items-center gap-3">
         <button type="button" onClick={handleSave} disabled={saving || !dirty} className="btn-primary h-8 px-3 text-xs">
-          {saving ? 'Saving...' : 'Save note'}
+          {saving ? 'Đang lưu...' : 'Lưu ghi chú'}
         </button>
         {error && <span className="error-text">{error}</span>}
-        {!error && justSaved && !dirty && <span className="text-xs text-success">Saved</span>}
+        {!error && justSaved && !dirty && <span className="text-xs text-success">Đã lưu</span>}
       </div>
     </div>
   );

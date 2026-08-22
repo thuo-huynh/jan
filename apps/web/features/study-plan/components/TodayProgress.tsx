@@ -29,13 +29,13 @@ function ProgressLine({ label, done, target }: { label: string; done: number; ta
         <span className="text-foreground">{label}</span>
         <span className={met ? 'font-medium text-success' : 'text-muted-foreground'}>
           {done}/{target}
-          {!met && target > 0 && <span className="ml-1 text-xs">({remaining} to go)</span>}
+          {!met && target > 0 && <span className="ml-1 text-xs">(còn {remaining})</span>}
         </span>
       </div>
       <div
         className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-muted"
         role="progressbar"
-        aria-label={`${label} — ${done} of ${target} done today`}
+        aria-label={`${label} — đã làm ${done}/${target} hôm nay`}
         aria-valuenow={pct}
         aria-valuemin={0}
         aria-valuemax={100}
@@ -56,11 +56,11 @@ export function TodayProgress({ vocabDone, vocabTarget, grammarDone, grammarTarg
   return (
     <div className="card space-y-3">
       <div className="flex items-center justify-between gap-2">
-        <h2 className="text-sm font-semibold text-foreground">Today</h2>
+        <h2 className="text-sm font-semibold text-foreground">Hôm nay</h2>
         {goalMet && (
           <span className="badge-success">
             <CheckCircle2 className="h-3 w-3" aria-hidden="true" />
-            Goal met
+            Đã đạt mục tiêu
           </span>
         )}
       </div>
@@ -68,17 +68,17 @@ export function TodayProgress({ vocabDone, vocabTarget, grammarDone, grammarTarg
       {noGoalSet ? (
         <p className="flex items-center gap-2 text-sm text-muted-foreground">
           <Target className="h-4 w-4 shrink-0" aria-hidden="true" />
-          Set a daily goal below to track today&apos;s progress here.
+          Đặt mục tiêu hằng ngày bên dưới để theo dõi tiến độ hôm nay.
         </p>
       ) : (
         <>
           <div className="space-y-3">
-            {vocabTarget > 0 && <ProgressLine label="Vocab & kanji reviews" done={vocabDone} target={vocabTarget} />}
-            {grammarTarget > 0 && <ProgressLine label="Grammar reviews" done={grammarDone} target={grammarTarget} />}
+            {vocabTarget > 0 && <ProgressLine label="Ôn từ vựng & Hán tự" done={vocabDone} target={vocabTarget} />}
+            {grammarTarget > 0 && <ProgressLine label="Ôn ngữ pháp" done={grammarDone} target={grammarTarget} />}
           </div>
           {!goalMet && (
             <Link href="/learn/review" className="btn-primary h-9 w-fit px-3 text-xs">
-              Review now
+              Ôn ngay
               <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
             </Link>
           )}

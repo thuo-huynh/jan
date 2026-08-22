@@ -66,14 +66,13 @@ export default async function StudyPlanPage() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-baseline justify-between gap-2">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">Study Plan</h1>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">Kế hoạch học</h1>
           <p className="mt-1.5 text-sm text-muted-foreground">
-            Set a daily goal and track your consistency.
+            Đặt mục tiêu hằng ngày và theo dõi độ đều đặn của bạn.
           </p>
         </div>
         <p className="text-sm text-muted-foreground">
-          Current streak: <span className="font-semibold text-foreground">{streak}</span>{' '}
-          {streak === 1 ? 'day' : 'days'}
+          Chuỗi hiện tại: <span className="font-semibold text-foreground">{streak}</span> ngày
         </p>
       </div>
 

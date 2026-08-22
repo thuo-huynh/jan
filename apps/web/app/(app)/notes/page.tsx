@@ -70,10 +70,10 @@ export default async function NotesPage({
     <div>
       <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">Notes</h1>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">Ghi chú</h1>
           <p className="mt-1.5 text-sm text-muted-foreground">
-            Freeform markdown notes — organize by folder/tags, pin favorites, link to tasks or
-            vocab.
+            Ghi chú markdown tự do — sắp xếp theo thư mục/thẻ, ghim mục yêu thích, liên kết với
+            công việc hoặc từ vựng.
           </p>
         </div>
         <NewNoteButton />
@@ -86,7 +86,7 @@ export default async function NotesPage({
 
         {error && (
           <p className="rounded-lg border border-danger/30 bg-danger/10 px-3 py-2 text-sm text-danger">
-            Could not load notes: {error.message}
+            Không tải được ghi chú: {error.message}
           </p>
         )}
 
@@ -97,8 +97,8 @@ export default async function NotesPage({
             </div>
             <p className="max-w-xs text-sm text-muted-foreground">
               {hasActiveFilters
-                ? 'No notes match these filters.'
-                : 'No notes yet — create your first one above.'}
+                ? 'Không có ghi chú nào khớp với bộ lọc này.'
+                : 'Chưa có ghi chú nào — tạo ghi chú đầu tiên ở trên.'}
             </p>
           </div>
         )}

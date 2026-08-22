@@ -26,7 +26,7 @@ interface TodayChecklistProps {
 export function TodayChecklist({ habits, doneToday, streakByHabit, pendingHabitIds, onToggle }: TodayChecklistProps) {
   return (
     <div className="card space-y-3">
-      <h2 className="text-sm font-semibold text-foreground">Today</h2>
+      <h2 className="text-sm font-semibold text-foreground">Hôm nay</h2>
       <div className="flex flex-wrap gap-2">
         {habits.map((habit) => (
           <TodayPill

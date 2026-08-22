@@ -40,7 +40,7 @@ export function ListeningLogManager({ initialLogs }: ListeningLogManagerProps) {
       notes: notes || null,
     });
     if (!parsed.success) {
-      setError(parsed.error.issues[0]?.message ?? 'Invalid entry');
+      setError(parsed.error.issues[0]?.message ?? 'Mục không hợp lệ');
       return;
     }
 
@@ -51,7 +51,7 @@ export function ListeningLogManager({ initialLogs }: ListeningLogManagerProps) {
     } = await supabase.auth.getUser();
     if (!user) {
       setSubmitting(false);
-      setError('You must be signed in.');
+      setError('Bạn cần đăng nhập.');
       return;
     }
 
@@ -70,7 +70,7 @@ export function ListeningLogManager({ initialLogs }: ListeningLogManagerProps) {
     setSubmitting(false);
 
     if (dbError || !data) {
-      setError(dbError?.message ?? 'Failed to save entry');
+      setError(dbError?.message ?? 'Lưu thất bại');
       return;
     }
 
@@ -83,8 +83,8 @@ export function ListeningLogManager({ initialLogs }: ListeningLogManagerProps) {
 
   async function handleDelete(id: string) {
     const ok = await confirm({
-      title: 'Delete this listening session?',
-      description: 'This cannot be undone.',
+      title: 'Xóa buổi nghe này?',
+      description: 'Không thể hoàn tác thao tác này.',
     });
     if (!ok) return;
     setDeleteError(null);
@@ -106,20 +106,20 @@ export function ListeningLogManager({ initialLogs }: ListeningLogManagerProps) {
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <div>
             <label className="label-field" htmlFor="listening-source">
-              Source
+              Nguồn
             </label>
             <input
               id="listening-source"
               value={source}
               onChange={(e) => setSource(e.target.value)}
-              placeholder="e.g. NHK Easy News podcast"
+              placeholder="vd: Podcast NHK Easy News"
               required
               className="input-field"
             />
           </div>
           <div>
             <label className="label-field" htmlFor="listening-duration">
-              Duration (min)
+              Thời gian (phút)
             </label>
             <input
               id="listening-duration"
@@ -134,7 +134,7 @@ export function ListeningLogManager({ initialLogs }: ListeningLogManagerProps) {
         </div>
         <div>
           <label className="label-field" htmlFor="listening-score">
-            Comprehension %
+            Độ hiểu bài (%)
           </label>
           <input
             id="listening-score"
@@ -148,7 +148,7 @@ export function ListeningLogManager({ initialLogs }: ListeningLogManagerProps) {
         </div>
         <div>
           <label className="label-field" htmlFor="listening-notes">
-            Notes
+            Ghi chú
           </label>
           <textarea
             id="listening-notes"
@@ -162,7 +162,7 @@ export function ListeningLogManager({ initialLogs }: ListeningLogManagerProps) {
         {error && <p className="error-text">{error}</p>}
 
         <button type="submit" disabled={submitting} className="btn-primary">
-          {submitting ? 'Saving…' : 'Log session'}
+          {submitting ? 'Đang lưu…' : 'Ghi lại buổi học'}
         </button>
       </form>
 
@@ -170,7 +170,7 @@ export function ListeningLogManager({ initialLogs }: ListeningLogManagerProps) {
 
       {logs.length === 0 ? (
         <div className="flex flex-col items-center gap-2 rounded-lg border border-dashed border-border p-8 text-center">
-          <p className="text-sm text-muted-foreground">No listening sessions logged yet.</p>
+          <p className="text-sm text-muted-foreground">Chưa có buổi nghe nào được ghi lại.</p>
         </div>
       ) : (
         <ul className="space-y-2">
@@ -180,8 +180,8 @@ export function ListeningLogManager({ initialLogs }: ListeningLogManagerProps) {
                 <div>
                   <p className="text-sm font-medium text-foreground">{log.source}</p>
                   <p className="text-xs text-muted-foreground">
-                    {new Date(log.practiced_at).toLocaleDateString()} · {log.duration_min} min
-                    {log.comprehension_score !== null && <> · {log.comprehension_score}% comprehension</>}
+                    {new Date(log.practiced_at).toLocaleDateString('vi-VN')} · {log.duration_min} phút
+                    {log.comprehension_score !== null && <> · hiểu {log.comprehension_score}%</>}
                   </p>
                   {log.notes && <p className="mt-1 text-sm text-muted-foreground">{log.notes}</p>}
                 </div>
@@ -189,7 +189,7 @@ export function ListeningLogManager({ initialLogs }: ListeningLogManagerProps) {
                   type="button"
                   onClick={() => handleDelete(log.id)}
                   disabled={deletingId === log.id}
-                  aria-label={`Delete listening session: ${log.source}`}
+                  aria-label={`Xóa buổi nghe: ${log.source}`}
                   className="flex h-7 w-7 shrink-0 items-center justify-center rounded text-muted-foreground transition-colors hover:bg-danger/10 hover:text-danger disabled:opacity-40"
                 >
                   <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />

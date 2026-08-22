@@ -32,10 +32,10 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   }
 
   const navLinks: NavLinkItem[] = [
-    { href: '/admin/users', label: 'Users' },
-    { href: '/admin/content', label: 'Content' },
-    { href: '/admin/stats', label: 'Stats' },
-    { href: '/admin/reference-data', label: 'Reference Data' },
+    { href: '/admin/users', label: 'Người dùng' },
+    { href: '/admin/content', label: 'Nội dung' },
+    { href: '/admin/stats', label: 'Thống kê' },
+    { href: '/admin/reference-data', label: 'Dữ liệu tham chiếu' },
   ];
 
   return (
@@ -48,13 +48,13 @@ export default async function AdminLayout({ children }: { children: React.ReactN
               className="flex items-center gap-2 text-base font-bold tracking-tight text-foreground"
             >
               <ShieldCheck className="h-6 w-6 text-primary" aria-hidden="true" />
-              JanGo Admin
+              JanGo Quản trị
             </Link>
             <AppNav links={navLinks} />
           </div>
-          <Link href="/boards" aria-label="Back to app" className="btn-ghost shrink-0">
+          <Link href="/boards" aria-label="Về ứng dụng" className="btn-ghost shrink-0">
             <ArrowLeft className="h-4 w-4" aria-hidden="true" />
-            <span className="hidden sm:inline">Back to app</span>
+            <span className="hidden sm:inline">Về ứng dụng</span>
           </Link>
         </div>
       </header>

@@ -25,7 +25,7 @@ const notoSansJP = Noto_Sans_JP({
 
 export const metadata: Metadata = {
   title: 'JanGo',
-  description: 'Kanban task management + JLPT N2 Japanese study tracker',
+  description: 'Quản lý công việc Kanban + theo dõi học tiếng Nhật JLPT N2',
 };
 
 /**
@@ -75,7 +75,7 @@ export default function RootLayout({
   const mode = cookieValue?.mode ?? 'light';
 
   return (
-    <html lang="en" className={mode === 'dark' ? 'dark' : undefined} data-theme={cookieValue?.themeSlug}>
+    <html lang="vi" className={mode === 'dark' ? 'dark' : undefined} data-theme={cookieValue?.themeSlug}>
       <head>{cookieValue && <ThemeStyle slug={cookieValue.themeSlug} colors={cookieValue.colors} />}</head>
       <body className={`${plusJakartaSans.variable} ${notoSansJP.variable} antialiased`}>
         {children}

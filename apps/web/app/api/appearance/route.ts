@@ -33,20 +33,20 @@ export async function POST(request: NextRequest) {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    return NextResponse.json({ error: 'Chưa đăng nhập' }, { status: 401 });
   }
 
   let body: unknown;
   try {
     body = await request.json();
   } catch {
-    return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 });
+    return NextResponse.json({ error: 'Nội dung JSON không hợp lệ' }, { status: 400 });
   }
 
   const parsed = appearanceSchema.safeParse(body);
   if (!parsed.success) {
     return NextResponse.json(
-      { error: 'Invalid request body', issues: parsed.error.issues },
+      { error: 'Nội dung yêu cầu không hợp lệ', issues: parsed.error.issues },
       { status: 400 },
     );
   }
@@ -58,7 +58,7 @@ export async function POST(request: NextRequest) {
     .limit(1)
     .maybeSingle<ThemeRow>();
   if (defaultThemeError || !defaultTheme) {
-    return NextResponse.json({ error: 'No themes are configured' }, { status: 500 });
+    return NextResponse.json({ error: 'Chưa có giao diện nào được thiết lập' }, { status: 500 });
   }
 
   const { data: existing } = await supabase
@@ -79,7 +79,7 @@ export async function POST(request: NextRequest) {
       .eq('id', parsed.data.themeId)
       .maybeSingle<ThemeRow>();
     if (themeError || !requestedTheme) {
-      return NextResponse.json({ error: 'themeId does not resolve to an existing theme' }, { status: 400 });
+      return NextResponse.json({ error: 'themeId không khớp với giao diện nào đang tồn tại' }, { status: 400 });
     }
     theme = requestedTheme;
     themeId = requestedTheme.id;

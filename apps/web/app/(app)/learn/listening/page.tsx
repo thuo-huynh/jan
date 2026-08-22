@@ -25,9 +25,9 @@ export default async function ListeningLogPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">Listening Log (聴解)</h1>
+        <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">Nhật ký Nghe hiểu (聴解)</h1>
         <p className="mt-1.5 text-sm text-muted-foreground">
-          Log listening/shadowing practice sessions and track comprehension over time.
+          Ghi lại các buổi luyện nghe/shadowing và theo dõi độ hiểu bài theo thời gian.
         </p>
       </div>
 

@@ -15,9 +15,9 @@ interface GrammarPointRowProps {
 }
 
 const STATUS_OPTIONS: { value: GrammarStatus; label: string; title: string }[] = [
-  { value: 'not_started', label: 'Chưa học', title: 'Not started' },
-  { value: 'learning', label: 'Đang ôn', title: 'Learning' },
-  { value: 'mastered', label: 'Đã thuộc', title: 'Mastered' },
+  { value: 'not_started', label: 'Chưa học', title: 'Chưa học' },
+  { value: 'learning', label: 'Đang ôn', title: 'Đang ôn' },
+  { value: 'mastered', label: 'Đã thuộc', title: 'Đã thuộc' },
 ];
 
 const STATUS_ACTIVE_STYLES: Record<GrammarStatus, string> = {
@@ -62,7 +62,7 @@ export function GrammarPointRow({ point, userId, onStatusChange, onNoteChange }:
     setSaving(false);
     if (upsertError) {
       onStatusChange(point.id, previousStatus);
-      setError('Could not save status. Please try again.');
+      setError('Không thể lưu trạng thái. Vui lòng thử lại.');
     }
   }
 
@@ -73,7 +73,7 @@ export function GrammarPointRow({ point, userId, onStatusChange, onNoteChange }:
           <div className="flex flex-wrap items-center gap-2">
             <h3 className="font-jp text-lg font-semibold text-foreground">{point.pattern}</h3>
             {point.frequencyTag && <span className="badge-neutral">{point.frequencyTag}</span>}
-            {point.n3Overlap && <span className="badge-neutral">N3 overlap</span>}
+            {point.n3Overlap && <span className="badge-neutral">Trùng N3</span>}
           </div>
 
           <p className="mt-1 text-sm text-foreground">{point.meaning}</p>
@@ -104,7 +104,7 @@ export function GrammarPointRow({ point, userId, onStatusChange, onNoteChange }:
                   className="inline-flex items-center gap-1 rounded-full border border-primary/40 bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary transition-colors hover:bg-primary/20"
                 >
                   <ArrowLeftRight className="h-3 w-3" aria-hidden="true" />
-                  Confusable{pair.partnerPattern ? ` — vs. ${pair.partnerPattern}` : ''}
+                  Dễ nhầm{pair.partnerPattern ? ` — với ${pair.partnerPattern}` : ''}
                 </Link>
               ))}
             </div>
@@ -115,7 +115,7 @@ export function GrammarPointRow({ point, userId, onStatusChange, onNoteChange }:
           <div
             className="inline-flex overflow-hidden rounded border border-border"
             role="group"
-            aria-label={`Status for ${point.pattern}`}
+            aria-label={`Trạng thái của ${point.pattern}`}
           >
             {STATUS_OPTIONS.map((opt, i) => {
               const active = point.status === opt.value;
@@ -141,7 +141,7 @@ export function GrammarPointRow({ point, userId, onStatusChange, onNoteChange }:
             onClick={() => setNotesOpen((open) => !open)}
             className="text-xs font-medium text-primary transition-colors hover:opacity-80"
           >
-            {notesOpen ? 'Hide notes' : point.notesUser ? 'Edit notes' : 'Add notes'}
+            {notesOpen ? 'Ẩn ghi chú' : point.notesUser ? 'Sửa ghi chú' : 'Thêm ghi chú'}
           </button>
         </div>
       </div>

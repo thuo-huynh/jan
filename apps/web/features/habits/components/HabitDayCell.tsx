@@ -52,7 +52,7 @@ export function HabitDayCell({
         type="button"
         role="checkbox"
         aria-checked={completed}
-        aria-label={`${habitName} — day ${day}${completed ? ', done' : ', not done'}`}
+        aria-label={`${habitName} — ngày ${day}${completed ? ', đã hoàn thành' : ', chưa hoàn thành'}`}
         disabled={disabled}
         onClick={onToggle}
         className={`h-7 w-7 rounded border transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${

@@ -37,7 +37,7 @@ export function AttachToSrsButton({ readingLogId }: AttachToSrsButtonProps) {
       sourceReadingLogId: readingLogId,
     });
     if (!parsed.success) {
-      setError(parsed.error.issues[0]?.message ?? 'Invalid entry');
+      setError(parsed.error.issues[0]?.message ?? 'Mục không hợp lệ');
       return;
     }
 
@@ -48,7 +48,7 @@ export function AttachToSrsButton({ readingLogId }: AttachToSrsButtonProps) {
     } = await supabase.auth.getUser();
     if (!user) {
       setSubmitting(false);
-      setError('You must be signed in.');
+      setError('Bạn cần đăng nhập.');
       return;
     }
 
@@ -80,25 +80,25 @@ export function AttachToSrsButton({ readingLogId }: AttachToSrsButtonProps) {
         {open ? (
           <>
             <X className="h-3 w-3" aria-hidden="true" />
-            Cancel
+            Hủy
           </>
         ) : (
           <>
             <Plus className="h-3 w-3" aria-hidden="true" />
-            Add unknown word to SRS
+            Thêm từ chưa biết vào SRS
           </>
         )}
       </button>
       {attachedCount > 0 && !open && (
         <span className="ml-2 text-xs text-muted-foreground">
-          {attachedCount} added to SRS
+          Đã thêm {attachedCount} từ vào SRS
         </span>
       )}
 
       {open && (
         <form onSubmit={handleSubmit} className="mt-2 flex flex-wrap items-end gap-2 rounded-lg border border-border bg-card p-3">
           <div>
-            <label className="label-field text-xs">Word</label>
+            <label className="label-field text-xs">Từ</label>
             <input
               value={word}
               onChange={(e) => setWord(e.target.value)}
@@ -107,7 +107,7 @@ export function AttachToSrsButton({ readingLogId }: AttachToSrsButtonProps) {
             />
           </div>
           <div>
-            <label className="label-field text-xs">Reading</label>
+            <label className="label-field text-xs">Cách đọc</label>
             <input
               value={reading}
               onChange={(e) => setReading(e.target.value)}
@@ -115,7 +115,7 @@ export function AttachToSrsButton({ readingLogId }: AttachToSrsButtonProps) {
             />
           </div>
           <div>
-            <label className="label-field text-xs">Meaning</label>
+            <label className="label-field text-xs">Nghĩa</label>
             <input
               value={meaning}
               onChange={(e) => setMeaning(e.target.value)}
@@ -124,7 +124,7 @@ export function AttachToSrsButton({ readingLogId }: AttachToSrsButtonProps) {
             />
           </div>
           <button type="submit" disabled={submitting} className="btn-primary h-9 px-3 text-sm">
-            {submitting ? 'Adding…' : 'Add to SRS'}
+            {submitting ? 'Đang thêm…' : 'Thêm vào SRS'}
           </button>
           {error && <p className="error-text w-full">{error}</p>}
         </form>

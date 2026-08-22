@@ -20,19 +20,19 @@ export function SessionStats({ logs }: SessionStatsProps) {
   const tiles = [
     {
       icon: CalendarDays,
-      label: 'This week',
+      label: 'Tuần này',
       sessions: stats.weekSessions,
       minutes: stats.weekMinutes,
     },
     {
       icon: CalendarRange,
-      label: 'This month',
+      label: 'Tháng này',
       sessions: stats.monthSessions,
       minutes: stats.monthMinutes,
     },
     {
       icon: Clock,
-      label: 'All time',
+      label: 'Tổng cộng',
       sessions: stats.totalSessions,
       minutes: stats.totalMinutes,
     },
@@ -48,9 +48,9 @@ export function SessionStats({ logs }: SessionStatsProps) {
           </div>
           <p className="mt-1 text-xl font-semibold text-foreground sm:text-2xl">
             {tile.sessions}
-            <span className="text-sm font-normal text-muted-foreground"> sess.</span>
+            <span className="text-sm font-normal text-muted-foreground"> buổi</span>
           </p>
-          <p className="text-xs text-muted-foreground">{tile.minutes} min</p>
+          <p className="text-xs text-muted-foreground">{tile.minutes} phút</p>
         </div>
       ))}
     </div>

@@ -16,8 +16,8 @@ interface ModeToggleProps {
 
 export function ModeToggle({ mode, disabled, onChange }: ModeToggleProps) {
   const options: { value: AppearanceMode; label: string; icon: typeof Sun }[] = [
-    { value: 'light', label: 'Light', icon: Sun },
-    { value: 'dark', label: 'Dark', icon: Moon },
+    { value: 'light', label: 'Sáng', icon: Sun },
+    { value: 'dark', label: 'Tối', icon: Moon },
   ];
 
   return (

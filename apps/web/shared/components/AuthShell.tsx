@@ -12,10 +12,10 @@ import { GraduationCap, LayoutGrid, BookOpen, Headphones, ClipboardCheck } from 
  * the form content passed as `children` differs.
  */
 const FEATURES = [
-  { icon: LayoutGrid, label: 'Kanban boards for daily tasks' },
-  { icon: BookOpen, label: 'Spaced repetition for vocab and grammar' },
-  { icon: Headphones, label: 'Reading and listening practice logs' },
-  { icon: ClipboardCheck, label: 'Mock tests and a mistake notebook' },
+  { icon: LayoutGrid, label: 'Bảng Kanban cho công việc hằng ngày' },
+  { icon: BookOpen, label: 'Ôn tập ngắt quãng cho từ vựng và ngữ pháp' },
+  { icon: Headphones, label: 'Nhật ký luyện đọc và luyện nghe' },
+  { icon: ClipboardCheck, label: 'Đề thi thử và sổ lỗi sai' },
 ] as const;
 
 export function AuthShell({ children }: { children: React.ReactNode }) {
@@ -28,11 +28,11 @@ export function AuthShell({ children }: { children: React.ReactNode }) {
             JanGo
           </div>
           <h1 className="mt-10 text-3xl font-bold tracking-tight text-balance xl:text-4xl">
-            Every step to N2, tracked in one place.
+            Từng bước chinh phục N2, lưu lại trong một nơi duy nhất.
           </h1>
           <p className="mt-4 text-sm leading-relaxed text-primary-foreground/80">
-            Kanban boards for your tasks, spaced review for vocab and grammar, and a log for
-            every reading, listening, and mock test session along the way.
+            Bảng Kanban cho công việc của bạn, ôn tập ngắt quãng cho từ vựng và ngữ pháp, cùng
+            nhật ký cho mọi buổi đọc, nghe và thi thử trên chặng đường đó.
           </p>
           <ul className="mt-10 space-y-4">
             {FEATURES.map(({ icon: Icon, label }) => (

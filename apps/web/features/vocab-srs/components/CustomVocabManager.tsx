@@ -41,8 +41,8 @@ export function CustomVocabManager({ initialEntries }: CustomVocabManagerProps) 
 
   async function handleDelete(id: string) {
     const ok = await confirm({
-      title: 'Delete this custom entry?',
-      description: 'Its review history will be removed too.',
+      title: 'Xóa mục từ vựng này?',
+      description: 'Lịch sử ôn tập của mục này cũng sẽ bị xóa.',
     });
     if (!ok) return;
     setDeleteError(null);
@@ -59,7 +59,7 @@ export function CustomVocabManager({ initialEntries }: CustomVocabManagerProps) 
     <div className="space-y-4">
       {confirmDialog}
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <h2 className="text-lg font-semibold tracking-tight text-foreground">Your custom entries</h2>
+        <h2 className="text-lg font-semibold tracking-tight text-foreground">Từ vựng bạn tự thêm</h2>
         <div className="flex gap-2">
           <button
             type="button"
@@ -69,12 +69,12 @@ export function CustomVocabManager({ initialEntries }: CustomVocabManagerProps) 
             {addMode === 'bulk' ? (
               <>
                 <X className="h-4 w-4" aria-hidden="true" />
-                Close
+                Đóng
               </>
             ) : (
               <>
                 <ListPlus className="h-4 w-4" aria-hidden="true" />
-                Bulk add
+                Thêm hàng loạt
               </>
             )}
           </button>
@@ -86,12 +86,12 @@ export function CustomVocabManager({ initialEntries }: CustomVocabManagerProps) 
             {addMode === 'single' ? (
               <>
                 <X className="h-4 w-4" aria-hidden="true" />
-                Close
+                Đóng
               </>
             ) : (
               <>
                 <Plus className="h-4 w-4" aria-hidden="true" />
-                Add word
+                Thêm từ
               </>
             )}
           </button>
@@ -110,7 +110,7 @@ export function CustomVocabManager({ initialEntries }: CustomVocabManagerProps) 
       {entries.length === 0 ? (
         <div className="flex flex-col items-center gap-2 rounded-lg border border-dashed border-border p-8 text-center">
           <p className="max-w-xs text-sm text-muted-foreground">
-            No custom entries yet — add your own N2 vocab or kanji to blend into the review queue.
+            Chưa có từ nào — thêm từ vựng hoặc Hán tự N2 của riêng bạn để gộp vào hàng đợi ôn tập.
           </p>
         </div>
       ) : (
@@ -145,11 +145,11 @@ export function CustomVocabManager({ initialEntries }: CustomVocabManagerProps) 
                   <p className="text-sm text-muted-foreground">{entry.meaning}</p>
                 </div>
                 <div className="flex shrink-0 items-center gap-2">
-                  <span className="badge-neutral">{entry.is_kanji ? 'kanji' : 'vocab'} · custom</span>
+                  <span className="badge-neutral">{entry.is_kanji ? 'hán tự' : 'từ vựng'} · tự thêm</span>
                   <button
                     type="button"
                     onClick={() => setEditingId(entry.id)}
-                    aria-label={`Edit ${entry.word}`}
+                    aria-label={`Sửa ${entry.word}`}
                     className="flex h-7 w-7 items-center justify-center rounded text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
                   >
                     <Pencil className="h-3.5 w-3.5" aria-hidden="true" />
@@ -157,7 +157,7 @@ export function CustomVocabManager({ initialEntries }: CustomVocabManagerProps) 
                   <button
                     type="button"
                     onClick={() => handleDelete(entry.id)}
-                    aria-label={`Delete ${entry.word}`}
+                    aria-label={`Xóa ${entry.word}`}
                     className="flex h-7 w-7 items-center justify-center rounded text-muted-foreground transition-colors hover:bg-danger/10 hover:text-danger"
                   >
                     <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />

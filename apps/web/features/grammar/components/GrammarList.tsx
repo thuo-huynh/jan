@@ -66,20 +66,20 @@ export function GrammarList({ points: initialPoints, userId }: GrammarListProps)
     <div className="space-y-4">
       <div className="card space-y-3 p-4">
         <div className="flex flex-wrap items-center gap-2 text-sm">
-          <span className="font-medium text-foreground">{points.length} grammar points</span>
-          <span className="badge-success">{counts.mastered} mastered</span>
-          <span className="badge-warning">{counts.learning} learning</span>
-          <span className="badge-neutral">{counts.not_started} not started</span>
+          <span className="font-medium text-foreground">{points.length} điểm ngữ pháp</span>
+          <span className="badge-success">{counts.mastered} đã thuộc</span>
+          <span className="badge-warning">{counts.learning} đang học</span>
+          <span className="badge-neutral">{counts.not_started} chưa học</span>
           {confusablePairCount > 0 && (
             <button
               type="button"
               onClick={() => setOnlyConfusable((v) => !v)}
               aria-pressed={onlyConfusable}
-              title="Show only points that are part of a confusable pair"
+              title="Chỉ hiện các điểm thuộc một cặp dễ nhầm"
               className={`badge-primary transition-colors ${onlyConfusable ? 'ring-1 ring-primary' : 'hover:opacity-80'}`}
             >
               <ArrowLeftRight className="h-3 w-3" aria-hidden="true" />
-              {confusablePairCount} confusable pairs
+              {confusablePairCount} cặp dễ nhầm
             </button>
           )}
         </div>
@@ -94,8 +94,8 @@ export function GrammarList({ points: initialPoints, userId }: GrammarListProps)
               type="search"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search by pattern or meaning (e.g. として)…"
-              aria-label="Search grammar points"
+              placeholder="Tìm theo mẫu ngữ pháp hoặc nghĩa (vd: として)…"
+              aria-label="Tìm điểm ngữ pháp"
               className="input-field h-9 pl-8"
             />
           </div>
@@ -106,7 +106,7 @@ export function GrammarList({ points: initialPoints, userId }: GrammarListProps)
               onChange={(e) => setHideN3Overlap(e.target.checked)}
               className="h-4 w-4 rounded border-border text-primary focus:ring-primary"
             />
-            Hide N3-level material
+            Ẩn nội dung trình độ N3
           </label>
           {hasActiveFilter && (
             <button
@@ -119,7 +119,7 @@ export function GrammarList({ points: initialPoints, userId }: GrammarListProps)
               className="btn-ghost h-9 px-2.5 text-xs"
             >
               <X className="h-3.5 w-3.5" aria-hidden="true" />
-              Clear filters
+              Xóa bộ lọc
             </button>
           )}
         </div>
@@ -131,7 +131,7 @@ export function GrammarList({ points: initialPoints, userId }: GrammarListProps)
             <SearchX className="h-6 w-6 text-primary" aria-hidden="true" />
           </div>
           <p className="max-w-xs text-sm text-muted-foreground">
-            No grammar points match your search or filters. Try clearing them above.
+            Không có điểm ngữ pháp nào khớp với tìm kiếm/bộ lọc. Thử xóa bộ lọc ở trên.
           </p>
         </div>
       ) : (

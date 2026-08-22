@@ -28,9 +28,9 @@ export default async function MockTestsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">Mock Tests</h1>
+        <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">Đề thi thử</h1>
         <p className="mt-1.5 text-sm text-muted-foreground">
-          Track practice/past-paper results by section and count down to your exam date.
+          Theo dõi kết quả luyện đề/đề thi cũ theo từng phần và đếm ngược đến ngày thi.
         </p>
       </div>
 

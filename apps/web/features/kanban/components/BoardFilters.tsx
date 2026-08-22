@@ -46,7 +46,7 @@ export function BoardFilters({ columns, filters, onChange }: BoardFiltersProps) 
           type="search"
           value={filters.query}
           onChange={(e) => onChange({ ...filters, query: e.target.value })}
-          placeholder="Search tasks…"
+          placeholder="Tìm công việc…"
           className="input-field h-9 pl-8"
         />
       </div>
@@ -56,7 +56,7 @@ export function BoardFilters({ columns, filters, onChange }: BoardFiltersProps) 
         onChange={(e) => onChange({ ...filters, tag: e.target.value || null })}
         className="input-field h-9 w-auto"
       >
-        <option value="">All tags</option>
+        <option value="">Tất cả thẻ</option>
         {allTags.map((tag) => (
           <option key={tag} value={tag}>
             {tag}
@@ -69,7 +69,7 @@ export function BoardFilters({ columns, filters, onChange }: BoardFiltersProps) 
         onChange={(e) => onChange({ ...filters, columnId: e.target.value || null })}
         className="input-field h-9 w-auto"
       >
-        <option value="">All columns</option>
+        <option value="">Tất cả cột</option>
         {columns.map((column) => (
           <option key={column.id} value={column.id}>
             {column.name}
@@ -79,7 +79,7 @@ export function BoardFilters({ columns, filters, onChange }: BoardFiltersProps) 
 
       <div className="flex items-center gap-1.5">
         <label htmlFor="due-before" className="text-xs text-muted-foreground">
-          Due before
+          Hạn trước ngày
         </label>
         <input
           id="due-before"
@@ -93,7 +93,7 @@ export function BoardFilters({ columns, filters, onChange }: BoardFiltersProps) 
       {hasActiveFilters && (
         <button type="button" onClick={() => onChange(EMPTY_FILTERS)} className="btn-ghost h-9 px-2.5 text-xs">
           <X className="h-3.5 w-3.5" aria-hidden="true" />
-          Clear filters
+          Xóa bộ lọc
         </button>
       )}
     </div>

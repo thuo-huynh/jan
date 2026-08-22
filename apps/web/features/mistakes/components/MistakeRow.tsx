@@ -33,11 +33,11 @@ export function MistakeRow({ mistake, onResolvedChange }: MistakeRowProps) {
       const res = await fetch(`/api/mistakes/${mistake.id}/add-to-srs`, { method: 'POST' });
       if (!res.ok) {
         const body = await res.json().catch(() => ({}) as { error?: string });
-        throw new Error(body.error ?? 'Failed to add to SRS queue');
+        throw new Error(body.error ?? 'Thêm vào hàng đợi SRS thất bại');
       }
-      setSrsMessage('Added to review queue.');
+      setSrsMessage('Đã thêm vào hàng đợi ôn tập.');
     } catch (err) {
-      setSrsError(err instanceof Error ? err.message : 'Failed to add to SRS queue');
+      setSrsError(err instanceof Error ? err.message : 'Thêm vào hàng đợi SRS thất bại');
     } finally {
       setAddingToSrs(false);
     }
@@ -65,8 +65,8 @@ export function MistakeRow({ mistake, onResolvedChange }: MistakeRowProps) {
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div>
           <div className="mb-1 flex items-center gap-2">
-            <span className="badge-neutral">{mistake.source === 'mock_test' ? 'Mock test' : 'Manual'}</span>
-            {mistake.resolved && <span className="badge-success">Resolved</span>}
+            <span className="badge-neutral">{mistake.source === 'mock_test' ? 'Đề thi thử' : 'Tự nhập'}</span>
+            {mistake.resolved && <span className="badge-success">Đã xử lý</span>}
           </div>
           <p className={`text-sm text-foreground ${mistake.resolved ? 'line-through' : ''}`}>
             {mistake.content}
@@ -85,12 +85,12 @@ export function MistakeRow({ mistake, onResolvedChange }: MistakeRowProps) {
           {mistake.resolved ? (
             <>
               <RotateCcw className="h-3.5 w-3.5" aria-hidden="true" />
-              Reopen
+              Mở lại
             </>
           ) : (
             <>
               <CheckCircle2 className="h-3.5 w-3.5" aria-hidden="true" />
-              Mark resolved
+              Đánh dấu đã xử lý
             </>
           )}
         </button>
@@ -101,11 +101,11 @@ export function MistakeRow({ mistake, onResolvedChange }: MistakeRowProps) {
           type="button"
           onClick={handleAddToSrs}
           disabled={!hasLink || addingToSrs}
-          title={hasLink ? undefined : 'Link a vocab or grammar item to add this to the SRS queue'}
+          title={hasLink ? undefined : 'Liên kết một từ vựng hoặc điểm ngữ pháp để thêm vào hàng đợi SRS'}
           className="btn-outline h-7 px-2 text-xs hover:border-primary hover:text-primary disabled:cursor-not-allowed disabled:hover:border-border disabled:hover:text-muted-foreground"
         >
           <BookPlus className="h-3.5 w-3.5" aria-hidden="true" />
-          {addingToSrs ? 'Adding…' : 'Add to SRS queue'}
+          {addingToSrs ? 'Đang thêm…' : 'Thêm vào hàng đợi SRS'}
         </button>
         {srsMessage && <span className="text-xs text-success">{srsMessage}</span>}
         {srsError && <span className="error-text mt-0">{srsError}</span>}

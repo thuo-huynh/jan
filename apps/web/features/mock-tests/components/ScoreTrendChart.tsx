@@ -54,7 +54,7 @@ export function ScoreTrendChart({ results }: ScoreTrendChartProps) {
     return (
       <div className="card p-4">
         <p className="text-sm text-muted-foreground">
-          Record at least two mock test results to see the score trend.
+          Ghi ít nhất hai kết quả đề thi thử để xem xu hướng điểm số.
         </p>
       </div>
     );
@@ -79,11 +79,11 @@ export function ScoreTrendChart({ results }: ScoreTrendChartProps) {
   return (
     <div className="card space-y-2 p-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <h2 className="text-sm font-semibold text-foreground">Score trend</h2>
+        <h2 className="text-sm font-semibold text-foreground">Xu hướng điểm số</h2>
         <div className={`flex items-center gap-1.5 text-sm font-medium ${trendColor}`}>
           <TrendIcon className="h-4 w-4" aria-hidden="true" />
-          {delta === 0 ? 'No change' : `${delta > 0 ? '+' : ''}${delta} total`}
-          <span className="font-normal text-muted-foreground">vs previous test</span>
+          {delta === 0 ? 'Không đổi' : `${delta > 0 ? '+' : ''}${delta} tổng điểm`}
+          <span className="font-normal text-muted-foreground">so với lần thi trước</span>
         </div>
       </div>
       <ResponsiveContainer width="100%" height={260}>
@@ -91,7 +91,7 @@ export function ScoreTrendChart({ results }: ScoreTrendChartProps) {
           <CartesianGrid stroke="var(--border)" vertical={false} />
           <XAxis
             dataKey="testDate"
-            tickFormatter={(v: string) => new Date(v).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+            tickFormatter={(v: string) => new Date(v).toLocaleDateString('vi-VN', { month: 'short', day: 'numeric' })}
             stroke="var(--muted-foreground)"
             tick={{ fill: 'var(--muted-foreground)', fontSize: 12 }}
             axisLine={{ stroke: 'var(--border)' }}
@@ -112,7 +112,7 @@ export function ScoreTrendChart({ results }: ScoreTrendChartProps) {
               fontSize: 12,
               color: 'var(--foreground)',
             }}
-            labelFormatter={(v) => (typeof v === 'string' ? new Date(v).toLocaleDateString() : v)}
+            labelFormatter={(v) => (typeof v === 'string' ? new Date(v).toLocaleDateString('vi-VN') : v)}
             labelStyle={{ color: 'var(--foreground)' }}
           />
           <Legend

@@ -47,7 +47,7 @@ export function FolderTagPicker({
     <div className="grid gap-3 sm:grid-cols-2">
       <div>
         <label htmlFor="note-folder" className="label-field">
-          Folder
+          Thư mục
         </label>
         <input
           id="note-folder"
@@ -55,7 +55,7 @@ export function FolderTagPicker({
           type="text"
           value={folder ?? ''}
           onChange={(e) => onFolderChange(e.target.value.trim() === '' ? null : e.target.value)}
-          placeholder="e.g. Grammar, Vocab, General"
+          placeholder="vd: Ngữ pháp, Từ vựng, Chung"
           className="input-field"
         />
         <datalist id="note-folder-options">
@@ -67,7 +67,7 @@ export function FolderTagPicker({
 
       <div>
         <label htmlFor="note-tags" className="label-field">
-          Tags
+          Thẻ
         </label>
         <div className="flex min-h-10 flex-wrap items-center gap-1.5 rounded border border-border bg-background px-2 py-1.5 transition-colors focus-within:border-primary">
           {tags.map((tag) => (
@@ -76,7 +76,7 @@ export function FolderTagPicker({
               <button
                 type="button"
                 onClick={() => removeTag(tag)}
-                aria-label={`Remove tag ${tag}`}
+                aria-label={`Xóa thẻ ${tag}`}
                 className="text-primary/70 hover:text-primary"
               >
                 ×
@@ -90,7 +90,7 @@ export function FolderTagPicker({
             onChange={(e) => setTagDraft(e.target.value)}
             onKeyDown={handleTagKeyDown}
             onBlur={commitTag}
-            placeholder={tags.length === 0 ? 'Add tag, press Enter' : ''}
+            placeholder={tags.length === 0 ? 'Thêm thẻ, nhấn Enter' : ''}
             className="min-w-[6rem] flex-1 bg-transparent text-sm text-foreground focus:outline-none"
           />
         </div>

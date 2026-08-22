@@ -27,6 +27,8 @@ interface StudyTimeChartProps {
 
 type Granularity = 'daily' | 'weekly';
 
+const GRANULARITY_LABEL: Record<Granularity, string> = { daily: 'Ngày', weekly: 'Tuần' };
+
 function isoWeekStart(date: Date): string {
   const d = new Date(date);
   const day = (d.getDay() + 6) % 7; // Monday = 0
@@ -53,20 +55,20 @@ export function StudyTimeChart({ sessions }: StudyTimeChartProps) {
   return (
     <div className="card space-y-2 p-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-sm font-semibold text-foreground">Study time</h2>
+        <h2 className="text-sm font-semibold text-foreground">Thời gian học</h2>
         <div className="flex gap-1 rounded border border-border bg-muted p-0.5">
           {(['daily', 'weekly'] as const).map((g) => (
             <button
               key={g}
               type="button"
               onClick={() => setGranularity(g)}
-              className={`rounded px-2 py-0.5 text-xs font-medium capitalize transition-colors ${
+              className={`rounded px-2 py-0.5 text-xs font-medium transition-colors ${
                 granularity === g
                   ? 'bg-card text-foreground shadow-sm'
                   : 'text-muted-foreground hover:text-foreground'
               }`}
             >
-              {g}
+              {GRANULARITY_LABEL[g]}
             </button>
           ))}
         </div>
@@ -74,7 +76,7 @@ export function StudyTimeChart({ sessions }: StudyTimeChartProps) {
 
       {data.length === 0 ? (
         <p className="text-sm text-muted-foreground">
-          Log reading or listening sessions to see study time here.
+          Ghi lại buổi đọc hoặc nghe để xem thời gian học ở đây.
         </p>
       ) : (
         <ResponsiveContainer width="100%" height={200}>
@@ -82,7 +84,7 @@ export function StudyTimeChart({ sessions }: StudyTimeChartProps) {
             <CartesianGrid stroke="var(--border)" vertical={false} />
             <XAxis
               dataKey="bucket"
-              tickFormatter={(v: string) => new Date(v).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+              tickFormatter={(v: string) => new Date(v).toLocaleDateString('vi-VN', { month: 'short', day: 'numeric' })}
               stroke="var(--muted-foreground)"
               tick={{ fill: 'var(--muted-foreground)', fontSize: 11 }}
               axisLine={{ stroke: 'var(--border)' }}
@@ -103,8 +105,8 @@ export function StudyTimeChart({ sessions }: StudyTimeChartProps) {
                 fontSize: 12,
                 color: 'var(--foreground)',
               }}
-              formatter={(value) => [`${value} min`, 'Study time']}
-              labelFormatter={(v) => (typeof v === 'string' ? new Date(v).toLocaleDateString() : v)}
+              formatter={(value) => [`${value} phút`, 'Thời gian học']}
+              labelFormatter={(v) => (typeof v === 'string' ? new Date(v).toLocaleDateString('vi-VN') : v)}
               labelStyle={{ color: 'var(--foreground)' }}
             />
             <Bar dataKey="minutes" fill="var(--primary)" radius={[4, 4, 0, 0]} maxBarSize={24} />

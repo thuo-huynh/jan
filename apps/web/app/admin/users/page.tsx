@@ -42,11 +42,11 @@ export default function AdminUsersPage() {
       if (query.trim()) params.set('query', query.trim());
       const res = await fetch(`/api/admin/users?${params.toString()}`);
       const json = await res.json();
-      if (!res.ok) throw new Error(json.error ?? 'Failed to load users');
+      if (!res.ok) throw new Error(json.error ?? 'Không tải được danh sách người dùng');
       setUsers(json.users);
       setTotal(json.total);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load users');
+      setError(err instanceof Error ? err.message : 'Không tải được danh sách người dùng');
     } finally {
       setLoading(false);
     }
@@ -67,10 +67,10 @@ export default function AdminUsersPage() {
         body: JSON.stringify({ status: nextStatus }),
       });
       const json = await res.json();
-      if (!res.ok) throw new Error(json.error ?? 'Action failed');
+      if (!res.ok) throw new Error(json.error ?? 'Thao tác thất bại');
       setUsers((prev) => prev.map((u) => (u.id === user.id ? { ...u, status: json.status } : u)));
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Action failed');
+      setError(err instanceof Error ? err.message : 'Thao tác thất bại');
     } finally {
       setBusyId(null);
     }
@@ -78,8 +78,8 @@ export default function AdminUsersPage() {
 
   async function handleDelete(user: AdminUser) {
     const confirmed = await confirm({
-      title: `Permanently delete ${user.email}?`,
-      description: 'All their content will be deleted too. This cannot be undone.',
+      title: `Xóa vĩnh viễn ${user.email}?`,
+      description: 'Toàn bộ nội dung của người này cũng sẽ bị xóa. Không thể hoàn tác.',
     });
     if (!confirmed) return;
 
@@ -92,11 +92,11 @@ export default function AdminUsersPage() {
         body: JSON.stringify({ confirm: true }),
       });
       const json = await res.json();
-      if (!res.ok) throw new Error(json.error ?? 'Delete failed');
+      if (!res.ok) throw new Error(json.error ?? 'Xóa thất bại');
       setUsers((prev) => prev.filter((u) => u.id !== user.id));
       setTotal((t) => Math.max(0, t - 1));
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Delete failed');
+      setError(err instanceof Error ? err.message : 'Xóa thất bại');
     } finally {
       setBusyId(null);
     }
@@ -108,9 +108,9 @@ export default function AdminUsersPage() {
     <div className="space-y-6">
       {confirmDialog}
       <div>
-        <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">Users</h1>
+        <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">Người dùng</h1>
         <p className="mt-1.5 text-sm text-muted-foreground">
-          Search, suspend, and delete user accounts (FR-044/FR-045/FR-049).
+          Tìm kiếm, tạm khóa và xóa tài khoản người dùng.
         </p>
       </div>
 
@@ -126,13 +126,13 @@ export default function AdminUsersPage() {
           type="text"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="Search by email…"
-          aria-label="Search by email"
+          placeholder="Tìm theo email…"
+          aria-label="Tìm theo email"
           className="input-field max-w-sm"
         />
         <button type="submit" className="btn-outline shrink-0">
           <Search className="h-4 w-4" aria-hidden="true" />
-          Search
+          Tìm
         </button>
       </form>
 
@@ -147,11 +147,11 @@ export default function AdminUsersPage() {
           <thead className="border-b border-border text-xs uppercase tracking-wide text-muted-foreground">
             <tr>
               <th className="px-4 py-3">Email</th>
-              <th className="px-4 py-3">Role</th>
-              <th className="px-4 py-3">Status</th>
-              <th className="px-4 py-3">Signed up</th>
-              <th className="px-4 py-3">Last active</th>
-              <th className="px-4 py-3 text-right">Actions</th>
+              <th className="px-4 py-3">Vai trò</th>
+              <th className="px-4 py-3">Trạng thái</th>
+              <th className="px-4 py-3">Ngày đăng ký</th>
+              <th className="px-4 py-3">Hoạt động gần nhất</th>
+              <th className="px-4 py-3 text-right">Thao tác</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-border">
@@ -164,7 +164,7 @@ export default function AdminUsersPage() {
                       <Users className="h-6 w-6 text-muted-foreground" aria-hidden="true" />
                     </div>
                     <p className="text-sm text-muted-foreground">
-                      {query ? 'No users match this search.' : 'No users found.'}
+                      {query ? 'Không có người dùng nào khớp với tìm kiếm.' : 'Không tìm thấy người dùng nào.'}
                     </p>
                   </div>
                 </td>
@@ -174,17 +174,19 @@ export default function AdminUsersPage() {
               users.map((user) => (
                 <tr key={user.id}>
                   <td className="px-4 py-3 text-foreground">{user.email}</td>
-                  <td className="px-4 py-3 text-muted-foreground">{user.role}</td>
+                  <td className="px-4 py-3 text-muted-foreground">
+                    {user.role === 'admin' ? 'Quản trị viên' : 'Người dùng'}
+                  </td>
                   <td className="px-4 py-3">
                     <span className={user.status === 'suspended' ? 'badge-danger' : 'badge-success'}>
-                      {user.status}
+                      {user.status === 'suspended' ? 'Đã khóa' : 'Hoạt động'}
                     </span>
                   </td>
                   <td className="px-4 py-3 text-muted-foreground">
-                    {new Date(user.signupDate).toLocaleDateString()}
+                    {new Date(user.signupDate).toLocaleDateString('vi-VN')}
                   </td>
                   <td className="px-4 py-3 text-muted-foreground">
-                    {new Date(user.lastActiveAt).toLocaleDateString()}
+                    {new Date(user.lastActiveAt).toLocaleDateString('vi-VN')}
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex justify-end gap-2">
@@ -194,7 +196,7 @@ export default function AdminUsersPage() {
                         onClick={() => handleToggleSuspend(user)}
                         className="btn-outline h-8 px-3 text-xs"
                       >
-                        {user.status === 'suspended' ? 'Reinstate' : 'Suspend'}
+                        {user.status === 'suspended' ? 'Mở khóa' : 'Tạm khóa'}
                       </button>
                       <button
                         type="button"
@@ -202,7 +204,7 @@ export default function AdminUsersPage() {
                         onClick={() => handleDelete(user)}
                         className="btn-outline h-8 border-danger/40 px-3 text-xs text-danger hover:bg-danger/10"
                       >
-                        Delete
+                        Xóa
                       </button>
                     </div>
                   </td>
@@ -214,7 +216,7 @@ export default function AdminUsersPage() {
 
       <div className="flex items-center justify-between text-sm text-muted-foreground">
         <span>
-          Page {page} of {totalPages} ({total} users)
+          Trang {page} / {totalPages} ({total} người dùng)
         </span>
         <div className="flex gap-2">
           <button
@@ -223,7 +225,7 @@ export default function AdminUsersPage() {
             onClick={() => setPage((p) => Math.max(1, p - 1))}
             className="btn-outline h-8 px-3 text-xs disabled:opacity-40"
           >
-            Previous
+            Trước
           </button>
           <button
             type="button"
@@ -231,7 +233,7 @@ export default function AdminUsersPage() {
             onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
             className="btn-outline h-8 px-3 text-xs disabled:opacity-40"
           >
-            Next
+            Sau
           </button>
         </div>
       </div>

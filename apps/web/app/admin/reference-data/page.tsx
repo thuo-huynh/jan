@@ -42,7 +42,7 @@ function PaginationBar({
   return (
     <div className="flex items-center justify-between text-sm text-muted-foreground">
       <span>
-        Page {page} of {totalPages} ({total} {itemLabel})
+        Trang {page} / {totalPages} ({total} {itemLabel})
       </span>
       <div className="flex gap-2">
         <button
@@ -51,7 +51,7 @@ function PaginationBar({
           onClick={() => onPageChange(Math.max(1, page - 1))}
           className="btn-outline h-8 px-3 text-xs disabled:opacity-40"
         >
-          Previous
+          Trước
         </button>
         <button
           type="button"
@@ -59,7 +59,7 @@ function PaginationBar({
           onClick={() => onPageChange(Math.min(totalPages, page + 1))}
           className="btn-outline h-8 px-3 text-xs disabled:opacity-40"
         >
-          Next
+          Sau
         </button>
       </div>
     </div>
@@ -86,10 +86,10 @@ const dangerButtonClass = 'btn-outline h-8 border-danger/40 px-3 text-xs text-da
 type Tab = 'vocab' | 'grammar' | 'pairs' | 'themes';
 
 const TABS: { value: Tab; label: string }[] = [
-  { value: 'vocab', label: 'Vocab & Kanji' },
-  { value: 'grammar', label: 'Grammar Points' },
-  { value: 'pairs', label: 'Confusable Pairs' },
-  { value: 'themes', label: 'Themes' },
+  { value: 'vocab', label: 'Từ vựng & Hán tự' },
+  { value: 'grammar', label: 'Điểm ngữ pháp' },
+  { value: 'pairs', label: 'Cặp dễ nhầm' },
+  { value: 'themes', label: 'Giao diện' },
 ];
 
 export default function AdminReferenceDataPage() {
@@ -99,11 +99,11 @@ export default function AdminReferenceDataPage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
-          Reference data
+          Dữ liệu tham chiếu
         </h1>
         <p className="mt-1.5 text-sm text-muted-foreground">
-          Manage the shared/global N2 vocab, kanji, grammar points, and confusable pairs (FR-048)
-          — independent of any user&apos;s own custom entries or personal notes.
+          Quản lý kho từ vựng, Hán tự, điểm ngữ pháp và cặp dễ nhầm N2 dùng chung/toàn cục — độc
+          lập với các mục tự thêm hoặc ghi chú cá nhân của người dùng.
         </p>
       </div>
 
@@ -175,11 +175,11 @@ function VocabTab() {
       if (query.trim()) params.set('query', query.trim());
       const res = await fetch(`/api/admin/reference-data/vocab?${params.toString()}`);
       const json = await res.json();
-      if (!res.ok) throw new Error(json.error ?? 'Failed to load vocab');
+      if (!res.ok) throw new Error(json.error ?? 'Không tải được từ vựng');
       setItems(json.items);
       setTotal(json.total);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load vocab');
+      setError(err instanceof Error ? err.message : 'Không tải được từ vựng');
     } finally {
       setLoading(false);
     }
@@ -207,26 +207,26 @@ function VocabTab() {
         body: JSON.stringify(form.id ? { id: form.id, ...payload } : payload),
       });
       const json = await res.json();
-      if (!res.ok) throw new Error(json.error?.formErrors?.[0] ?? json.error ?? 'Save failed');
+      if (!res.ok) throw new Error(json.error?.formErrors?.[0] ?? json.error ?? 'Lưu thất bại');
       setForm(emptyVocabForm);
       await load();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Save failed');
+      setError(err instanceof Error ? err.message : 'Lưu thất bại');
     } finally {
       setSaving(false);
     }
   }
 
   async function handleDelete(id: string) {
-    if (!(await confirm({ title: 'Delete this global vocab/kanji entry?' }))) return;
+    if (!(await confirm({ title: 'Xóa mục từ vựng/Hán tự toàn cục này?' }))) return;
     setError(null);
     try {
       const res = await fetch(`/api/admin/reference-data/vocab?id=${id}`, { method: 'DELETE' });
       const json = await res.json();
-      if (!res.ok) throw new Error(json.error ?? 'Delete failed');
+      if (!res.ok) throw new Error(json.error ?? 'Xóa thất bại');
       await load();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Delete failed');
+      setError(err instanceof Error ? err.message : 'Xóa thất bại');
     }
   }
 
@@ -235,11 +235,11 @@ function VocabTab() {
       {confirmDialog}
       <div className="card">
         <h2 className="text-sm font-semibold text-foreground">
-          {form.id ? 'Edit entry' : 'Add new entry'}
+          {form.id ? 'Sửa mục' : 'Thêm mục mới'}
         </h2>
         <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
           <div>
-            <label className={labelClass}>Word</label>
+            <label className={labelClass}>Từ</label>
             <input
               className={inputClass}
               value={form.word}
@@ -247,7 +247,7 @@ function VocabTab() {
             />
           </div>
           <div>
-            <label className={labelClass}>Reading</label>
+            <label className={labelClass}>Cách đọc</label>
             <input
               className={inputClass}
               value={form.reading}
@@ -255,7 +255,7 @@ function VocabTab() {
             />
           </div>
           <div className="sm:col-span-2">
-            <label className={labelClass}>Meaning</label>
+            <label className={labelClass}>Nghĩa</label>
             <input
               className={inputClass}
               value={form.meaning}
@@ -263,7 +263,7 @@ function VocabTab() {
             />
           </div>
           <div className="sm:col-span-2">
-            <label className={labelClass}>Example</label>
+            <label className={labelClass}>Ví dụ</label>
             <input
               className={inputClass}
               value={form.example}
@@ -271,7 +271,7 @@ function VocabTab() {
             />
           </div>
           <div>
-            <label className={labelClass}>JLPT level</label>
+            <label className={labelClass}>Cấp độ JLPT</label>
             <input
               className={inputClass}
               value={form.jlptLevel}
@@ -286,7 +286,7 @@ function VocabTab() {
                 onChange={(e) => setForm((f) => ({ ...f, isKanji: e.target.checked }))}
                 className="h-4 w-4 rounded border-border accent-primary"
               />
-              Is kanji
+              Là Hán tự
             </label>
           </div>
         </div>
@@ -297,11 +297,11 @@ function VocabTab() {
             onClick={handleSubmit}
             className={primaryButtonClass}
           >
-            {form.id ? 'Save changes' : 'Add entry'}
+            {form.id ? 'Lưu thay đổi' : 'Thêm mục'}
           </button>
           {form.id && (
             <button type="button" onClick={() => setForm(emptyVocabForm)} className={secondaryButtonClass}>
-              Cancel
+              Hủy
             </button>
           )}
         </div>
@@ -317,8 +317,8 @@ function VocabTab() {
       >
         <input
           className={`${inputClass} max-w-sm`}
-          placeholder="Search word/meaning…"
-          aria-label="Search word/meaning"
+          placeholder="Tìm từ/nghĩa…"
+          aria-label="Tìm từ/nghĩa"
           value={query}
           onChange={(e) => {
             setPage(1);
@@ -326,7 +326,7 @@ function VocabTab() {
           }}
         />
         <button type="submit" className={secondaryButtonClass}>
-          Search
+          Tìm
         </button>
       </form>
 
@@ -340,11 +340,11 @@ function VocabTab() {
         <table className="w-full text-left text-sm">
           <thead className="border-b border-border text-xs uppercase tracking-wide text-muted-foreground">
             <tr>
-              <th className="px-4 py-3">Word</th>
-              <th className="px-4 py-3">Reading</th>
-              <th className="px-4 py-3">Meaning</th>
-              <th className="px-4 py-3">Kanji</th>
-              <th className="px-4 py-3 text-right">Actions</th>
+              <th className="px-4 py-3">Từ</th>
+              <th className="px-4 py-3">Cách đọc</th>
+              <th className="px-4 py-3">Nghĩa</th>
+              <th className="px-4 py-3">Hán tự</th>
+              <th className="px-4 py-3 text-right">Thao tác</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-border">
@@ -352,7 +352,7 @@ function VocabTab() {
             {!loading && items.length === 0 && (
               <tr>
                 <td colSpan={5}>
-                  <EmptyTableState icon={PackageOpen} message="No entries found." />
+                  <EmptyTableState icon={PackageOpen} message="Không tìm thấy mục nào." />
                 </td>
               </tr>
             )}
@@ -362,7 +362,7 @@ function VocabTab() {
                   <td className="px-4 py-3 font-jp text-foreground">{item.word}</td>
                   <td className="px-4 py-3 font-jp text-muted-foreground">{item.reading}</td>
                   <td className="px-4 py-3 text-muted-foreground">{item.meaning}</td>
-                  <td className="px-4 py-3 text-muted-foreground">{item.is_kanji ? 'Yes' : 'No'}</td>
+                  <td className="px-4 py-3 text-muted-foreground">{item.is_kanji ? 'Có' : 'Không'}</td>
                   <td className="px-4 py-3">
                     <div className="flex justify-end gap-2">
                       <button
@@ -381,11 +381,11 @@ function VocabTab() {
                         }
                       >
                         <Pencil className="h-3.5 w-3.5" aria-hidden="true" />
-                        Edit
+                        Sửa
                       </button>
                       <button type="button" className={dangerButtonClass} onClick={() => handleDelete(item.id)}>
                         <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
-                        Delete
+                        Xóa
                       </button>
                     </div>
                   </td>
@@ -394,7 +394,7 @@ function VocabTab() {
           </tbody>
         </table>
       </div>
-      <PaginationBar page={page} total={total} itemLabel="global entries" onPageChange={setPage} />
+      <PaginationBar page={page} total={total} itemLabel="mục toàn cục" onPageChange={setPage} />
     </div>
   );
 }
@@ -446,11 +446,11 @@ function GrammarTab() {
       if (query.trim()) params.set('query', query.trim());
       const res = await fetch(`/api/admin/reference-data/grammar?${params.toString()}`);
       const json = await res.json();
-      if (!res.ok) throw new Error(json.error ?? 'Failed to load grammar points');
+      if (!res.ok) throw new Error(json.error ?? 'Không tải được điểm ngữ pháp');
       setItems(json.items);
       setTotal(json.total);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load grammar points');
+      setError(err instanceof Error ? err.message : 'Không tải được điểm ngữ pháp');
     } finally {
       setLoading(false);
     }
@@ -483,11 +483,11 @@ function GrammarTab() {
         body: JSON.stringify(form.id ? { id: form.id, ...payload } : payload),
       });
       const json = await res.json();
-      if (!res.ok) throw new Error(json.error?.formErrors?.[0] ?? json.error ?? 'Save failed');
+      if (!res.ok) throw new Error(json.error?.formErrors?.[0] ?? json.error ?? 'Lưu thất bại');
       setForm(emptyGrammarForm);
       await load();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Save failed');
+      setError(err instanceof Error ? err.message : 'Lưu thất bại');
     } finally {
       setSaving(false);
     }
@@ -495,18 +495,18 @@ function GrammarTab() {
 
   async function handleDelete(id: string) {
     const ok = await confirm({
-      title: 'Delete this global grammar point?',
-      description: 'Any confusable pairs referencing it will also break.',
+      title: 'Xóa điểm ngữ pháp toàn cục này?',
+      description: 'Các cặp dễ nhầm tham chiếu đến điểm này cũng sẽ bị lỗi.',
     });
     if (!ok) return;
     setError(null);
     try {
       const res = await fetch(`/api/admin/reference-data/grammar?id=${id}`, { method: 'DELETE' });
       const json = await res.json();
-      if (!res.ok) throw new Error(json.error ?? 'Delete failed');
+      if (!res.ok) throw new Error(json.error ?? 'Xóa thất bại');
       await load();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Delete failed');
+      setError(err instanceof Error ? err.message : 'Xóa thất bại');
     }
   }
 
@@ -515,11 +515,11 @@ function GrammarTab() {
       {confirmDialog}
       <div className="card">
         <h2 className="text-sm font-semibold text-foreground">
-          {form.id ? 'Edit grammar point' : 'Add new grammar point'}
+          {form.id ? 'Sửa điểm ngữ pháp' : 'Thêm điểm ngữ pháp mới'}
         </h2>
         <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
           <div>
-            <label className={labelClass}>Pattern (文型)</label>
+            <label className={labelClass}>Mẫu câu (文型)</label>
             <input
               className={inputClass}
               value={form.pattern}
@@ -527,7 +527,7 @@ function GrammarTab() {
             />
           </div>
           <div>
-            <label className={labelClass}>Connection form (接続)</label>
+            <label className={labelClass}>Thể chia (接続)</label>
             <input
               className={inputClass}
               value={form.connectionForm}
@@ -535,7 +535,7 @@ function GrammarTab() {
             />
           </div>
           <div className="sm:col-span-2">
-            <label className={labelClass}>Meaning</label>
+            <label className={labelClass}>Nghĩa</label>
             <input
               className={inputClass}
               value={form.meaning}
@@ -543,7 +543,7 @@ function GrammarTab() {
             />
           </div>
           <div className="sm:col-span-2">
-            <label className={labelClass}>Formality / nuance</label>
+            <label className={labelClass}>Mức trang trọng / sắc thái</label>
             <input
               className={inputClass}
               value={form.formalityNuance}
@@ -551,7 +551,7 @@ function GrammarTab() {
             />
           </div>
           <div className="sm:col-span-2">
-            <label className={labelClass}>Example sentences (one per line)</label>
+            <label className={labelClass}>Câu ví dụ (mỗi dòng một câu)</label>
             <textarea
               className="textarea-field"
               rows={3}
@@ -560,7 +560,7 @@ function GrammarTab() {
             />
           </div>
           <div>
-            <label className={labelClass}>JLPT level</label>
+            <label className={labelClass}>Cấp độ JLPT</label>
             <input
               className={inputClass}
               value={form.jlptLevel}
@@ -568,10 +568,10 @@ function GrammarTab() {
             />
           </div>
           <div>
-            <label className={labelClass}>Frequency tag</label>
+            <label className={labelClass}>Tần suất</label>
             <input
               className={inputClass}
-              placeholder="high / medium / low"
+              placeholder="cao / trung bình / thấp"
               value={form.frequencyTag}
               onChange={(e) => setForm((f) => ({ ...f, frequencyTag: e.target.value }))}
             />
@@ -584,7 +584,7 @@ function GrammarTab() {
                 onChange={(e) => setForm((f) => ({ ...f, n3Overlap: e.target.checked }))}
                 className="h-4 w-4 rounded border-border accent-primary"
               />
-              N3 overlap
+              Trùng N3
             </label>
           </div>
         </div>
@@ -595,11 +595,11 @@ function GrammarTab() {
             onClick={handleSubmit}
             className={primaryButtonClass}
           >
-            {form.id ? 'Save changes' : 'Add grammar point'}
+            {form.id ? 'Lưu thay đổi' : 'Thêm điểm ngữ pháp'}
           </button>
           {form.id && (
             <button type="button" onClick={() => setForm(emptyGrammarForm)} className={secondaryButtonClass}>
-              Cancel
+              Hủy
             </button>
           )}
         </div>
@@ -615,8 +615,8 @@ function GrammarTab() {
       >
         <input
           className={`${inputClass} max-w-sm`}
-          placeholder="Search pattern/meaning…"
-          aria-label="Search pattern/meaning"
+          placeholder="Tìm mẫu câu/nghĩa…"
+          aria-label="Tìm mẫu câu/nghĩa"
           value={query}
           onChange={(e) => {
             setPage(1);
@@ -624,7 +624,7 @@ function GrammarTab() {
           }}
         />
         <button type="submit" className={secondaryButtonClass}>
-          Search
+          Tìm
         </button>
       </form>
 
@@ -638,11 +638,11 @@ function GrammarTab() {
         <table className="w-full text-left text-sm">
           <thead className="border-b border-border text-xs uppercase tracking-wide text-muted-foreground">
             <tr>
-              <th className="px-4 py-3">Pattern</th>
-              <th className="px-4 py-3">Meaning</th>
-              <th className="px-4 py-3">Frequency</th>
-              <th className="px-4 py-3">N3 overlap</th>
-              <th className="px-4 py-3 text-right">Actions</th>
+              <th className="px-4 py-3">Mẫu câu</th>
+              <th className="px-4 py-3">Nghĩa</th>
+              <th className="px-4 py-3">Tần suất</th>
+              <th className="px-4 py-3">Trùng N3</th>
+              <th className="px-4 py-3 text-right">Thao tác</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-border">
@@ -650,7 +650,7 @@ function GrammarTab() {
             {!loading && items.length === 0 && (
               <tr>
                 <td colSpan={5}>
-                  <EmptyTableState icon={BookMarked} message="No grammar points found." />
+                  <EmptyTableState icon={BookMarked} message="Không tìm thấy điểm ngữ pháp nào." />
                 </td>
               </tr>
             )}
@@ -660,7 +660,7 @@ function GrammarTab() {
                   <td className="px-4 py-3 font-jp text-foreground">{item.pattern}</td>
                   <td className="px-4 py-3 text-muted-foreground">{item.meaning}</td>
                   <td className="px-4 py-3 text-muted-foreground">{item.frequency_tag ?? '—'}</td>
-                  <td className="px-4 py-3 text-muted-foreground">{item.n3_overlap ? 'Yes' : 'No'}</td>
+                  <td className="px-4 py-3 text-muted-foreground">{item.n3_overlap ? 'Có' : 'Không'}</td>
                   <td className="px-4 py-3">
                     <div className="flex justify-end gap-2">
                       <button
@@ -681,11 +681,11 @@ function GrammarTab() {
                         }
                       >
                         <Pencil className="h-3.5 w-3.5" aria-hidden="true" />
-                        Edit
+                        Sửa
                       </button>
                       <button type="button" className={dangerButtonClass} onClick={() => handleDelete(item.id)}>
                         <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
-                        Delete
+                        Xóa
                       </button>
                     </div>
                   </td>
@@ -694,7 +694,7 @@ function GrammarTab() {
           </tbody>
         </table>
       </div>
-      <PaginationBar page={page} total={total} itemLabel="grammar points" onPageChange={setPage} />
+      <PaginationBar page={page} total={total} itemLabel="điểm ngữ pháp" onPageChange={setPage} />
     </div>
   );
 }
@@ -757,12 +757,12 @@ function PairsTab() {
         fetchAllGrammarOptions(),
       ]);
       const json = await pairsRes.json();
-      if (!pairsRes.ok) throw new Error(json.error ?? 'Failed to load confusable pairs');
+      if (!pairsRes.ok) throw new Error(json.error ?? 'Không tải được cặp dễ nhầm');
       setItems(json.items);
       setTotal(json.total);
       setGrammarOptions(options);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load confusable pairs');
+      setError(err instanceof Error ? err.message : 'Không tải được cặp dễ nhầm');
     } finally {
       setLoading(false);
     }
@@ -787,28 +787,28 @@ function PairsTab() {
         body: JSON.stringify(form.id ? { id: form.id, ...payload } : payload),
       });
       const json = await res.json();
-      if (!res.ok) throw new Error(json.error?.formErrors?.[0] ?? json.error ?? 'Save failed');
+      if (!res.ok) throw new Error(json.error?.formErrors?.[0] ?? json.error ?? 'Lưu thất bại');
       setForm(emptyPairForm);
       await load();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Save failed');
+      setError(err instanceof Error ? err.message : 'Lưu thất bại');
     } finally {
       setSaving(false);
     }
   }
 
   async function handleDelete(id: string) {
-    if (!(await confirm({ title: 'Delete this confusable-pair comparison?' }))) return;
+    if (!(await confirm({ title: 'Xóa so sánh cặp dễ nhầm này?' }))) return;
     setError(null);
     try {
       const res = await fetch(`/api/admin/reference-data/confusable-pairs?id=${id}`, {
         method: 'DELETE',
       });
       const json = await res.json();
-      if (!res.ok) throw new Error(json.error ?? 'Delete failed');
+      if (!res.ok) throw new Error(json.error ?? 'Xóa thất bại');
       await load();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Delete failed');
+      setError(err instanceof Error ? err.message : 'Xóa thất bại');
     }
   }
 
@@ -817,17 +817,17 @@ function PairsTab() {
       {confirmDialog}
       <div className="card">
         <h2 className="text-sm font-semibold text-foreground">
-          {form.id ? 'Edit confusable pair' : 'Add new confusable pair'}
+          {form.id ? 'Sửa cặp dễ nhầm' : 'Thêm cặp dễ nhầm mới'}
         </h2>
         <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
           <div>
-            <label className={labelClass}>Grammar point A</label>
+            <label className={labelClass}>Điểm ngữ pháp A</label>
             <select
               className={inputClass}
               value={form.grammarPointIdA}
               onChange={(e) => setForm((f) => ({ ...f, grammarPointIdA: e.target.value }))}
             >
-              <option value="">Select…</option>
+              <option value="">Chọn…</option>
               {grammarOptions.map((g) => (
                 <option key={g.id} value={g.id}>
                   {g.pattern}
@@ -836,13 +836,13 @@ function PairsTab() {
             </select>
           </div>
           <div>
-            <label className={labelClass}>Grammar point B</label>
+            <label className={labelClass}>Điểm ngữ pháp B</label>
             <select
               className={inputClass}
               value={form.grammarPointIdB}
               onChange={(e) => setForm((f) => ({ ...f, grammarPointIdB: e.target.value }))}
             >
-              <option value="">Select…</option>
+              <option value="">Chọn…</option>
               {grammarOptions.map((g) => (
                 <option key={g.id} value={g.id}>
                   {g.pattern}
@@ -851,7 +851,7 @@ function PairsTab() {
             </select>
           </div>
           <div className="sm:col-span-2">
-            <label className={labelClass}>Comparison note</label>
+            <label className={labelClass}>Ghi chú so sánh</label>
             <textarea
               className="textarea-field"
               rows={4}
@@ -873,11 +873,11 @@ function PairsTab() {
             onClick={handleSubmit}
             className={primaryButtonClass}
           >
-            {form.id ? 'Save changes' : 'Add pair'}
+            {form.id ? 'Lưu thay đổi' : 'Thêm cặp'}
           </button>
           {form.id && (
             <button type="button" onClick={() => setForm(emptyPairForm)} className={secondaryButtonClass}>
-              Cancel
+              Hủy
             </button>
           )}
         </div>
@@ -893,8 +893,8 @@ function PairsTab() {
       >
         <input
           className={`${inputClass} max-w-sm`}
-          placeholder="Search comparison note…"
-          aria-label="Search comparison note"
+          placeholder="Tìm ghi chú so sánh…"
+          aria-label="Tìm ghi chú so sánh"
           value={query}
           onChange={(e) => {
             setPage(1);
@@ -902,7 +902,7 @@ function PairsTab() {
           }}
         />
         <button type="submit" className={secondaryButtonClass}>
-          Search
+          Tìm
         </button>
       </form>
 
@@ -916,9 +916,9 @@ function PairsTab() {
         <table className="w-full text-left text-sm">
           <thead className="border-b border-border text-xs uppercase tracking-wide text-muted-foreground">
             <tr>
-              <th className="px-4 py-3">Pair</th>
-              <th className="px-4 py-3">Comparison note</th>
-              <th className="px-4 py-3 text-right">Actions</th>
+              <th className="px-4 py-3">Cặp</th>
+              <th className="px-4 py-3">Ghi chú so sánh</th>
+              <th className="px-4 py-3 text-right">Thao tác</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-border">
@@ -926,7 +926,7 @@ function PairsTab() {
             {!loading && items.length === 0 && (
               <tr>
                 <td colSpan={3}>
-                  <EmptyTableState icon={GitCompare} message="No confusable pairs yet." />
+                  <EmptyTableState icon={GitCompare} message="Chưa có cặp dễ nhầm nào." />
                 </td>
               </tr>
             )}
@@ -934,7 +934,7 @@ function PairsTab() {
               items.map((item) => (
                 <tr key={item.id}>
                   <td className="px-4 py-3 font-jp text-foreground">
-                    {item.pointA?.pattern ?? '?'} vs {item.pointB?.pattern ?? '?'}
+                    {item.pointA?.pattern ?? '?'} và {item.pointB?.pattern ?? '?'}
                   </td>
                   <td className="max-w-md truncate px-4 py-3 text-muted-foreground">
                     {item.comparisonNote}
@@ -954,11 +954,11 @@ function PairsTab() {
                         }
                       >
                         <Pencil className="h-3.5 w-3.5" aria-hidden="true" />
-                        Edit
+                        Sửa
                       </button>
                       <button type="button" className={dangerButtonClass} onClick={() => handleDelete(item.id)}>
                         <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
-                        Delete
+                        Xóa
                       </button>
                     </div>
                   </td>
@@ -967,7 +967,7 @@ function PairsTab() {
           </tbody>
         </table>
       </div>
-      <PaginationBar page={page} total={total} itemLabel="confusable pairs" onPageChange={setPage} />
+      <PaginationBar page={page} total={total} itemLabel="cặp dễ nhầm" onPageChange={setPage} />
     </div>
   );
 }
@@ -1065,10 +1065,10 @@ function ThemesTab() {
     try {
       const res = await fetch('/api/admin/reference-data/themes');
       const json = await res.json();
-      if (!res.ok) throw new Error(json.error ?? 'Failed to load themes');
+      if (!res.ok) throw new Error(json.error ?? 'Không tải được giao diện');
       setItems(json.items);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load themes');
+      setError(err instanceof Error ? err.message : 'Không tải được giao diện');
     } finally {
       setLoading(false);
     }
@@ -1105,11 +1105,11 @@ function ThemesTab() {
         body: JSON.stringify(form.id ? { id: form.id, ...payload } : payload),
       });
       const json = await res.json();
-      if (!res.ok) throw new Error(json.error?.formErrors?.[0] ?? json.error ?? 'Save failed');
+      if (!res.ok) throw new Error(json.error?.formErrors?.[0] ?? json.error ?? 'Lưu thất bại');
       setForm(emptyThemeForm);
       await load();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Save failed');
+      setError(err instanceof Error ? err.message : 'Lưu thất bại');
     } finally {
       setSaving(false);
     }
@@ -1117,18 +1117,18 @@ function ThemesTab() {
 
   async function handleDelete(id: string) {
     const ok = await confirm({
-      title: 'Delete this theme?',
-      description: 'Users who have it selected will fall back to the default theme.',
+      title: 'Xóa giao diện này?',
+      description: 'Người dùng đang chọn giao diện này sẽ tự động chuyển về giao diện mặc định.',
     });
     if (!ok) return;
     setError(null);
     try {
       const res = await fetch(`/api/admin/reference-data/themes?id=${id}`, { method: 'DELETE' });
       const json = await res.json();
-      if (!res.ok) throw new Error(json.error ?? 'Delete failed');
+      if (!res.ok) throw new Error(json.error ?? 'Xóa thất bại');
       await load();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Delete failed');
+      setError(err instanceof Error ? err.message : 'Xóa thất bại');
     }
   }
 
@@ -1137,11 +1137,11 @@ function ThemesTab() {
       {confirmDialog}
       <div className="card">
         <h2 className="text-sm font-semibold text-foreground">
-          {form.id ? 'Edit theme' : 'Add new theme'}
+          {form.id ? 'Sửa giao diện' : 'Thêm giao diện mới'}
         </h2>
         <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-3">
           <div>
-            <label className={labelClass}>Name</label>
+            <label className={labelClass}>Tên</label>
             <input
               className={inputClass}
               value={form.name}
@@ -1158,7 +1158,7 @@ function ThemesTab() {
             />
           </div>
           <div>
-            <label className={labelClass}>Sort order</label>
+            <label className={labelClass}>Thứ tự sắp xếp</label>
             <input
               type="number"
               className={inputClass}
@@ -1171,28 +1171,28 @@ function ThemesTab() {
         <div className="mt-4 grid grid-cols-1 gap-6 sm:grid-cols-2">
           <div>
             <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-              Light mode
+              Chế độ sáng
             </h3>
             <div className="space-y-3">
-              <ColorField label="Primary" value={form.primaryLight} onChange={(v) => setForm((f) => ({ ...f, primaryLight: v }))} />
-              <ColorField label="Primary foreground" value={form.primaryForegroundLight} onChange={(v) => setForm((f) => ({ ...f, primaryForegroundLight: v }))} />
-              <ColorField label="Secondary" value={form.secondaryLight} onChange={(v) => setForm((f) => ({ ...f, secondaryLight: v }))} />
-              <ColorField label="Secondary foreground" value={form.secondaryForegroundLight} onChange={(v) => setForm((f) => ({ ...f, secondaryForegroundLight: v }))} />
-              <ColorField label="Accent" value={form.accentLight} onChange={(v) => setForm((f) => ({ ...f, accentLight: v }))} />
-              <ColorField label="Accent foreground" value={form.accentForegroundLight} onChange={(v) => setForm((f) => ({ ...f, accentForegroundLight: v }))} />
+              <ColorField label="Màu chính" value={form.primaryLight} onChange={(v) => setForm((f) => ({ ...f, primaryLight: v }))} />
+              <ColorField label="Chữ trên nền chính" value={form.primaryForegroundLight} onChange={(v) => setForm((f) => ({ ...f, primaryForegroundLight: v }))} />
+              <ColorField label="Màu phụ" value={form.secondaryLight} onChange={(v) => setForm((f) => ({ ...f, secondaryLight: v }))} />
+              <ColorField label="Chữ trên nền phụ" value={form.secondaryForegroundLight} onChange={(v) => setForm((f) => ({ ...f, secondaryForegroundLight: v }))} />
+              <ColorField label="Màu nhấn" value={form.accentLight} onChange={(v) => setForm((f) => ({ ...f, accentLight: v }))} />
+              <ColorField label="Chữ trên nền nhấn" value={form.accentForegroundLight} onChange={(v) => setForm((f) => ({ ...f, accentForegroundLight: v }))} />
             </div>
           </div>
           <div>
             <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-              Dark mode
+              Chế độ tối
             </h3>
             <div className="space-y-3">
-              <ColorField label="Primary" value={form.primaryDark} onChange={(v) => setForm((f) => ({ ...f, primaryDark: v }))} />
-              <ColorField label="Primary foreground" value={form.primaryForegroundDark} onChange={(v) => setForm((f) => ({ ...f, primaryForegroundDark: v }))} />
-              <ColorField label="Secondary" value={form.secondaryDark} onChange={(v) => setForm((f) => ({ ...f, secondaryDark: v }))} />
-              <ColorField label="Secondary foreground" value={form.secondaryForegroundDark} onChange={(v) => setForm((f) => ({ ...f, secondaryForegroundDark: v }))} />
-              <ColorField label="Accent" value={form.accentDark} onChange={(v) => setForm((f) => ({ ...f, accentDark: v }))} />
-              <ColorField label="Accent foreground" value={form.accentForegroundDark} onChange={(v) => setForm((f) => ({ ...f, accentForegroundDark: v }))} />
+              <ColorField label="Màu chính" value={form.primaryDark} onChange={(v) => setForm((f) => ({ ...f, primaryDark: v }))} />
+              <ColorField label="Chữ trên nền chính" value={form.primaryForegroundDark} onChange={(v) => setForm((f) => ({ ...f, primaryForegroundDark: v }))} />
+              <ColorField label="Màu phụ" value={form.secondaryDark} onChange={(v) => setForm((f) => ({ ...f, secondaryDark: v }))} />
+              <ColorField label="Chữ trên nền phụ" value={form.secondaryForegroundDark} onChange={(v) => setForm((f) => ({ ...f, secondaryForegroundDark: v }))} />
+              <ColorField label="Màu nhấn" value={form.accentDark} onChange={(v) => setForm((f) => ({ ...f, accentDark: v }))} />
+              <ColorField label="Chữ trên nền nhấn" value={form.accentForegroundDark} onChange={(v) => setForm((f) => ({ ...f, accentForegroundDark: v }))} />
             </div>
           </div>
         </div>
@@ -1204,11 +1204,11 @@ function ThemesTab() {
             onClick={handleSubmit}
             className={primaryButtonClass}
           >
-            {form.id ? 'Save changes' : 'Add theme'}
+            {form.id ? 'Lưu thay đổi' : 'Thêm giao diện'}
           </button>
           {form.id && (
             <button type="button" onClick={() => setForm(emptyThemeForm)} className={secondaryButtonClass}>
-              Cancel
+              Hủy
             </button>
           )}
         </div>
@@ -1224,11 +1224,11 @@ function ThemesTab() {
         <table className="w-full text-left text-sm">
           <thead className="border-b border-border text-xs uppercase tracking-wide text-muted-foreground">
             <tr>
-              <th className="px-4 py-3">Order</th>
-              <th className="px-4 py-3">Name</th>
+              <th className="px-4 py-3">Thứ tự</th>
+              <th className="px-4 py-3">Tên</th>
               <th className="px-4 py-3">Slug</th>
-              <th className="px-4 py-3">Preview</th>
-              <th className="px-4 py-3 text-right">Actions</th>
+              <th className="px-4 py-3">Xem trước</th>
+              <th className="px-4 py-3 text-right">Thao tác</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-border">
@@ -1236,7 +1236,7 @@ function ThemesTab() {
             {!loading && items.length === 0 && (
               <tr>
                 <td colSpan={5}>
-                  <EmptyTableState icon={Palette} message="No themes yet." />
+                  <EmptyTableState icon={Palette} message="Chưa có giao diện nào." />
                 </td>
               </tr>
             )}
@@ -1249,7 +1249,7 @@ function ThemesTab() {
                   <td className="px-4 py-3">
                     <div className="space-y-1">
                       <div className="flex items-center gap-1">
-                        <span className="w-8 text-[10px] uppercase text-muted-foreground">Light</span>
+                        <span className="w-8 text-[10px] uppercase text-muted-foreground">Sáng</span>
                         <span
                           className="h-5 w-5 rounded-full border border-border"
                           style={{ backgroundColor: item.primary_light }}
@@ -1264,7 +1264,7 @@ function ThemesTab() {
                         />
                       </div>
                       <div className="flex items-center gap-1 rounded bg-[#0b0b1a] px-1 py-1">
-                        <span className="w-8 text-[10px] uppercase text-white/60">Dark</span>
+                        <span className="w-8 text-[10px] uppercase text-white/60">Tối</span>
                         <span
                           className="h-5 w-5 rounded-full border border-white/20"
                           style={{ backgroundColor: item.primary_dark }}
@@ -1307,11 +1307,11 @@ function ThemesTab() {
                         }
                       >
                         <Pencil className="h-3.5 w-3.5" aria-hidden="true" />
-                        Edit
+                        Sửa
                       </button>
                       <button type="button" className={dangerButtonClass} onClick={() => handleDelete(item.id)}>
                         <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
-                        Delete
+                        Xóa
                       </button>
                     </div>
                   </td>
@@ -1320,7 +1320,7 @@ function ThemesTab() {
           </tbody>
         </table>
       </div>
-      <p className="text-xs text-muted-foreground">{items.length} total themes.</p>
+      <p className="text-xs text-muted-foreground">Tổng cộng {items.length} giao diện.</p>
     </div>
   );
 }

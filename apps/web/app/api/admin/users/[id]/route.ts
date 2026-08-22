@@ -28,13 +28,13 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
   const body = await request.json().catch(() => ({}));
   if (body?.confirm !== true) {
     return NextResponse.json(
-      { error: 'Deletion requires { "confirm": true } in the request body' },
+      { error: 'Xóa cần có { "confirm": true } trong nội dung yêu cầu' },
       { status: 400 },
     );
   }
 
   if (targetId === user.id) {
-    return NextResponse.json({ error: 'Cannot delete your own account' }, { status: 409 });
+    return NextResponse.json({ error: 'Không thể xóa tài khoản của chính bạn' }, { status: 409 });
   }
 
   const { data: target, error: fetchError } = await admin
@@ -47,7 +47,7 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
     return NextResponse.json({ error: fetchError.message }, { status: 500 });
   }
   if (!target) {
-    return NextResponse.json({ error: 'User not found' }, { status: 404 });
+    return NextResponse.json({ error: 'Không tìm thấy người dùng' }, { status: 404 });
   }
 
   if (target.role === 'admin') {
@@ -61,7 +61,7 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
     }
     if ((count ?? 0) <= 1) {
       return NextResponse.json(
-        { error: 'Cannot delete the last remaining admin account' },
+        { error: 'Không thể xóa tài khoản quản trị viên cuối cùng' },
         { status: 409 },
       );
     }

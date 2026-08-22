@@ -18,7 +18,7 @@ export function MarkdownPreview({
   if (!markdown.trim()) {
     return (
       <p className={`text-sm italic text-muted-foreground ${className}`}>
-        Nothing to preview yet.
+        Chưa có gì để xem trước.
       </p>
     );
   }

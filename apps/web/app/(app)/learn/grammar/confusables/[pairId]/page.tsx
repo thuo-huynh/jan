@@ -75,14 +75,14 @@ export default async function ConfusablePairPage({ params }: ConfusablePairPageP
           className="inline-flex items-center gap-1.5 text-sm font-medium text-primary transition-colors hover:opacity-80"
         >
           <ArrowLeft className="h-4 w-4" aria-hidden="true" />
-          Back to grammar list
+          Về danh sách ngữ pháp
         </Link>
         <h1 className="mt-2 text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
-          <span className="font-jp">{pointA.pattern}</span> vs.{' '}
+          <span className="font-jp">{pointA.pattern}</span> và{' '}
           <span className="font-jp">{pointB.pattern}</span>
         </h1>
         <p className="mt-1.5 text-sm text-muted-foreground">
-          Side-by-side comparison to help disambiguate this confusable pair.
+          So sánh song song để phân biệt cặp ngữ pháp dễ nhầm này.
         </p>
       </div>
 

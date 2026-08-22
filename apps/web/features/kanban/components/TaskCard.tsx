@@ -108,8 +108,8 @@ export function TaskCard({ task, onClick, overlay }: TaskCardProps) {
               <Clock className="h-3 w-3" aria-hidden="true" />
             ) : null}
             {urgency === 'today'
-              ? 'Due today'
-              : new Date(`${task.due_date}T00:00:00`).toLocaleDateString(undefined, {
+              ? 'Đến hạn hôm nay'
+              : new Date(`${task.due_date}T00:00:00`).toLocaleDateString('vi-VN', {
                   month: 'short',
                   day: 'numeric',
                 })}
@@ -128,7 +128,7 @@ export function TaskCard({ task, onClick, overlay }: TaskCardProps) {
         )}
         {task.assignee_id && (
           <span
-            title="Assignee"
+            title="Người phụ trách"
             className="ml-auto flex h-5 w-5 items-center justify-center rounded-full bg-primary text-[10px] font-semibold text-primary-foreground"
           >
             {initials(task.assignee_id)}

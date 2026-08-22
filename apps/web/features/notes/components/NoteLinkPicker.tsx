@@ -47,7 +47,7 @@ function LinkSelect<T extends { id: string }>({
             onClick={() => onSelect(null)}
             className="shrink-0 text-xs font-medium text-muted-foreground hover:text-danger"
           >
-            Unlink
+            Bỏ liên kết
           </button>
         </div>
       ) : (
@@ -64,7 +64,7 @@ function LinkSelect<T extends { id: string }>({
           {open && (
             <ul className="absolute z-10 mt-1 max-h-48 w-full overflow-auto rounded-lg border border-border bg-card py-1 text-sm shadow-lg">
               {filtered.length === 0 && (
-                <li className="px-3 py-1.5 text-muted-foreground">No matches</li>
+                <li className="px-3 py-1.5 text-muted-foreground">Không có kết quả</li>
               )}
               {filtered.map((option) => (
                 <li key={option.id}>
@@ -117,20 +117,20 @@ export function NoteLinkPicker({
   return (
     <div className="grid gap-3 sm:grid-cols-2">
       <LinkSelect
-        label="Linked task"
+        label="Công việc liên kết"
         options={taskOptions}
         selectedId={linkedTaskId}
-        renderLabel={(t) => t.title || 'Untitled task'}
+        renderLabel={(t) => t.title || 'Công việc chưa đặt tên'}
         onSelect={onLinkedTaskChange}
-        placeholder="Search tasks…"
+        placeholder="Tìm công việc…"
       />
       <LinkSelect
-        label="Linked vocab / kanji"
+        label="Từ vựng / Hán tự liên kết"
         options={vocabOptions}
         selectedId={linkedVocabId}
         renderLabel={(v) => `${v.word} — ${v.meaning}`}
         onSelect={onLinkedVocabChange}
-        placeholder="Search vocab…"
+        placeholder="Tìm từ vựng…"
       />
     </div>
   );

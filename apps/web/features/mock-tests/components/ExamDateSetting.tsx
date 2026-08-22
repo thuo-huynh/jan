@@ -40,7 +40,7 @@ export function ExamDateSetting({ initialExamDate }: ExamDateSettingProps) {
 
     const parsed = examDateSchema.safeParse({ examDate: examDate || null });
     if (!parsed.success) {
-      setError(parsed.error.issues[0]?.message ?? 'Invalid date');
+      setError(parsed.error.issues[0]?.message ?? 'Ngày không hợp lệ');
       return;
     }
 
@@ -51,7 +51,7 @@ export function ExamDateSetting({ initialExamDate }: ExamDateSettingProps) {
     } = await supabase.auth.getUser();
     if (!user) {
       setSubmitting(false);
-      setError('You must be signed in.');
+      setError('Bạn cần đăng nhập.');
       return;
     }
 
@@ -74,11 +74,11 @@ export function ExamDateSetting({ initialExamDate }: ExamDateSettingProps) {
 
   return (
     <div className={`card space-y-3 p-4 ${urgent ? 'border-accent/40 bg-accent/5' : ''}`}>
-      <h2 className="text-sm font-semibold tracking-tight text-foreground">Exam date</h2>
+      <h2 className="text-sm font-semibold tracking-tight text-foreground">Ngày thi</h2>
       <form onSubmit={handleSubmit} className="flex flex-wrap items-end gap-2">
         <div>
           <label className="label-field" htmlFor="exam-date">
-            JLPT N2 exam date
+            Ngày thi JLPT N2
           </label>
           <input
             id="exam-date"
@@ -89,7 +89,7 @@ export function ExamDateSetting({ initialExamDate }: ExamDateSettingProps) {
           />
         </div>
         <button type="submit" disabled={submitting} className="btn-primary">
-          {submitting ? 'Saving…' : 'Save'}
+          {submitting ? 'Đang lưu…' : 'Lưu'}
         </button>
       </form>
       {error && <p className="error-text">{error}</p>}

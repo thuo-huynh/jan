@@ -55,8 +55,8 @@ export function PinButton({
       onClick={handleToggle}
       disabled={saving}
       aria-pressed={pinnedState}
-      aria-label={pinnedState ? 'Unpin note' : 'Pin note'}
-      title={pinnedState ? 'Unpin note' : 'Pin note'}
+      aria-label={pinnedState ? 'Bỏ ghim' : 'Ghim ghi chú'}
+      title={pinnedState ? 'Bỏ ghim' : 'Ghim ghi chú'}
       className={`inline-flex h-8 w-8 shrink-0 items-center justify-center rounded border transition-colors disabled:opacity-60 ${
         pinnedState
           ? 'border-accent/40 bg-accent/10 text-accent'
@@ -78,13 +78,13 @@ export function NoteCard({ note }: { note: Note }) {
           href={`/notes/${note.id}`}
           className="line-clamp-1 flex-1 text-sm font-semibold text-foreground transition-colors hover:text-primary"
         >
-          {note.title.trim() || 'Untitled note'}
+          {note.title.trim() || 'Ghi chú chưa đặt tên'}
         </Link>
         <PinButton noteId={note.id} pinned={note.pinned} />
       </div>
 
       <p className="line-clamp-2 min-h-[2.5rem] text-sm text-muted-foreground">
-        {excerpt || 'No content yet.'}
+        {excerpt || 'Chưa có nội dung.'}
       </p>
 
       {(note.folder || note.tags.length > 0) && (
@@ -98,7 +98,7 @@ export function NoteCard({ note }: { note: Note }) {
         </div>
       )}
 
-      <p className="text-xs text-muted-foreground">Edited {formatRelativeTime(note.updated_at)}</p>
+      <p className="text-xs text-muted-foreground">Đã sửa {formatRelativeTime(note.updated_at)}</p>
     </div>
   );
 }

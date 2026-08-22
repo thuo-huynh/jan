@@ -86,9 +86,9 @@ export function FlashcardDeck({ cards }: FlashcardDeckProps) {
   if (cards.length === 0) {
     return (
       <div className="flex flex-col items-center gap-3 rounded-lg border border-dashed border-border p-10 text-center">
-        <p className="max-w-xs text-sm text-muted-foreground">No cards match this filter.</p>
+        <p className="max-w-xs text-sm text-muted-foreground">Không có thẻ nào khớp với bộ lọc này.</p>
         <Link href="/learn/vocab" className="text-sm font-medium text-primary hover:opacity-80">
-          Back to vocab deck
+          Về kho từ vựng
         </Link>
       </div>
     );
@@ -101,19 +101,19 @@ export function FlashcardDeck({ cards }: FlashcardDeckProps) {
           <CheckCircle2 className="h-6 w-6 text-success" aria-hidden="true" />
         </div>
         <div>
-          <p className="text-lg font-semibold text-foreground">Deck complete</p>
+          <p className="text-lg font-semibold text-foreground">Đã học hết bộ thẻ</p>
           <p className="mt-1 text-sm text-muted-foreground">
-            You went through all {order.length} card{order.length === 1 ? '' : 's'}.
+            Bạn đã xem qua tất cả {order.length} thẻ.
           </p>
         </div>
         <div className="flex flex-wrap justify-center gap-2">
           <button type="button" onClick={() => restart(false)} className="btn-outline">
             <RotateCcw className="h-4 w-4" aria-hidden="true" />
-            Restart
+            Học lại
           </button>
           <button type="button" onClick={() => restart(true)} className="btn-primary">
             <Shuffle className="h-4 w-4" aria-hidden="true" />
-            Restart shuffled
+            Học lại (xáo trộn)
           </button>
         </div>
       </div>
@@ -130,7 +130,7 @@ export function FlashcardDeck({ cards }: FlashcardDeckProps) {
           className="flex items-center gap-1 font-medium text-primary hover:opacity-80"
         >
           <Shuffle className="h-3.5 w-3.5" aria-hidden="true" />
-          Shuffle
+          Xáo trộn
         </button>
       </div>
 
@@ -140,15 +140,15 @@ export function FlashcardDeck({ cards }: FlashcardDeckProps) {
           onClick={() => setFlipped((f) => !f)}
           role="button"
           tabIndex={0}
-          aria-label={flipped ? 'Showing meaning — click to flip back' : 'Showing word — click to reveal meaning'}
+          aria-label={flipped ? 'Đang hiện nghĩa — nhấn để lật lại' : 'Đang hiện từ — nhấn để xem nghĩa'}
           onKeyDown={(e) => {
             if (e.key === ' ' || e.key === 'Enter') e.preventDefault();
           }}
         >
           <div className="flashcard-face card flex cursor-pointer flex-col items-center justify-center gap-2 p-6 text-center">
-            <span className="badge-neutral">{current!.source === 'custom' ? 'custom' : 'N2'}</span>
+            <span className="badge-neutral">{current!.source === 'custom' ? 'tự thêm' : 'N2'}</span>
             <p className="font-jp text-4xl text-foreground">{current!.word}</p>
-            <p className="text-xs text-muted-foreground">Click or press Space to flip</p>
+            <p className="text-xs text-muted-foreground">Nhấn hoặc bấm phím Space để lật thẻ</p>
           </div>
           <div className="flashcard-face flashcard-face-back card flex cursor-pointer flex-col items-center justify-center gap-2 p-6 text-center">
             {current!.reading && <p className="font-jp text-lg text-muted-foreground">{current!.reading}</p>}
@@ -164,13 +164,13 @@ export function FlashcardDeck({ cards }: FlashcardDeckProps) {
           onClick={goPrev}
           disabled={position === 0}
           className="btn-outline"
-          aria-label="Previous card"
+          aria-label="Thẻ trước"
         >
           <ChevronLeft className="h-4 w-4" aria-hidden="true" />
-          Prev
+          Trước
         </button>
-        <button type="button" onClick={goNext} className="btn-primary flex-1" aria-label="Next card">
-          Next
+        <button type="button" onClick={goNext} className="btn-primary flex-1" aria-label="Thẻ tiếp theo">
+          Tiếp
           <ChevronRight className="h-4 w-4" aria-hidden="true" />
         </button>
       </div>

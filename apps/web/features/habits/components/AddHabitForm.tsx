@@ -27,7 +27,7 @@ export function AddHabitForm({ onCreated }: AddHabitFormProps) {
 
     const parsed = habitSchema.safeParse({ name });
     if (!parsed.success) {
-      setError(parsed.error.issues[0]?.message ?? 'Invalid habit name');
+      setError(parsed.error.issues[0]?.message ?? 'Tên thói quen không hợp lệ');
       return;
     }
 
@@ -38,7 +38,7 @@ export function AddHabitForm({ onCreated }: AddHabitFormProps) {
     } = await supabase.auth.getUser();
     if (!user) {
       setSubmitting(false);
-      setError('You must be signed in.');
+      setError('Bạn cần đăng nhập.');
       return;
     }
 
@@ -51,7 +51,7 @@ export function AddHabitForm({ onCreated }: AddHabitFormProps) {
     setSubmitting(false);
 
     if (dbError || !data) {
-      setError(dbError?.message ?? 'Failed to add habit');
+      setError(dbError?.message ?? 'Thêm thói quen thất bại');
       return;
     }
 
@@ -64,7 +64,7 @@ export function AddHabitForm({ onCreated }: AddHabitFormProps) {
     return (
       <button type="button" onClick={() => setOpen(true)} className="btn-primary h-9 px-3 text-sm">
         <Plus className="h-4 w-4" aria-hidden="true" />
-        Add habit
+        Thêm thói quen
       </button>
     );
   }
@@ -75,7 +75,7 @@ export function AddHabitForm({ onCreated }: AddHabitFormProps) {
         <input
           value={name}
           onChange={(e) => setName(e.target.value)}
-          placeholder="e.g. Read 1 news article"
+          placeholder="vd: Đọc 1 bài báo"
           autoFocus
           required
           className="input-field h-9 w-64"
@@ -83,10 +83,10 @@ export function AddHabitForm({ onCreated }: AddHabitFormProps) {
         {error && <p className="error-text">{error}</p>}
       </div>
       <button type="submit" disabled={submitting} className="btn-primary h-9 px-3 text-sm">
-        {submitting ? 'Adding…' : 'Add'}
+        {submitting ? 'Đang thêm…' : 'Thêm'}
       </button>
       <button type="button" onClick={() => setOpen(false)} className="btn-outline h-9 px-3 text-sm">
-        Cancel
+        Hủy
       </button>
     </form>
   );

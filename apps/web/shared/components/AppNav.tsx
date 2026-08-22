@@ -43,7 +43,7 @@ export function AppNav({ links }: AppNavProps) {
         type="button"
         onClick={() => setOpen((v) => !v)}
         aria-expanded={open}
-        aria-label="Toggle navigation menu"
+        aria-label="Mở/đóng menu điều hướng"
         className="flex h-10 w-10 items-center justify-center rounded text-foreground transition-colors hover:bg-muted sm:hidden"
       >
         {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}

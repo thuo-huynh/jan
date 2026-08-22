@@ -11,27 +11,27 @@ import { z } from 'zod';
 
 const uuid = z.string().uuid();
 /** `YYYY-MM-DD`, matching Postgres `date` columns (due_date, test_date, etc.). */
-const isoDate = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Expected YYYY-MM-DD');
+const isoDate = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Định dạng phải là YYYY-MM-DD');
 
 // ---------------------------------------------------------------------------
 // Kanban: boards / columns / tasks / task_checklist_items
 // ---------------------------------------------------------------------------
 
 export const boardSchema = z.object({
-  name: z.string().trim().min(1, 'Board name is required').max(200),
+  name: z.string().trim().min(1, 'Tên bảng là bắt buộc').max(200),
 });
 export type BoardInput = z.infer<typeof boardSchema>;
 
 export const columnSchema = z.object({
   boardId: uuid,
-  name: z.string().trim().min(1, 'Column name is required').max(100),
+  name: z.string().trim().min(1, 'Tên cột là bắt buộc').max(100),
   position: z.number().int().min(0).optional(),
 });
 export type ColumnInput = z.infer<typeof columnSchema>;
 
 export const checklistItemSchema = z.object({
   taskId: uuid,
-  text: z.string().trim().min(1, 'Checklist item text is required').max(500),
+  text: z.string().trim().min(1, 'Nội dung mục checklist là bắt buộc').max(500),
   completed: z.boolean().optional().default(false),
   position: z.number().int().min(0).optional(),
 });
@@ -40,7 +40,7 @@ export type ChecklistItemInput = z.infer<typeof checklistItemSchema>;
 export const taskSchema = z.object({
   columnId: uuid,
   boardId: uuid,
-  title: z.string().trim().min(1, 'Title is required').max(200),
+  title: z.string().trim().min(1, 'Tiêu đề là bắt buộc').max(200),
   description: z.string().max(10_000).optional().nullable(),
   tags: z.array(z.string().trim().min(1).max(50)).max(20).optional().default([]),
   dueDate: isoDate.optional().nullable(),
@@ -54,9 +54,9 @@ export type TaskInput = z.infer<typeof taskSchema>;
 // ---------------------------------------------------------------------------
 
 export const vocabEntrySchema = z.object({
-  word: z.string().trim().min(1, 'Word is required').max(200),
+  word: z.string().trim().min(1, 'Từ là bắt buộc').max(200),
   reading: z.string().trim().max(200).optional().nullable(),
-  meaning: z.string().trim().min(1, 'Meaning is required').max(1000),
+  meaning: z.string().trim().min(1, 'Nghĩa là bắt buộc').max(1000),
   example: z.string().trim().max(1000).optional().nullable(),
   jlptLevel: z.string().trim().max(10).optional().nullable(),
   isKanji: z.boolean().optional().default(false),
@@ -86,7 +86,7 @@ export type GrammarNoteInput = z.infer<typeof grammarNoteSchema>;
 // ---------------------------------------------------------------------------
 
 export const noteSchema = z.object({
-  title: z.string().trim().min(1, 'Title is required').max(200),
+  title: z.string().trim().min(1, 'Tiêu đề là bắt buộc').max(200),
   bodyMarkdown: z.string().max(50_000).optional().default(''),
   folder: z.string().trim().max(100).optional().nullable(),
   tags: z.array(z.string().trim().min(1).max(50)).max(20).optional().default([]),
@@ -101,8 +101,8 @@ export type NoteInput = z.infer<typeof noteSchema>;
 // ---------------------------------------------------------------------------
 
 const logEntryBase = {
-  source: z.string().trim().min(1, 'Source is required').max(300),
-  durationMin: z.number().int().min(0, 'Duration must be zero or more'),
+  source: z.string().trim().min(1, 'Nguồn là bắt buộc').max(300),
+  durationMin: z.number().int().min(0, 'Thời gian phải từ 0 trở lên'),
   comprehensionScore: z.number().int().min(0).max(100).optional().nullable(),
   notes: z.string().max(5000).optional().nullable(),
   practicedAt: z.string().datetime().optional(),
@@ -121,9 +121,9 @@ export type ListeningLogInput = z.infer<typeof listeningLogSchema>;
 
 /** "Attach unknown word to SRS" quick-add from a reading log entry (T059). */
 export const attachToSrsSchema = z.object({
-  word: z.string().trim().min(1, 'Word is required').max(200),
+  word: z.string().trim().min(1, 'Từ là bắt buộc').max(200),
   reading: z.string().trim().max(200).optional().nullable(),
-  meaning: z.string().trim().min(1, 'Meaning is required').max(1000),
+  meaning: z.string().trim().min(1, 'Nghĩa là bắt buộc').max(1000),
   sourceReadingLogId: uuid,
 });
 export type AttachToSrsInput = z.infer<typeof attachToSrsSchema>;
@@ -153,7 +153,7 @@ export type ExamDateInput = z.infer<typeof examDateSchema>;
 // ---------------------------------------------------------------------------
 
 export const mistakeSchema = z.object({
-  content: z.string().trim().min(1, 'Content is required').max(2000),
+  content: z.string().trim().min(1, 'Nội dung là bắt buộc').max(2000),
   linkedVocabId: uuid.optional().nullable(),
   linkedGrammarId: uuid.optional().nullable(),
 });
@@ -170,8 +170,8 @@ export type MistakeInput = z.infer<typeof mistakeSchema>;
 // ---------------------------------------------------------------------------
 
 export const grammarPointSchema = z.object({
-  pattern: z.string().trim().min(1, 'Pattern is required').max(200),
-  meaning: z.string().trim().min(1, 'Meaning is required').max(1000),
+  pattern: z.string().trim().min(1, 'Mẫu câu là bắt buộc').max(200),
+  meaning: z.string().trim().min(1, 'Nghĩa là bắt buộc').max(1000),
   connectionForm: z.string().trim().max(500).optional().nullable(),
   formalityNuance: z.string().trim().max(1000).optional().nullable(),
   exampleSentences: z
@@ -188,7 +188,7 @@ export type GrammarPointInput = z.infer<typeof grammarPointSchema>;
 export const confusablePairSchema = z.object({
   grammarPointIdA: uuid,
   grammarPointIdB: uuid,
-  comparisonNote: z.string().trim().min(1, 'Comparison note is required').max(5000),
+  comparisonNote: z.string().trim().min(1, 'Ghi chú so sánh là bắt buộc').max(5000),
 });
 export type ConfusablePairInput = z.infer<typeof confusablePairSchema>;
 
@@ -197,7 +197,7 @@ export type ConfusablePairInput = z.infer<typeof confusablePairSchema>;
 // ---------------------------------------------------------------------------
 
 export const habitSchema = z.object({
-  name: z.string().trim().min(1, 'Habit name is required').max(100),
+  name: z.string().trim().min(1, 'Tên thói quen là bắt buộc').max(100),
 });
 export type HabitInput = z.infer<typeof habitSchema>;
 
@@ -217,16 +217,16 @@ export type AppearanceInput = z.infer<typeof appearanceSchema>;
 // Admin theme CRUD (themes — T030, /api/admin/reference-data/themes)
 // ---------------------------------------------------------------------------
 
-const hexColor = z.string().regex(/^#[0-9a-fA-F]{6}$/, 'Expected a hex color like #0d9488');
+const hexColor = z.string().regex(/^#[0-9a-fA-F]{6}$/, 'Cần một mã màu hex, ví dụ #0d9488');
 
 export const themeSchema = z.object({
   slug: z
     .string()
     .trim()
-    .min(1, 'Slug is required')
+    .min(1, 'Slug là bắt buộc')
     .max(50)
-    .regex(/^[a-z0-9-]+$/, 'Slug must be lowercase letters, numbers, and hyphens only'),
-  name: z.string().trim().min(1, 'Name is required').max(100),
+    .regex(/^[a-z0-9-]+$/, 'Slug chỉ được chứa chữ thường, số và dấu gạch ngang'),
+  name: z.string().trim().min(1, 'Tên là bắt buộc').max(100),
   sortOrder: z.number().int().min(0).optional().default(0),
   primaryLight: hexColor,
   primaryForegroundLight: hexColor,

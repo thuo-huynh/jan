@@ -58,7 +58,7 @@ export default async function NoteDetailPage({ params }: { params: { noteId: str
       .eq('id', typedNote.linked_task_id)
       .maybeSingle();
     if (data) {
-      linkedTaskInfo = { id: data.id, label: data.title || 'Untitled task' };
+      linkedTaskInfo = { id: data.id, label: data.title || 'Công việc chưa đặt tên' };
     } else {
       linkedTaskMissing = true;
     }

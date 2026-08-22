@@ -29,7 +29,7 @@ export async function GET(request: NextRequest) {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    return NextResponse.json({ error: 'Chưa đăng nhập' }, { status: 401 });
   }
 
   const weakOnly = request.nextUrl.searchParams.get('weakOnly') === 'true';
@@ -38,7 +38,7 @@ export async function GET(request: NextRequest) {
   try {
     sortable = await loadDueReviewQueue(supabase, user.id);
   } catch (err) {
-    return NextResponse.json({ error: err instanceof Error ? err.message : 'Failed to load queue' }, { status: 500 });
+    return NextResponse.json({ error: err instanceof Error ? err.message : 'Không tải được hàng đợi' }, { status: 500 });
   }
 
   const filtered = weakOnly ? sortable.filter((s) => s.item.isWeak) : sortable;

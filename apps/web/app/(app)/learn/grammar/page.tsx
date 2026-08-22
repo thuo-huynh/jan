@@ -62,10 +62,10 @@ export default async function GrammarListPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">N2 Grammar Tracker</h1>
+        <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">Theo dõi Ngữ pháp N2</h1>
         <p className="mt-1.5 text-sm text-muted-foreground">
-          Browse the N2 grammar database, track your mastery, add personal notes, and compare
-          confusable pairs.
+          Duyệt kho ngữ pháp N2, theo dõi mức độ thành thạo, thêm ghi chú cá nhân và so sánh các
+          cặp dễ nhầm.
         </p>
       </div>
 
@@ -75,7 +75,7 @@ export default async function GrammarListPage() {
             <BookOpen className="h-6 w-6 text-primary" aria-hidden="true" />
           </div>
           <p className="max-w-xs text-sm text-muted-foreground">
-            No grammar points are available yet. Check back once the N2 catalog has been seeded.
+            Chưa có điểm ngữ pháp nào. Quay lại sau khi kho ngữ pháp N2 được cập nhật.
           </p>
         </div>
       ) : (

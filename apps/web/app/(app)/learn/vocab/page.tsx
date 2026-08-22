@@ -65,10 +65,10 @@ export default async function VocabDeckPage({ searchParams }: VocabPageProps) {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">Vocab &amp; Kanji Deck</h1>
+        <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">Kho từ vựng &amp; Hán tự</h1>
         <p className="mt-1.5 text-sm text-muted-foreground">
-          Browse the N2 reference deck and manage your own custom entries — both are blended into
-          the same review queue.
+          Duyệt kho từ N2 chuẩn và quản lý các từ bạn tự thêm — cả hai đều được gộp chung vào
+          hàng đợi ôn tập.
         </p>
       </div>
 
@@ -81,24 +81,22 @@ export default async function VocabDeckPage({ searchParams }: VocabPageProps) {
             <div>
               <p className="text-2xl font-bold tracking-tight text-foreground">
                 {dueCount}
-                <span className="ml-1.5 text-sm font-normal text-muted-foreground">
-                  {dueCount === 1 ? 'card due today' : 'cards due today'}
-                </span>
+                <span className="ml-1.5 text-sm font-normal text-muted-foreground">thẻ cần ôn hôm nay</span>
               </p>
               {weakCount > 0 && (
                 <p className="mt-0.5 flex items-center gap-1 text-xs text-danger">
                   <Flame className="h-3 w-3" aria-hidden="true" />
-                  {weakCount} weak {weakCount === 1 ? 'item needs' : 'items need'} extra practice
+                  {weakCount} mục yếu cần luyện thêm
                 </p>
               )}
             </div>
           </div>
           <div className="flex gap-2">
             <Link href="/learn/vocab/flashcards" className="btn-outline">
-              Study flashcards
+              Học bằng flashcard
             </Link>
             <Link href="/learn/review" className={dueCount > 0 ? 'btn-primary' : 'btn-outline'}>
-              {dueCount > 0 ? 'Start review' : 'Review queue'}
+              {dueCount > 0 ? 'Bắt đầu ôn tập' : 'Hàng đợi ôn tập'}
             </Link>
           </div>
         </div>
@@ -108,18 +106,18 @@ export default async function VocabDeckPage({ searchParams }: VocabPageProps) {
 
       <div className="space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-4">
-          <h2 className="text-lg font-semibold tracking-tight text-foreground">N2 reference deck</h2>
+          <h2 className="text-lg font-semibold tracking-tight text-foreground">Kho từ N2 chuẩn</h2>
           <form className="flex items-center gap-2" action="/learn/vocab" method="get">
             <input
               type="text"
               name="q"
               defaultValue={q}
-              placeholder="Search word, reading, or meaning"
-              aria-label="Search word, reading, or meaning"
+              placeholder="Tìm từ, cách đọc, hoặc nghĩa"
+              aria-label="Tìm từ, cách đọc, hoặc nghĩa"
               className="input-field w-64"
             />
             <button type="submit" className="btn-outline">
-              Search
+              Tìm
             </button>
           </form>
         </div>
@@ -128,10 +126,10 @@ export default async function VocabDeckPage({ searchParams }: VocabPageProps) {
           <table className="w-full text-left text-sm">
             <thead className="bg-muted text-muted-foreground">
               <tr>
-                <th className="px-3 py-2 font-medium">Word</th>
-                <th className="px-3 py-2 font-medium">Reading</th>
-                <th className="px-3 py-2 font-medium">Meaning</th>
-                <th className="px-3 py-2 font-medium">Type</th>
+                <th className="px-3 py-2 font-medium">Từ</th>
+                <th className="px-3 py-2 font-medium">Cách đọc</th>
+                <th className="px-3 py-2 font-medium">Nghĩa</th>
+                <th className="px-3 py-2 font-medium">Loại</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
@@ -141,14 +139,14 @@ export default async function VocabDeckPage({ searchParams }: VocabPageProps) {
                   <td className="px-3 py-2 font-jp text-muted-foreground">{entry.reading}</td>
                   <td className="px-3 py-2 text-foreground">{entry.meaning}</td>
                   <td className="px-3 py-2 text-muted-foreground">
-                    {entry.is_kanji ? 'kanji' : 'vocab'} · N2
+                    {entry.is_kanji ? 'hán tự' : 'từ vựng'} · N2
                   </td>
                 </tr>
               ))}
               {(globalEntries ?? []).length === 0 && (
                 <tr>
                   <td colSpan={4} className="px-3 py-6 text-center text-muted-foreground">
-                    No matching entries.
+                    Không tìm thấy mục nào phù hợp.
                   </td>
                 </tr>
               )}
@@ -158,17 +156,17 @@ export default async function VocabDeckPage({ searchParams }: VocabPageProps) {
 
         <div className="flex items-center justify-between text-sm text-muted-foreground">
           <span>
-            Page {page} of {totalPages}
+            Trang {page} / {totalPages}
           </span>
           <div className="flex gap-2">
             {page > 1 && (
               <a href={`/learn/vocab?${prevParams.toString()}`} className="btn-outline h-9 px-3 text-sm">
-                Previous
+                Trước
               </a>
             )}
             {page < totalPages && (
               <a href={`/learn/vocab?${nextParams.toString()}`} className="btn-outline h-9 px-3 text-sm">
-                Next
+                Sau
               </a>
             )}
           </div>

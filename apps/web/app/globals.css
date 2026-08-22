@@ -3,10 +3,16 @@
 @tailwind utilities;
 
 /*
- * Palette: "Japan Blue" — indigo (primary) + sky (secondary) + amber (accent).
- * Replaces the earlier teal/orange scheme (see DESIGN.md "Why this palette").
- * Every pair below is WCAG AA-verified (>= 4.5:1 for text, foreground-on-color
- * pairs included) — see DESIGN.md for the full contrast table.
+ * Palette: "Chàm & Son" (indigo & vermillion) — aizome indigo (primary),
+ * bamboo teal (secondary), shuiro vermillion (accent), replacing the "Japan
+ * Blue" indigo/sky/amber pass (see DESIGN.md "Why this palette v2"). Indigo
+ * stays the anchor hue (still real: aizome dyeing), but is now inkier/more
+ * muted, and amber is replaced by a hanko-stamp red — the app's one
+ * signature accent, reserved for the `.hanko-stamp` badge and genuinely
+ * urgent CTAs, not decorative use. background/foreground/card/border/muted
+ * are unchanged (shared across all theme-picker presets, not part of this
+ * pass). Every pair below is WCAG AA-verified (>= 4.5:1 text pairs) — see
+ * DESIGN.md for the full contrast table.
  */
 :root {
   --background: #f7f7fc;
@@ -16,12 +22,12 @@
   --muted: #efeff8;
   --muted-foreground: #5b5b7d;
 
-  --primary: #4f46e5;
+  --primary: #3b4a8c;
   --primary-foreground: #f5f3ff;
-  --secondary: #0369a1;
-  --secondary-foreground: #f0f9ff;
-  --accent: #d97706;
-  --accent-foreground: #451a03;
+  --secondary: #0f766e;
+  --secondary-foreground: #f0fdfa;
+  --accent: #c0392e;
+  --accent-foreground: #fdf3f0;
 
   --success: #15803d;
   --warning: #c2410c;
@@ -33,7 +39,7 @@
      own blue since nothing else claims that slot. */
   --srs-again: #dc2626;
   --srs-hard: #c2410c;
-  --srs-good: #4f46e5;
+  --srs-good: #3b4a8c;
   --srs-easy: #2563eb;
 }
 
@@ -51,12 +57,12 @@
   --muted: #1e1e3d;
   --muted-foreground: #9a9ac0;
 
-  --primary: #818cf8;
+  --primary: #8c97e3;
   --primary-foreground: #1e1b4b;
-  --secondary: #38bdf8;
-  --secondary-foreground: #082f49;
-  --accent: #fbbf24;
-  --accent-foreground: #451a03;
+  --secondary: #2dd4bf;
+  --secondary-foreground: #042f2b;
+  --accent: #f0836f;
+  --accent-foreground: #3a0e0a;
 
   --success: #4ade80;
   --warning: #fb923c;
@@ -64,7 +70,7 @@
 
   --srs-again: #f87171;
   --srs-hard: #fb923c;
-  --srs-good: #818cf8;
+  --srs-good: #8c97e3;
   --srs-easy: #60a5fa;
 }
 
@@ -140,6 +146,22 @@ body {
     @apply card cursor-pointer transition-shadow duration-200 hover:shadow-md;
   }
 
+  /*
+   * Signature texture (DESIGN.md "Signature element"): a faint genkouyoushi
+   * (原稿用紙) grid — the squared manuscript paper used to hand-practice
+   * kanji, one character per box. Reserved for the dashboard hero band only
+   * (not a background-everywhere pattern) so it reads as a deliberate nod to
+   * the app's actual study material, not decoration. Built from the
+   * existing `--border` token at low opacity so it stays legible under text
+   * in both light and dark mode without a separate color.
+   */
+  .grid-paper {
+    background-image:
+      linear-gradient(to right, color-mix(in srgb, var(--border) 70%, transparent) 1px, transparent 1px),
+      linear-gradient(to bottom, color-mix(in srgb, var(--border) 70%, transparent) 1px, transparent 1px);
+    background-size: 28px 28px;
+  }
+
   .label-field {
     @apply mb-1.5 block text-sm font-medium text-foreground;
   }
@@ -181,6 +203,24 @@ body {
   }
   .badge-neutral {
     @apply badge bg-muted text-muted-foreground;
+  }
+
+  /*
+   * Signature accent (DESIGN.md "Signature element"): a hanko (印, name-seal)
+   * stamp — the one deliberately bold shape in the app, reserved for streaks
+   * and the exam countdown so it keeps meaning "this is the number that
+   * matters right now" instead of decorating every card. Modeled on a real
+   * ink stamp: solid accent fill, a slightly darker inset ring standing in
+   * for the carved seal edge, a few degrees of rotation so it reads as
+   * "stamped" rather than a generic circular badge.
+   */
+  .hanko-stamp {
+    @apply relative inline-flex h-16 w-16 shrink-0 flex-col items-center justify-center rounded-full text-center leading-none text-accent-foreground shadow-md;
+    background-color: var(--accent);
+    box-shadow:
+      inset 0 0 0 2px color-mix(in srgb, var(--accent-foreground) 35%, transparent),
+      0 4px 10px -2px rgb(22 22 43 / 0.25);
+    transform: rotate(-6deg);
   }
 
   /*

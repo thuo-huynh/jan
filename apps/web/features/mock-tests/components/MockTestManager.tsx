@@ -53,7 +53,7 @@ export function MockTestManager({ initialResults }: MockTestManagerProps) {
       totalScore: total === '' ? autoTotal : toNumberOrNull(total),
     });
     if (!parsed.success) {
-      setError(parsed.error.issues[0]?.message ?? 'Invalid entry');
+      setError(parsed.error.issues[0]?.message ?? 'Mục không hợp lệ');
       return;
     }
 
@@ -64,7 +64,7 @@ export function MockTestManager({ initialResults }: MockTestManagerProps) {
     } = await supabase.auth.getUser();
     if (!user) {
       setSubmitting(false);
-      setError('You must be signed in.');
+      setError('Bạn cần đăng nhập.');
       return;
     }
 
@@ -84,7 +84,7 @@ export function MockTestManager({ initialResults }: MockTestManagerProps) {
     setSubmitting(false);
 
     if (dbError || !data) {
-      setError(dbError?.message ?? 'Failed to save result');
+      setError(dbError?.message ?? 'Lưu kết quả thất bại');
       return;
     }
 
@@ -99,8 +99,8 @@ export function MockTestManager({ initialResults }: MockTestManagerProps) {
 
   async function handleDelete(id: string) {
     const ok = await confirm({
-      title: 'Delete this mock test result?',
-      description: 'This cannot be undone.',
+      title: 'Xóa kết quả đề thi thử này?',
+      description: 'Không thể hoàn tác thao tác này.',
     });
     if (!ok) return;
     setDeleteError(null);
@@ -122,7 +122,7 @@ export function MockTestManager({ initialResults }: MockTestManagerProps) {
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
           <div>
             <label className="label-field" htmlFor="mt-date">
-              Test date
+              Ngày thi
             </label>
             <input
               id="mt-date"
@@ -174,7 +174,7 @@ export function MockTestManager({ initialResults }: MockTestManagerProps) {
           </div>
           <div>
             <label className="label-field" htmlFor="mt-total">
-              Total
+              Tổng điểm
             </label>
             <input
               id="mt-total"
@@ -188,13 +188,13 @@ export function MockTestManager({ initialResults }: MockTestManagerProps) {
           </div>
         </div>
         {autoTotal !== null && (
-          <p className="helper-text">Leave Total blank to auto-sum the sections above ({autoTotal}).</p>
+          <p className="helper-text">Để trống Tổng điểm để tự động cộng các phần trên ({autoTotal}).</p>
         )}
 
         {error && <p className="error-text">{error}</p>}
 
         <button type="submit" disabled={submitting} className="btn-primary">
-          {submitting ? 'Saving…' : 'Save result'}
+          {submitting ? 'Đang lưu…' : 'Lưu kết quả'}
         </button>
       </form>
 
@@ -202,20 +202,20 @@ export function MockTestManager({ initialResults }: MockTestManagerProps) {
 
       {results.length === 0 ? (
         <div className="flex flex-col items-center gap-2 rounded-lg border border-dashed border-border p-8 text-center">
-          <p className="text-sm text-muted-foreground">No mock test results recorded yet.</p>
+          <p className="text-sm text-muted-foreground">Chưa có kết quả đề thi thử nào được ghi lại.</p>
         </div>
       ) : (
         <div className="overflow-x-auto rounded-lg border border-border">
           <table className="w-full text-left text-sm">
             <thead className="bg-muted text-muted-foreground">
               <tr>
-                <th className="px-3 py-2 font-medium">Date</th>
+                <th className="px-3 py-2 font-medium">Ngày</th>
                 <th className="px-3 py-2 font-medium">文字・語彙・文法</th>
                 <th className="px-3 py-2 font-medium">読解</th>
                 <th className="px-3 py-2 font-medium">聴解</th>
-                <th className="px-3 py-2 font-medium">Total</th>
+                <th className="px-3 py-2 font-medium">Tổng điểm</th>
                 <th className="px-3 py-2 font-medium">
-                  <span className="sr-only">Actions</span>
+                  <span className="sr-only">Thao tác</span>
                 </th>
               </tr>
             </thead>
@@ -225,7 +225,7 @@ export function MockTestManager({ initialResults }: MockTestManagerProps) {
                 .map((r) => (
                   <tr key={r.id} className="bg-card">
                     <td className="px-3 py-2 text-foreground">
-                      {new Date(r.test_date).toLocaleDateString()}
+                      {new Date(r.test_date).toLocaleDateString('vi-VN')}
                     </td>
                     <td className="px-3 py-2 text-foreground">{r.vocab_grammar_score ?? '—'}</td>
                     <td className="px-3 py-2 text-foreground">{r.reading_score ?? '—'}</td>
@@ -236,7 +236,7 @@ export function MockTestManager({ initialResults }: MockTestManagerProps) {
                         type="button"
                         onClick={() => handleDelete(r.id)}
                         disabled={deletingId === r.id}
-                        aria-label={`Delete result from ${new Date(r.test_date).toLocaleDateString()}`}
+                        aria-label={`Xóa kết quả ngày ${new Date(r.test_date).toLocaleDateString('vi-VN')}`}
                         className="inline-flex h-7 w-7 items-center justify-center rounded text-muted-foreground transition-colors hover:bg-danger/10 hover:text-danger disabled:opacity-40"
                       >
                         <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />

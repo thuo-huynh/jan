@@ -81,7 +81,7 @@ export function NoteEditor({
 
     if (!parsed.success) {
       setStatus('error');
-      setErrorMessage(parsed.error.issues[0]?.message ?? 'Invalid note');
+      setErrorMessage(parsed.error.issues[0]?.message ?? 'Ghi chú không hợp lệ');
       return;
     }
 
@@ -112,7 +112,7 @@ export function NoteEditor({
   }
 
   async function handleDelete() {
-    const ok = await confirm({ title: 'Delete this note?', description: 'This cannot be undone.' });
+    const ok = await confirm({ title: 'Xóa ghi chú này?', description: 'Không thể hoàn tác thao tác này.' });
     if (!ok) return;
 
     startTransition(async () => {
@@ -138,31 +138,31 @@ export function NoteEditor({
         className="inline-flex w-fit items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
       >
         <ArrowLeft className="h-4 w-4" aria-hidden="true" />
-        Back to notes
+        Về danh sách ghi chú
       </Link>
 
       <div className="flex items-start justify-between gap-3">
         <input
           value={title}
           onChange={(e) => setTitle(e.target.value)}
-          placeholder="Untitled note"
-          aria-label="Note title"
+          placeholder="Ghi chú chưa đặt tên"
+          aria-label="Tiêu đề ghi chú"
           className="w-full border-none bg-transparent text-2xl font-semibold text-foreground focus:outline-none"
         />
         <div className="flex shrink-0 items-center gap-3">
           <span className="hidden text-xs text-muted-foreground sm:inline">
-            Edited {formatRelativeTime(note.updated_at)}
+            Đã sửa {formatRelativeTime(note.updated_at)}
           </span>
           <PinButton noteId={note.id} pinned={note.pinned} />
           <button
             type="button"
             onClick={handleDelete}
             disabled={isPending}
-            aria-label="Delete note"
+            aria-label="Xóa ghi chú"
             className="btn-outline h-9 border-danger/40 px-3 text-xs text-danger hover:bg-danger/10"
           >
             <Trash2 className="h-4 w-4" aria-hidden="true" />
-            Delete
+            Xóa
           </button>
         </div>
       </div>
@@ -194,22 +194,22 @@ export function NoteEditor({
       */}
       {linkedTaskMissing && (
         <p className="rounded-lg border border-warning/30 bg-warning/10 px-3 py-2 text-sm text-warning">
-          This note was linked to a task that is no longer available.
+          Ghi chú này từng liên kết với một công việc hiện không còn tồn tại.
         </p>
       )}
       {linkedVocabMissing && (
         <p className="rounded-lg border border-warning/30 bg-warning/10 px-3 py-2 text-sm text-warning">
-          This note was linked to a vocab/kanji entry that is no longer available.
+          Ghi chú này từng liên kết với một mục từ vựng/Hán tự hiện không còn tồn tại.
         </p>
       )}
       {linkedTaskInfo && (
         <p className="text-sm text-muted-foreground">
-          Linked task: <span className="font-medium text-foreground">{linkedTaskInfo.label}</span>
+          Công việc liên kết: <span className="font-medium text-foreground">{linkedTaskInfo.label}</span>
         </p>
       )}
       {linkedVocabInfo && (
         <p className="text-sm text-muted-foreground">
-          Linked vocab: <span className="font-medium text-foreground">{linkedVocabInfo.label}</span>
+          Từ vựng liên kết: <span className="font-medium text-foreground">{linkedVocabInfo.label}</span>
         </p>
       )}
 
@@ -226,7 +226,7 @@ export function NoteEditor({
                   : 'text-muted-foreground hover:text-foreground'
               }`}
             >
-              Edit
+              Sửa
             </button>
             <button
               type="button"
@@ -238,15 +238,15 @@ export function NoteEditor({
                   : 'text-muted-foreground hover:text-foreground'
               }`}
             >
-              Preview
+              Xem trước
             </button>
           </div>
           {mode === 'edit' && (
             <p className="helper-text">
-              Supports <span className="font-mono"># headings</span>,{' '}
-              <span className="font-mono">**bold**</span>, <span className="font-mono">- lists</span>,{' '}
-              <span className="font-mono">`code`</span>, <span className="font-mono">[links](url)</span>, and
-              GFM tables.
+              Hỗ trợ <span className="font-mono"># tiêu đề</span>,{' '}
+              <span className="font-mono">**in đậm**</span>, <span className="font-mono">- danh sách</span>,{' '}
+              <span className="font-mono">`code`</span>, <span className="font-mono">[liên kết](url)</span>, và
+              bảng GFM.
             </p>
           )}
         </div>
@@ -256,8 +256,8 @@ export function NoteEditor({
             value={bodyMarkdown}
             onChange={(e) => setBodyMarkdown(e.target.value)}
             rows={18}
-            placeholder="Write in markdown… headings, lists, **bold**, `code`."
-            aria-label="Note body (markdown)"
+            placeholder="Viết bằng markdown… tiêu đề, danh sách, **in đậm**, `code`."
+            aria-label="Nội dung ghi chú (markdown)"
             className="textarea-field font-mono"
           />
         ) : (
@@ -269,9 +269,9 @@ export function NoteEditor({
 
       <div className="flex items-center gap-3">
         <button type="button" onClick={handleSave} disabled={isPending || !dirty} className="btn-primary">
-          {isPending ? 'Saving…' : 'Save'}
+          {isPending ? 'Đang lưu…' : 'Lưu'}
         </button>
-        {status === 'saved' && !dirty && <span className="text-sm text-success">Saved</span>}
+        {status === 'saved' && !dirty && <span className="text-sm text-success">Đã lưu</span>}
         {status === 'error' && errorMessage && (
           <span className="text-sm text-danger">{errorMessage}</span>
         )}

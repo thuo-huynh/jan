@@ -14,21 +14,6 @@ interface MonthNavProps {
   month: number;
 }
 
-const MONTH_LABELS = [
-  'January',
-  'February',
-  'March',
-  'April',
-  'May',
-  'June',
-  'July',
-  'August',
-  'September',
-  'October',
-  'November',
-  'December',
-];
-
 export function MonthNav({ year, month }: MonthNavProps) {
   const router = useRouter();
   const now = new Date();
@@ -52,25 +37,25 @@ export function MonthNav({ year, month }: MonthNavProps) {
       <button
         type="button"
         onClick={() => go(-1)}
-        aria-label="Previous month"
+        aria-label="Tháng trước"
         className="flex h-9 w-9 items-center justify-center rounded border border-border text-foreground transition-colors hover:bg-muted"
       >
         <ChevronLeft className="h-4 w-4" aria-hidden="true" />
       </button>
       <span className="min-w-32 text-center text-sm font-medium text-foreground">
-        {MONTH_LABELS[month - 1]} {year}
+        Tháng {month} năm {year}
       </span>
       <button
         type="button"
         onClick={() => go(1)}
-        aria-label="Next month"
+        aria-label="Tháng sau"
         className="flex h-9 w-9 items-center justify-center rounded border border-border text-foreground transition-colors hover:bg-muted"
       >
         <ChevronRight className="h-4 w-4" aria-hidden="true" />
       </button>
       {!isCurrentMonth && (
         <button type="button" onClick={goToday} className="btn-outline h-9 px-3 text-sm">
-          Today
+          Hôm nay
         </button>
       )}
     </div>

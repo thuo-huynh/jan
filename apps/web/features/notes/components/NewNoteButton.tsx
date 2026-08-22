@@ -28,21 +28,21 @@ export function NewNoteButton() {
     } = await supabase.auth.getUser();
 
     if (!user) {
-      setError('You must be signed in.');
+      setError('Bạn cần đăng nhập.');
       setCreating(false);
       return;
     }
 
     const { data, error: insertError } = await supabase
       .from('notes')
-      .insert({ user_id: user.id, title: 'Untitled note', body_markdown: '' })
+      .insert({ user_id: user.id, title: 'Ghi chú chưa đặt tên', body_markdown: '' })
       .select('id')
       .single();
 
     setCreating(false);
 
     if (insertError || !data) {
-      setError(insertError?.message ?? 'Could not create note.');
+      setError(insertError?.message ?? 'Không thể tạo ghi chú.');
       return;
     }
 
@@ -53,7 +53,7 @@ export function NewNoteButton() {
     <div className="flex flex-col items-end gap-1">
       <button type="button" onClick={handleCreate} disabled={creating} className="btn-primary shrink-0">
         <Plus className="h-4 w-4" aria-hidden="true" />
-        {creating ? 'Creating…' : 'New note'}
+        {creating ? 'Đang tạo…' : 'Ghi chú mới'}
       </button>
       {error && <span className="text-xs text-danger">{error}</span>}
     </div>

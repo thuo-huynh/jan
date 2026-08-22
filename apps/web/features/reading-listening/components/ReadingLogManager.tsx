@@ -43,7 +43,7 @@ export function ReadingLogManager({ initialLogs }: ReadingLogManagerProps) {
       notes: notes || null,
     });
     if (!parsed.success) {
-      setError(parsed.error.issues[0]?.message ?? 'Invalid entry');
+      setError(parsed.error.issues[0]?.message ?? 'Mục không hợp lệ');
       return;
     }
 
@@ -54,7 +54,7 @@ export function ReadingLogManager({ initialLogs }: ReadingLogManagerProps) {
     } = await supabase.auth.getUser();
     if (!user) {
       setSubmitting(false);
-      setError('You must be signed in.');
+      setError('Bạn cần đăng nhập.');
       return;
     }
 
@@ -74,7 +74,7 @@ export function ReadingLogManager({ initialLogs }: ReadingLogManagerProps) {
     setSubmitting(false);
 
     if (dbError || !data) {
-      setError(dbError?.message ?? 'Failed to save entry');
+      setError(dbError?.message ?? 'Lưu thất bại');
       return;
     }
 
@@ -88,8 +88,8 @@ export function ReadingLogManager({ initialLogs }: ReadingLogManagerProps) {
 
   async function handleDelete(id: string) {
     const ok = await confirm({
-      title: 'Delete this reading session?',
-      description: 'This cannot be undone.',
+      title: 'Xóa buổi đọc này?',
+      description: 'Không thể hoàn tác thao tác này.',
     });
     if (!ok) return;
     setDeleteError(null);
@@ -111,20 +111,20 @@ export function ReadingLogManager({ initialLogs }: ReadingLogManagerProps) {
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <div>
             <label className="label-field" htmlFor="reading-source">
-              Source
+              Nguồn
             </label>
             <input
               id="reading-source"
               value={source}
               onChange={(e) => setSource(e.target.value)}
-              placeholder="e.g. N2 practice book, ch. 3"
+              placeholder="vd: Sách luyện đọc N2, chương 3"
               required
               className="input-field"
             />
           </div>
           <div>
             <label className="label-field" htmlFor="reading-passage-type">
-              Passage type
+              Loại bài đọc
             </label>
             <input
               id="reading-passage-type"
@@ -144,7 +144,7 @@ export function ReadingLogManager({ initialLogs }: ReadingLogManagerProps) {
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
           <div>
             <label className="label-field" htmlFor="reading-duration">
-              Duration (min)
+              Thời gian (phút)
             </label>
             <input
               id="reading-duration"
@@ -158,7 +158,7 @@ export function ReadingLogManager({ initialLogs }: ReadingLogManagerProps) {
           </div>
           <div>
             <label className="label-field" htmlFor="reading-score">
-              Comprehension %
+              Độ hiểu bài (%)
             </label>
             <input
               id="reading-score"
@@ -173,7 +173,7 @@ export function ReadingLogManager({ initialLogs }: ReadingLogManagerProps) {
         </div>
         <div>
           <label className="label-field" htmlFor="reading-notes">
-            Notes
+            Ghi chú
           </label>
           <textarea
             id="reading-notes"
@@ -187,7 +187,7 @@ export function ReadingLogManager({ initialLogs }: ReadingLogManagerProps) {
         {error && <p className="error-text">{error}</p>}
 
         <button type="submit" disabled={submitting} className="btn-primary">
-          {submitting ? 'Saving…' : 'Log session'}
+          {submitting ? 'Đang lưu…' : 'Ghi lại buổi học'}
         </button>
       </form>
 
@@ -195,7 +195,7 @@ export function ReadingLogManager({ initialLogs }: ReadingLogManagerProps) {
 
       {logs.length === 0 ? (
         <div className="flex flex-col items-center gap-2 rounded-lg border border-dashed border-border p-8 text-center">
-          <p className="text-sm text-muted-foreground">No reading sessions logged yet.</p>
+          <p className="text-sm text-muted-foreground">Chưa có buổi đọc nào được ghi lại.</p>
         </div>
       ) : (
         <ul className="space-y-2">
@@ -205,9 +205,9 @@ export function ReadingLogManager({ initialLogs }: ReadingLogManagerProps) {
                 <div>
                   <p className="text-sm font-medium text-foreground">{log.source}</p>
                   <p className="text-xs text-muted-foreground">
-                    {new Date(log.practiced_at).toLocaleDateString()} · {log.duration_min} min
+                    {new Date(log.practiced_at).toLocaleDateString('vi-VN')} · {log.duration_min} phút
                     {log.passage_type && <span className="font-jp"> · {log.passage_type}</span>}
-                    {log.comprehension_score !== null && <> · {log.comprehension_score}% comprehension</>}
+                    {log.comprehension_score !== null && <> · hiểu {log.comprehension_score}%</>}
                   </p>
                   {log.notes && <p className="mt-1 text-sm text-muted-foreground">{log.notes}</p>}
                 </div>
@@ -215,7 +215,7 @@ export function ReadingLogManager({ initialLogs }: ReadingLogManagerProps) {
                   type="button"
                   onClick={() => handleDelete(log.id)}
                   disabled={deletingId === log.id}
-                  aria-label={`Delete reading session: ${log.source}`}
+                  aria-label={`Xóa buổi đọc: ${log.source}`}
                   className="flex h-7 w-7 shrink-0 items-center justify-center rounded text-muted-foreground transition-colors hover:bg-danger/10 hover:text-danger disabled:opacity-40"
                 >
                   <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />

@@ -30,9 +30,9 @@ export default async function ReadingLogPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">Reading Log (読解)</h1>
+        <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">Nhật ký Đọc hiểu (読解)</h1>
         <p className="mt-1.5 text-sm text-muted-foreground">
-          Log reading practice sessions and attach unknown words straight to your SRS queue.
+          Ghi lại các buổi luyện đọc và thêm ngay từ chưa biết vào hàng đợi ôn tập SRS.
         </p>
       </div>
 

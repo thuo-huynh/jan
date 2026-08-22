@@ -27,7 +27,7 @@ const EMPTY_GRADE_COUNTS: Record<ReviewResult, number> = { again: 0, hard: 0, go
 
 export default function ReviewQueuePage() {
   return (
-    <Suspense fallback={<p className="text-sm text-muted-foreground">Loading review queue…</p>}>
+    <Suspense fallback={<p className="text-sm text-muted-foreground">Đang tải hàng đợi ôn tập…</p>}>
       <ReviewSession />
     </Suspense>
   );
@@ -59,12 +59,12 @@ function ReviewSession() {
     try {
       const res = await fetch('/api/review-queue?weakOnly=false', { cache: 'no-store' });
       if (!res.ok) {
-        throw new Error('Failed to load review queue');
+        throw new Error('Không tải được hàng đợi ôn tập');
       }
       const data: ReviewQueueResponse = await res.json();
       setAllItems(data.items);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load review queue');
+      setError(err instanceof Error ? err.message : 'Không tải được hàng đợi ôn tập');
     }
   }, []);
 
@@ -107,7 +107,7 @@ function ReviewSession() {
     });
     if (!res.ok) {
       const body = await res.json().catch(() => ({}) as { error?: string });
-      throw new Error(body.error ?? 'Failed to submit review');
+      throw new Error(body.error ?? 'Không thể gửi kết quả ôn tập');
     }
     setReviewedCount((n) => n + 1);
     setGradeCounts((prev) => ({ ...prev, [result]: prev[result] + 1 }));
@@ -121,10 +121,10 @@ function ReviewSession() {
     <div className="mx-auto max-w-2xl space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">Review Queue</h1>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">Hàng đợi ôn tập</h1>
           <p className="mt-1.5 text-sm text-muted-foreground">
-            Blended N2 vocab, kanji, and grammar due today
-            {allItems !== null && ` — ${allItems.length} due`}.
+            Gộp chung từ vựng, Hán tự và ngữ pháp N2 cần ôn hôm nay
+            {allItems !== null && ` — ${allItems.length} mục cần ôn`}.
           </p>
         </div>
         <label className="flex items-center gap-2 text-sm text-foreground">
@@ -134,7 +134,7 @@ function ReviewSession() {
             onChange={(e) => toggleWeakOnly(e.target.checked)}
             className="h-4 w-4 rounded border-border text-primary focus:ring-primary"
           />
-          Weak items only
+          Chỉ mục yếu
           {allItems !== null && <span className="text-muted-foreground">({weakCount})</span>}
         </label>
       </div>
@@ -160,10 +160,10 @@ function ReviewSession() {
             <Inbox className="h-6 w-6 text-primary" aria-hidden="true" />
           </div>
           <p className="max-w-xs text-sm text-foreground">
-            {weakOnly ? 'No weak items right now — nice work.' : 'Nothing due for review right now.'}
+            {weakOnly ? 'Không còn mục yếu nào — làm tốt lắm.' : 'Không có mục nào cần ôn lúc này.'}
           </p>
           <Link href="/learn/vocab" className="text-sm font-medium text-primary hover:opacity-80">
-            Browse the deck
+            Duyệt kho từ vựng
           </Link>
         </div>
       )}
@@ -171,8 +171,8 @@ function ReviewSession() {
       {items !== null && items.length > 0 && index < items.length && (
         <>
           <p className="text-sm text-muted-foreground">
-            Card {index + 1} of {items.length}
-            {reviewedCount > 0 ? ` · ${reviewedCount} reviewed this session` : ''}
+            Thẻ {index + 1} / {items.length}
+            {reviewedCount > 0 ? ` · đã ôn ${reviewedCount} thẻ trong phiên này` : ''}
           </p>
           <ReviewCard
             key={items[index].itemId}
@@ -188,9 +188,9 @@ function ReviewSession() {
             <CheckCircle2 className="h-6 w-6 text-success" aria-hidden="true" />
           </div>
           <div>
-            <p className="text-lg font-semibold text-foreground">Session complete</p>
+            <p className="text-lg font-semibold text-foreground">Đã hoàn thành phiên ôn tập</p>
             <p className="mt-1 text-sm text-muted-foreground">
-              {reviewedCount} card{reviewedCount === 1 ? '' : 's'} reviewed · {accuracy}% accuracy
+              Đã ôn {reviewedCount} thẻ · độ chính xác {accuracy}%
             </p>
           </div>
           <div className="flex flex-wrap justify-center gap-2 text-xs">
@@ -199,27 +199,27 @@ function ReviewSession() {
                 grading" tokens. */}
             {gradeCounts.again > 0 && (
               <span className="rounded-full bg-srs-again px-2.5 py-1 font-medium text-white">
-                Again · {gradeCounts.again}
+                Lại · {gradeCounts.again}
               </span>
             )}
             {gradeCounts.hard > 0 && (
               <span className="rounded-full bg-srs-hard px-2.5 py-1 font-medium text-white">
-                Hard · {gradeCounts.hard}
+                Khó · {gradeCounts.hard}
               </span>
             )}
             {gradeCounts.good > 0 && (
               <span className="rounded-full bg-srs-good px-2.5 py-1 font-medium text-white">
-                Good · {gradeCounts.good}
+                Tốt · {gradeCounts.good}
               </span>
             )}
             {gradeCounts.easy > 0 && (
               <span className="rounded-full bg-srs-easy px-2.5 py-1 font-medium text-white">
-                Easy · {gradeCounts.easy}
+                Dễ · {gradeCounts.easy}
               </span>
             )}
           </div>
           <button type="button" onClick={loadQueue} className="btn-primary">
-            Check for more due items
+            Kiểm tra thêm mục cần ôn
           </button>
         </div>
       )}

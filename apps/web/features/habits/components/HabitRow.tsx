@@ -70,8 +70,8 @@ export function HabitRow({
 
   async function handleDelete() {
     const ok = await confirm({
-      title: `Delete "${habitName}"?`,
-      description: 'Its completion history will be removed too.',
+      title: `Xóa "${habitName}"?`,
+      description: 'Lịch sử hoàn thành của thói quen này cũng sẽ bị xóa.',
     });
     if (ok) onDelete();
   }
@@ -97,7 +97,7 @@ export function HabitRow({
                 type="button"
                 onClick={startEditing}
                 className="max-w-40 truncate rounded text-left text-sm font-medium text-foreground hover:text-primary sm:max-w-none"
-                title="Click to rename"
+                title="Nhấn để đổi tên"
               >
                 {habitName}
               </button>
@@ -106,16 +106,16 @@ export function HabitRow({
               {streak > 0 ? (
                 <>
                   <StreakBadge streak={streak} className="font-medium" />
-                  <span>-day streak</span>
+                  <span>ngày liên tiếp</span>
                 </>
               ) : (
-                `${count} this month`
+                `${count} lần trong tháng`
               )}
             </p>
             <div
               className="mt-1 h-1 w-full max-w-40 overflow-hidden rounded-full bg-muted"
               role="progressbar"
-              aria-label={`${habitName} — ${Math.round((count / days.length) * 100)}% this month`}
+              aria-label={`${habitName} — ${Math.round((count / days.length) * 100)}% trong tháng`}
               aria-valuenow={Math.round((count / days.length) * 100)}
               aria-valuemin={0}
               aria-valuemax={100}
@@ -129,7 +129,7 @@ export function HabitRow({
           <button
             type="button"
             onClick={handleDelete}
-            aria-label={`Delete ${habitName}`}
+            aria-label={`Xóa ${habitName}`}
             className="flex h-7 w-7 shrink-0 items-center justify-center rounded text-muted-foreground transition-colors hover:bg-danger/10 hover:text-danger"
           >
             <Trash2 className="h-4 w-4" aria-hidden="true" />

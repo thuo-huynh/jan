@@ -47,20 +47,20 @@ export async function POST(request: NextRequest) {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    return NextResponse.json({ error: 'Chưa đăng nhập' }, { status: 401 });
   }
 
   let body: unknown;
   try {
     body = await request.json();
   } catch {
-    return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 });
+    return NextResponse.json({ error: 'Nội dung JSON không hợp lệ' }, { status: 400 });
   }
 
   const parsed = reviewRequestSchema.safeParse(body);
   if (!parsed.success) {
     return NextResponse.json(
-      { error: 'Invalid request body', issues: parsed.error.issues },
+      { error: 'Nội dung yêu cầu không hợp lệ', issues: parsed.error.issues },
       { status: 400 },
     );
   }

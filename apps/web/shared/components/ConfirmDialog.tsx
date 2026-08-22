@@ -23,8 +23,8 @@ interface ConfirmDialogProps {
 export function ConfirmDialog({
   title,
   description,
-  confirmLabel = 'Delete',
-  cancelLabel = 'Cancel',
+  confirmLabel = 'Xóa',
+  cancelLabel = 'Hủy',
   danger = true,
   onConfirm,
   onCancel,

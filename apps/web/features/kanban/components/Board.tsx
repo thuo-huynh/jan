@@ -197,7 +197,7 @@ export function BoardView({ boardId, initialColumns }: BoardProps) {
       );
       const failed = results.find((r) => r.error);
       if (failed) {
-        setError('Could not save column order — reverted.');
+        setError('Không thể lưu thứ tự cột — đã khôi phục.');
         if (previous) setColumns(previous);
       }
       return;
@@ -245,7 +245,7 @@ export function BoardView({ boardId, initialColumns }: BoardProps) {
       const results = await Promise.all(updates);
       const failed = results.find((r) => r.error);
       if (failed) {
-        setError('Could not save task move — reverted.');
+        setError('Không thể lưu vị trí công việc — đã khôi phục.');
         if (previous) setColumns(previous);
       }
     }
@@ -268,7 +268,7 @@ export function BoardView({ boardId, initialColumns }: BoardProps) {
       .single();
 
     if (insertError || !data) {
-      setError(insertError?.message ?? 'Could not add column.');
+      setError(insertError?.message ?? 'Không thể thêm cột.');
       return;
     }
     setColumns((prev) => [...prev, { ...data, tasks: [] }]);
@@ -282,7 +282,7 @@ export function BoardView({ boardId, initialColumns }: BoardProps) {
     const supabase = createClient();
     const { error: updateError } = await supabase.from('columns').update({ name }).eq('id', columnId);
     if (updateError) {
-      setError('Could not rename column — reverted.');
+      setError('Không thể đổi tên cột — đã khôi phục.');
       setColumns(previous);
     }
   }
@@ -291,10 +291,10 @@ export function BoardView({ boardId, initialColumns }: BoardProps) {
     const column = columns.find((c) => c.id === columnId);
     if (!column) return;
     const ok = await confirm({
-      title: `Delete "${column.name}"?`,
+      title: `Xóa cột "${column.name}"?`,
       description:
         column.tasks.length > 0
-          ? `This also deletes its ${column.tasks.length} task(s). This cannot be undone.`
+          ? `Thao tác này cũng sẽ xóa ${column.tasks.length} công việc trong cột. Không thể hoàn tác.`
           : undefined,
     });
     if (!ok) return;
@@ -304,7 +304,7 @@ export function BoardView({ boardId, initialColumns }: BoardProps) {
     const supabase = createClient();
     const { error: deleteError } = await supabase.from('columns').delete().eq('id', columnId);
     if (deleteError) {
-      setError('Could not delete column — reverted.');
+      setError('Không thể xóa cột — đã khôi phục.');
       setColumns(previous);
     }
   }
@@ -335,7 +335,7 @@ export function BoardView({ boardId, initialColumns }: BoardProps) {
       .single();
 
     if (insertError || !data) {
-      setError(insertError?.message ?? 'Could not add task.');
+      setError(insertError?.message ?? 'Không thể thêm công việc.');
       return;
     }
 
@@ -363,7 +363,7 @@ export function BoardView({ boardId, initialColumns }: BoardProps) {
         <div className="mb-4 flex items-center justify-between rounded-lg border border-danger bg-card px-3 py-2 text-sm text-danger">
           <span>{error}</span>
           <button type="button" onClick={() => setError(null)} className="font-medium hover:opacity-80">
-            Dismiss
+            Đóng
           </button>
         </div>
       )}
@@ -382,7 +382,7 @@ export function BoardView({ boardId, initialColumns }: BoardProps) {
               }`}
             >
               <AlertTriangle className="h-3.5 w-3.5" aria-hidden="true" />
-              {dueSummary.overdue} overdue
+              {dueSummary.overdue} quá hạn
             </button>
           )}
           {dueSummary.dueToday > 0 && (
@@ -397,7 +397,7 @@ export function BoardView({ boardId, initialColumns }: BoardProps) {
               }`}
             >
               <Clock className="h-3.5 w-3.5" aria-hidden="true" />
-              {dueSummary.dueToday} due today
+              {dueSummary.dueToday} đến hạn hôm nay
             </button>
           )}
         </div>
@@ -408,7 +408,7 @@ export function BoardView({ boardId, initialColumns }: BoardProps) {
       {columns.length === 0 && (
         <div className="mb-4 flex flex-col items-center gap-2 rounded-lg border border-dashed border-border p-8 text-center">
           <p className="text-sm text-muted-foreground">
-            This board has no columns yet. Use &quot;+ Add column&quot; below to create one.
+            Bảng này chưa có cột nào. Dùng &quot;+ Thêm cột&quot; bên dưới để tạo cột mới.
           </p>
         </div>
       )}
@@ -447,12 +447,12 @@ export function BoardView({ boardId, initialColumns }: BoardProps) {
                       setNewColumnName('');
                     }
                   }}
-                  placeholder="Column name"
+                  placeholder="Tên cột"
                   className="input-field h-9"
                 />
                 <div className="mt-2 flex gap-2">
                   <button type="submit" className="btn-primary h-8 px-3 text-xs">
-                    Add column
+                    Thêm cột
                   </button>
                   <button
                     type="button"
@@ -463,7 +463,7 @@ export function BoardView({ boardId, initialColumns }: BoardProps) {
                     className="btn-ghost h-8 px-3 text-xs"
                   >
                     <X className="h-3.5 w-3.5" aria-hidden="true" />
-                    Cancel
+                    Hủy
                   </button>
                 </div>
               </form>
@@ -474,7 +474,7 @@ export function BoardView({ boardId, initialColumns }: BoardProps) {
                 className="flex w-full items-center gap-1.5 rounded-lg border border-dashed border-border p-3 text-left text-sm text-muted-foreground transition-colors hover:border-primary hover:text-foreground"
               >
                 <Plus className="h-4 w-4" aria-hidden="true" />
-                Add column
+                Thêm cột
               </button>
             )}
           </div>

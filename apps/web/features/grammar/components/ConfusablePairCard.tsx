@@ -59,7 +59,7 @@ export function ConfusablePairCard({
       </div>
 
       <div className="rounded-lg border border-primary/30 bg-primary/5 p-4">
-        <h2 className="mb-2 text-sm font-semibold text-primary">Distinction</h2>
+        <h2 className="mb-2 text-sm font-semibold text-primary">Phân biệt</h2>
         <GrammarMarkdown>{comparisonNote}</GrammarMarkdown>
       </div>
     </div>

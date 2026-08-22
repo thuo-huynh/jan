@@ -154,10 +154,10 @@ export function HabitGridManager({ year, month, days, initialHabits, initialComp
       const newStreak = computeHabitStreak([...previousDates, date], asOf);
       const milestone = crossedMilestone(oldStreak, newStreak);
       if (milestone && habit) {
-        pushCelebration(`🔥 ${milestone}-day streak on "${habit.name}"!`);
+        pushCelebration(`🔥 Chuỗi ${milestone} ngày cho "${habit.name}"!`);
       }
       if (habits.length > 0 && doneTodaySet.size + 1 >= habits.length) {
-        pushCelebration('All habits done for today! 🎉');
+        pushCelebration('Đã hoàn thành tất cả thói quen hôm nay! 🎉');
       }
     }
 
@@ -213,14 +213,14 @@ export function HabitGridManager({ year, month, days, initialHabits, initialComp
           <div className="card p-3 sm:p-4">
             <div className="flex items-center gap-2 text-muted-foreground">
               <ListChecks className="h-4 w-4" aria-hidden="true" />
-              <p className="text-xs sm:text-sm">Habits</p>
+              <p className="text-xs sm:text-sm">Thói quen</p>
             </div>
             <p className="mt-1 text-xl font-semibold text-foreground sm:text-2xl">{habits.length}</p>
           </div>
           <div className="card p-3 sm:p-4">
             <div className="flex items-center gap-2 text-muted-foreground">
               <CalendarCheck className="h-4 w-4" aria-hidden="true" />
-              <p className="text-xs sm:text-sm">Done today</p>
+              <p className="text-xs sm:text-sm">Hoàn thành hôm nay</p>
             </div>
             <p className="mt-1 text-xl font-semibold text-foreground sm:text-2xl">
               {stats.doneToday}
@@ -230,7 +230,7 @@ export function HabitGridManager({ year, month, days, initialHabits, initialComp
           <div className="card p-3 sm:p-4">
             <div className="flex items-center gap-2 text-muted-foreground">
               <Percent className="h-4 w-4" aria-hidden="true" />
-              <p className="text-xs sm:text-sm">This month</p>
+              <p className="text-xs sm:text-sm">Tháng này</p>
             </div>
             <p className="mt-1 text-xl font-semibold text-foreground sm:text-2xl">{stats.completionRate}%</p>
           </div>
@@ -243,7 +243,7 @@ export function HabitGridManager({ year, month, days, initialHabits, initialComp
             <CalendarDays className="h-6 w-6 text-primary" aria-hidden="true" />
           </div>
           <p className="max-w-xs text-sm text-muted-foreground">
-            No habits yet. Add your first one above and start ticking off days.
+            Chưa có thói quen nào. Thêm thói quen đầu tiên ở trên và bắt đầu tích ngày.
           </p>
         </div>
       ) : (
@@ -255,7 +255,7 @@ export function HabitGridManager({ year, month, days, initialHabits, initialComp
                   rowSpan={2}
                   className="sticky left-0 z-10 border-r border-border bg-muted px-2 py-1.5 text-left align-bottom font-medium"
                 >
-                  Habit
+                  Thói quen
                 </th>
                 {days.map((date) => (
                   <th

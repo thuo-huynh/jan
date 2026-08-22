@@ -35,7 +35,7 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
   } = await supabase.auth.getUser();
 
   if (!user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    return NextResponse.json({ error: 'Chưa đăng nhập' }, { status: 401 });
   }
 
   const { data: mistake, error: mistakeError } = await supabase
@@ -49,7 +49,7 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
   }
   if (!mistake || (!mistake.linked_vocab_id && !mistake.linked_grammar_id)) {
     return NextResponse.json(
-      { error: 'Mistake not found or has no linked vocab/grammar item' },
+      { error: 'Không tìm thấy lỗi sai hoặc lỗi sai chưa liên kết với từ vựng/ngữ pháp nào' },
       { status: 404 },
     );
   }

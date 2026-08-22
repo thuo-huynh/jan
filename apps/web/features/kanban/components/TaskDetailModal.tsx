@@ -57,7 +57,7 @@ export function TaskDetailModal({ task, onClose, onUpdated, onDeleted }: TaskDet
       dueDate: dueDate || null,
     });
     if (!parsed.success) {
-      setError(parsed.error.issues[0]?.message ?? 'Invalid task fields.');
+      setError(parsed.error.issues[0]?.message ?? 'Thông tin công việc không hợp lệ.');
       return;
     }
 
@@ -85,7 +85,7 @@ export function TaskDetailModal({ task, onClose, onUpdated, onDeleted }: TaskDet
 
     setSaving(false);
     if (updateError || !data) {
-      setError(updateError?.message ?? 'Could not save task.');
+      setError(updateError?.message ?? 'Không thể lưu công việc.');
       return;
     }
 
@@ -94,7 +94,7 @@ export function TaskDetailModal({ task, onClose, onUpdated, onDeleted }: TaskDet
   }
 
   async function handleDelete() {
-    const ok = await confirm({ title: 'Delete this task?', description: 'This cannot be undone.' });
+    const ok = await confirm({ title: 'Xóa công việc này?', description: 'Không thể hoàn tác thao tác này.' });
     if (!ok) return;
     setSaving(true);
     setError(null);
@@ -121,7 +121,7 @@ export function TaskDetailModal({ task, onClose, onUpdated, onDeleted }: TaskDet
         onClick={(e) => e.stopPropagation()}
         role="dialog"
         aria-modal="true"
-        aria-label="Task details"
+        aria-label="Chi tiết công việc"
       >
         <div className="flex items-start justify-between gap-3">
           <input
@@ -132,7 +132,7 @@ export function TaskDetailModal({ task, onClose, onUpdated, onDeleted }: TaskDet
           <button
             type="button"
             onClick={onClose}
-            aria-label="Close"
+            aria-label="Đóng"
             className="flex h-8 w-8 shrink-0 items-center justify-center rounded text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
           >
             <X className="h-5 w-5" aria-hidden="true" />
@@ -141,7 +141,7 @@ export function TaskDetailModal({ task, onClose, onUpdated, onDeleted }: TaskDet
 
         <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div>
-            <label className="label-field text-xs">Due date</label>
+            <label className="label-field text-xs">Hạn hoàn thành</label>
             <input
               type="date"
               value={dueDate}
@@ -150,11 +150,11 @@ export function TaskDetailModal({ task, onClose, onUpdated, onDeleted }: TaskDet
             />
           </div>
           <div>
-            <label className="label-field text-xs">Tags (comma-separated)</label>
+            <label className="label-field text-xs">Thẻ (cách nhau bằng dấu phẩy)</label>
             <input
               value={tagsInput}
               onChange={(e) => setTagsInput(e.target.value)}
-              placeholder="n2, urgent"
+              placeholder="n2, gấp"
               className="input-field h-9"
             />
           </div>
@@ -162,7 +162,7 @@ export function TaskDetailModal({ task, onClose, onUpdated, onDeleted }: TaskDet
 
         {!hasChecklist && (
           <div className="mt-4">
-            <label className="label-field text-xs">Progress % (no checklist yet — set manually)</label>
+            <label className="label-field text-xs">Tiến độ % (chưa có checklist — đặt thủ công)</label>
             <input
               type="number"
               min={0}
@@ -175,7 +175,7 @@ export function TaskDetailModal({ task, onClose, onUpdated, onDeleted }: TaskDet
         )}
 
         <div className="mt-4">
-          <label className="label-field text-xs">Description</label>
+          <label className="label-field text-xs">Mô tả</label>
           <textarea
             value={description}
             onChange={(e) => setDescription(e.target.value)}
@@ -192,14 +192,14 @@ export function TaskDetailModal({ task, onClose, onUpdated, onDeleted }: TaskDet
 
         <div className="mt-5 flex items-center justify-between border-t border-border pt-4">
           <button type="button" onClick={handleDelete} disabled={saving} className="btn-ghost h-9 px-2.5 text-danger hover:bg-danger/10">
-            Delete task
+            Xóa công việc
           </button>
           <div className="flex gap-2">
             <button type="button" onClick={onClose} className="btn-outline h-9 px-3 text-sm">
-              Cancel
+              Hủy
             </button>
             <button type="button" onClick={handleSave} disabled={saving} className="btn-primary h-9 px-4 text-sm">
-              {saving ? 'Saving…' : 'Save'}
+              {saving ? 'Đang lưu…' : 'Lưu'}
             </button>
           </div>
         </div>

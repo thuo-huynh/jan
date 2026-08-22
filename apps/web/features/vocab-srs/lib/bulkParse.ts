@@ -65,7 +65,7 @@ export function parseBulkVocabInput(text: string): BulkParseResult {
       errors.push({
         line: i + 1,
         raw: rawLine,
-        message: 'No separator found — use a tab, "-", ":", or "," between word and meaning',
+        message: 'Không tìm thấy dấu phân cách — dùng tab, "-", ":", hoặc "," giữa từ và nghĩa',
       });
       return;
     }
@@ -79,7 +79,7 @@ export function parseBulkVocabInput(text: string): BulkParseResult {
       isKanji: false,
     });
     if (!parsed.success) {
-      errors.push({ line: i + 1, raw: rawLine, message: parsed.error.issues[0]?.message ?? 'Invalid entry' });
+      errors.push({ line: i + 1, raw: rawLine, message: parsed.error.issues[0]?.message ?? 'Mục không hợp lệ' });
       return;
     }
 

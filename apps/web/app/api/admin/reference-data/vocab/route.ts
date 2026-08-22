@@ -107,7 +107,7 @@ export async function PUT(request: NextRequest) {
     .maybeSingle();
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-  if (!data) return NextResponse.json({ error: 'Not found' }, { status: 404 });
+  if (!data) return NextResponse.json({ error: 'Không tìm thấy' }, { status: 404 });
   return NextResponse.json(data);
 }
 
@@ -118,7 +118,7 @@ export async function DELETE(request: NextRequest) {
 
   const { searchParams } = new URL(request.url);
   const id = searchParams.get('id');
-  if (!id) return NextResponse.json({ error: 'id query param required' }, { status: 400 });
+  if (!id) return NextResponse.json({ error: 'Cần tham số id' }, { status: 400 });
 
   const { data, error } = await admin
     .from('vocab_entries')
@@ -129,6 +129,6 @@ export async function DELETE(request: NextRequest) {
     .maybeSingle();
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-  if (!data) return NextResponse.json({ error: 'Not found' }, { status: 404 });
+  if (!data) return NextResponse.json({ error: 'Không tìm thấy' }, { status: 404 });
   return NextResponse.json({ id, deleted: true });
 }

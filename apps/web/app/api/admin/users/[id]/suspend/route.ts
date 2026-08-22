@@ -61,7 +61,7 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
     return NextResponse.json({ error: updateError.message }, { status: 500 });
   }
   if (!updated) {
-    return NextResponse.json({ error: 'User not found' }, { status: 404 });
+    return NextResponse.json({ error: 'Không tìm thấy người dùng' }, { status: 404 });
   }
 
   // Best-effort auth-level session invalidation — see doc comment above.

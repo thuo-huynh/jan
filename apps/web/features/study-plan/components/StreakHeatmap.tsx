@@ -55,7 +55,7 @@ export function StreakHeatmap({ days }: StreakHeatmapProps) {
       if (month !== lastMonth) {
         labels.push({
           weekIndex,
-          label: new Date(`${firstRealDay.date}T00:00:00`).toLocaleDateString(undefined, {
+          label: new Date(`${firstRealDay.date}T00:00:00`).toLocaleDateString('vi-VN', {
             month: 'short',
           }),
         });
@@ -68,12 +68,12 @@ export function StreakHeatmap({ days }: StreakHeatmapProps) {
   return (
     <div className="card space-y-2 p-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-sm font-semibold text-foreground">Activity</h2>
+        <h2 className="text-sm font-semibold text-foreground">Hoạt động</h2>
         {hovered && (
           <p className="text-xs text-muted-foreground">
-            {new Date(`${hovered.date}T00:00:00`).toLocaleDateString()} — {hovered.totalCount}{' '}
-            review{hovered.totalCount === 1 ? '' : 's'}
-            {hovered.goalMet && <span className="ml-1 font-medium text-accent">· Goal met</span>}
+            {new Date(`${hovered.date}T00:00:00`).toLocaleDateString('vi-VN')} — {hovered.totalCount}{' '}
+            lượt ôn
+            {hovered.goalMet && <span className="ml-1 font-medium text-accent">· Đạt mục tiêu</span>}
           </p>
         )}
       </div>
@@ -118,7 +118,7 @@ export function StreakHeatmap({ days }: StreakHeatmapProps) {
       </div>
 
       <div className="flex items-center gap-2 text-[10px] text-muted-foreground">
-        <span>Less</span>
+        <span>Ít</span>
         {OPACITY.map((op, i) => (
           <div
             key={i}
@@ -129,13 +129,13 @@ export function StreakHeatmap({ days }: StreakHeatmapProps) {
             }}
           />
         ))}
-        <span>More</span>
+        <span>Nhiều</span>
         <span className="ml-3 flex items-center gap-1">
           <span
             className="h-[10px] w-[10px] rounded-[2px]"
             style={{ backgroundColor: 'var(--primary)', boxShadow: 'inset 0 0 0 1.5px var(--accent)' }}
           />
-          Goal met
+          Đạt mục tiêu
         </span>
       </div>
     </div>

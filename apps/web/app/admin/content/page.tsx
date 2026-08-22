@@ -14,13 +14,13 @@ import { useConfirm } from '@/shared/hooks/useConfirm';
  * note" instead of "Delete".
  */
 const CONTENT_TYPES = [
-  { value: 'tasks', label: 'Tasks' },
-  { value: 'notes', label: 'Notes' },
-  { value: 'vocab', label: 'Custom vocab' },
-  { value: 'grammar_notes', label: 'Grammar notes' },
-  { value: 'reading_logs', label: 'Reading logs' },
-  { value: 'listening_logs', label: 'Listening logs' },
-  { value: 'mistakes', label: 'Mistake notebook' },
+  { value: 'tasks', label: 'Công việc' },
+  { value: 'notes', label: 'Ghi chú' },
+  { value: 'vocab', label: 'Từ vựng tự thêm' },
+  { value: 'grammar_notes', label: 'Ghi chú ngữ pháp' },
+  { value: 'reading_logs', label: 'Nhật ký đọc' },
+  { value: 'listening_logs', label: 'Nhật ký nghe' },
+  { value: 'mistakes', label: 'Sổ lỗi sai' },
 ] as const;
 
 type ContentType = (typeof CONTENT_TYPES)[number]['value'];
@@ -74,11 +74,11 @@ export default function AdminContentPage() {
       if (query.trim()) params.set('query', query.trim());
       const res = await fetch(`/api/admin/content?${params.toString()}`);
       const json = await res.json();
-      if (!res.ok) throw new Error(json.error ?? 'Failed to load content');
+      if (!res.ok) throw new Error(json.error ?? 'Không tải được nội dung');
       setItems(json.items);
       setTotal(json.total);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load content');
+      setError(err instanceof Error ? err.message : 'Không tải được nội dung');
     } finally {
       setLoading(false);
     }
@@ -92,8 +92,8 @@ export default function AdminContentPage() {
     const isNote = type === 'grammar_notes';
     const confirmed = await confirm(
       isNote
-        ? { title: 'Clear this personal note?' }
-        : { title: 'Remove this content item?', description: 'This cannot be undone.' },
+        ? { title: 'Xóa ghi chú cá nhân này?' }
+        : { title: 'Xóa mục nội dung này?', description: 'Không thể hoàn tác thao tác này.' },
     );
     if (!confirmed) return;
 
@@ -102,11 +102,11 @@ export default function AdminContentPage() {
     try {
       const res = await fetch(`/api/admin/content/${type}/${item.id}`, { method: 'DELETE' });
       const json = await res.json();
-      if (!res.ok) throw new Error(json.error ?? 'Action failed');
+      if (!res.ok) throw new Error(json.error ?? 'Thao tác thất bại');
       setItems((prev) => prev.filter((i) => i.id !== item.id));
       setTotal((t) => Math.max(0, t - 1));
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Action failed');
+      setError(err instanceof Error ? err.message : 'Thao tác thất bại');
     } finally {
       setBusyId(null);
     }
@@ -119,10 +119,10 @@ export default function AdminContentPage() {
       {confirmDialog}
       <div>
         <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
-          Content moderation
+          Kiểm duyệt nội dung
         </h1>
         <p className="mt-1.5 text-sm text-muted-foreground">
-          Inspect and remove user-generated content (FR-046).
+          Xem và xóa nội dung do người dùng tạo.
         </p>
       </div>
 
@@ -158,13 +158,13 @@ export default function AdminContentPage() {
           type="text"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="Search content…"
-          aria-label="Search content"
+          placeholder="Tìm nội dung…"
+          aria-label="Tìm nội dung"
           className="input-field max-w-sm"
         />
         <button type="submit" className="btn-outline shrink-0">
           <Search className="h-4 w-4" aria-hidden="true" />
-          Search
+          Tìm
         </button>
       </form>
 
@@ -178,10 +178,10 @@ export default function AdminContentPage() {
         <table className="w-full text-left text-sm">
           <thead className="border-b border-border text-xs uppercase tracking-wide text-muted-foreground">
             <tr>
-              <th className="px-4 py-3">Owner</th>
-              <th className="px-4 py-3">Summary</th>
-              <th className="px-4 py-3">Created</th>
-              <th className="px-4 py-3 text-right">Actions</th>
+              <th className="px-4 py-3">Chủ sở hữu</th>
+              <th className="px-4 py-3">Tóm tắt</th>
+              <th className="px-4 py-3">Ngày tạo</th>
+              <th className="px-4 py-3 text-right">Thao tác</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-border">
@@ -194,7 +194,7 @@ export default function AdminContentPage() {
                       <Inbox className="h-6 w-6 text-muted-foreground" aria-hidden="true" />
                     </div>
                     <p className="text-sm text-muted-foreground">
-                      {query ? 'No items match this search.' : 'No items found.'}
+                      {query ? 'Không có mục nào khớp với tìm kiếm.' : 'Không tìm thấy mục nào.'}
                     </p>
                   </div>
                 </td>
@@ -212,7 +212,7 @@ export default function AdminContentPage() {
                       {summaryOf(type, item) || <span className="text-muted-foreground">—</span>}
                     </td>
                     <td className="px-4 py-3 text-muted-foreground">
-                      {createdAt ? new Date(createdAt).toLocaleDateString() : '—'}
+                      {createdAt ? new Date(createdAt).toLocaleDateString('vi-VN') : '—'}
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex justify-end">
@@ -222,7 +222,7 @@ export default function AdminContentPage() {
                           onClick={() => handleRemove(item)}
                           className="btn-outline h-8 border-danger/40 px-3 text-xs text-danger hover:bg-danger/10"
                         >
-                          {type === 'grammar_notes' ? 'Clear note' : 'Remove'}
+                          {type === 'grammar_notes' ? 'Xóa ghi chú' : 'Xóa'}
                         </button>
                       </div>
                     </td>
@@ -235,7 +235,7 @@ export default function AdminContentPage() {
 
       <div className="flex items-center justify-between text-sm text-muted-foreground">
         <span>
-          Page {page} of {totalPages} ({total} items)
+          Trang {page} / {totalPages} ({total} mục)
         </span>
         <div className="flex gap-2">
           <button
@@ -244,7 +244,7 @@ export default function AdminContentPage() {
             onClick={() => setPage((p) => Math.max(1, p - 1))}
             className="btn-outline h-8 px-3 text-xs disabled:opacity-40"
           >
-            Previous
+            Trước
           </button>
           <button
             type="button"
@@ -252,7 +252,7 @@ export default function AdminContentPage() {
             onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
             className="btn-outline h-8 px-3 text-xs disabled:opacity-40"
           >
-            Next
+            Sau
           </button>
         </div>
       </div>

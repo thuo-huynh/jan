@@ -30,9 +30,9 @@ export default async function MistakesPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">Mistake Notebook</h1>
+        <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">Sổ lỗi sai</h1>
         <p className="mt-1.5 text-sm text-muted-foreground">
-          Log mistakes, link them to vocab or grammar, and send them straight into your SRS queue.
+          Ghi lại lỗi sai, liên kết với từ vựng hoặc ngữ pháp, và đưa thẳng vào hàng đợi ôn tập SRS.
         </p>
       </div>
 

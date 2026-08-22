@@ -49,9 +49,9 @@ export function MistakeNotebookManager({
   }
 
   const tabs: { key: FilterTab; label: string; count: number }[] = [
-    { key: 'open', label: 'Open', count: openCount },
-    { key: 'resolved', label: 'Resolved', count: resolvedCount },
-    { key: 'all', label: 'All', count: mistakes.length },
+    { key: 'open', label: 'Chưa xử lý', count: openCount },
+    { key: 'resolved', label: 'Đã xử lý', count: resolvedCount },
+    { key: 'all', label: 'Tất cả', count: mistakes.length },
   ];
 
   return (
@@ -77,24 +77,24 @@ export function MistakeNotebookManager({
           <select
             value={sourceFilter}
             onChange={(e) => setSourceFilter(e.target.value as SourceFilter)}
-            aria-label="Filter by source"
+            aria-label="Lọc theo nguồn"
             className="input-field h-9 w-auto text-sm"
           >
-            <option value="all">All sources</option>
-            <option value="manual">Manual</option>
-            <option value="mock_test">Mock test</option>
+            <option value="all">Tất cả nguồn</option>
+            <option value="manual">Tự nhập</option>
+            <option value="mock_test">Đề thi thử</option>
           </select>
         </div>
         <button type="button" onClick={() => setAdding((v) => !v)} className="btn-primary h-9 px-3 text-sm">
           {adding ? (
             <>
               <X className="h-4 w-4" aria-hidden="true" />
-              Close
+              Đóng
             </>
           ) : (
             <>
               <Plus className="h-4 w-4" aria-hidden="true" />
-              Add mistake
+              Thêm lỗi sai
             </>
           )}
         </button>
@@ -113,10 +113,10 @@ export function MistakeNotebookManager({
         <div className="flex flex-col items-center gap-2 rounded-lg border border-dashed border-border p-8 text-center">
           <p className="text-sm text-muted-foreground">
             {mistakes.length === 0
-              ? 'No mistakes logged yet.'
+              ? 'Chưa có lỗi sai nào được ghi lại.'
               : filter === 'open' && sourceFilter === 'all'
-                ? 'No open mistakes — nice work.'
-                : 'No entries match this filter.'}
+                ? 'Không có lỗi sai nào đang mở — làm tốt lắm.'
+                : 'Không có mục nào khớp với bộ lọc này.'}
           </p>
         </div>
       ) : (

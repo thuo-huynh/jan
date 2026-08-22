@@ -83,7 +83,7 @@ export default async function BoardDetailPage({ params }: BoardDetailPageProps) 
         <Link
           href="/boards"
           className="flex h-9 w-9 shrink-0 items-center justify-center rounded text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-          aria-label="Back to boards"
+          aria-label="Về danh sách bảng"
         >
           <ArrowLeft className="h-5 w-5" aria-hidden="true" />
         </Link>

@@ -21,11 +21,11 @@ export default function SignupPage() {
     setError(null);
 
     if (password !== confirmPassword) {
-      setError('Passwords do not match.');
+      setError('Mật khẩu không khớp.');
       return;
     }
     if (password.length < 8) {
-      setError('Password must be at least 8 characters.');
+      setError('Mật khẩu phải có ít nhất 8 ký tự.');
       return;
     }
 
@@ -57,9 +57,9 @@ export default function SignupPage() {
   return (
     <AuthShell>
       <div>
-        <h1 className="text-2xl font-bold tracking-tight text-foreground">Create your account</h1>
+        <h1 className="text-2xl font-bold tracking-tight text-foreground">Tạo tài khoản của bạn</h1>
         <p className="mt-1.5 text-sm text-muted-foreground">
-          Start tracking tasks and your N2 study progress.
+          Bắt đầu theo dõi công việc và tiến độ học N2 của bạn.
         </p>
 
         {confirmationSent ? (
@@ -68,7 +68,7 @@ export default function SignupPage() {
               <MailCheck className="h-6 w-6 text-primary" aria-hidden="true" />
             </div>
             <p className="text-sm text-foreground">
-              Check your email to confirm your account before signing in.
+              Kiểm tra email để xác nhận tài khoản trước khi đăng nhập.
             </p>
           </div>
         ) : (
@@ -89,7 +89,7 @@ export default function SignupPage() {
             </div>
             <div>
               <label htmlFor="password" className="label-field">
-                Password
+                Mật khẩu
               </label>
               <input
                 id="password"
@@ -100,11 +100,11 @@ export default function SignupPage() {
                 onChange={(e) => setPassword(e.target.value)}
                 className="input-field"
               />
-              <p className="helper-text">At least 8 characters.</p>
+              <p className="helper-text">Ít nhất 8 ký tự.</p>
             </div>
             <div>
               <label htmlFor="confirmPassword" className="label-field">
-                Confirm password
+                Xác nhận mật khẩu
               </label>
               <input
                 id="confirmPassword"
@@ -120,15 +120,15 @@ export default function SignupPage() {
             {error && <p className="error-text">{error}</p>}
 
             <button type="submit" disabled={submitting} className="btn-primary w-full">
-              {submitting ? 'Creating account…' : 'Sign up'}
+              {submitting ? 'Đang tạo tài khoản…' : 'Đăng ký'}
             </button>
           </form>
         )}
 
         <p className="mt-6 text-center text-sm text-muted-foreground">
-          Already have an account?{' '}
+          Đã có tài khoản?{' '}
           <Link href="/login" className="font-medium text-primary hover:underline">
-            Sign in
+            Đăng nhập
           </Link>
         </p>
       </div>

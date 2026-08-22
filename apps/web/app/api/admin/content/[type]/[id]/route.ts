@@ -42,7 +42,7 @@ export async function DELETE(
       .maybeSingle();
 
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-    if (!data) return NextResponse.json({ error: 'Not found' }, { status: 404 });
+    if (!data) return NextResponse.json({ error: 'Không tìm thấy' }, { status: 404 });
     return NextResponse.json({ id, type, cleared: true });
   }
 
@@ -58,7 +58,7 @@ export async function DELETE(
       .maybeSingle();
 
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-    if (!data) return NextResponse.json({ error: 'Not found' }, { status: 404 });
+    if (!data) return NextResponse.json({ error: 'Không tìm thấy' }, { status: 404 });
     return NextResponse.json({ id, type, deleted: true });
   }
 
@@ -66,6 +66,6 @@ export async function DELETE(
   const { data, error } = await admin.from(table).delete().eq('id', id).select('id').maybeSingle();
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-  if (!data) return NextResponse.json({ error: 'Not found' }, { status: 404 });
+  if (!data) return NextResponse.json({ error: 'Không tìm thấy' }, { status: 404 });
   return NextResponse.json({ id, type, deleted: true });
 }

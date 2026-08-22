@@ -42,15 +42,15 @@ export default async function HabitsPage({ searchParams }: HabitsPageProps) {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">Habits</h1>
+        <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">Thói quen</h1>
         <p className="mt-1.5 text-sm text-muted-foreground">
-          Track daily habits on a calendar grid — tick a day to mark it done.
+          Theo dõi thói quen hằng ngày trên lịch — tích vào ngày để đánh dấu hoàn thành.
         </p>
       </div>
 
       {habitsError ? (
         <p className="rounded-lg border border-danger bg-danger/10 px-3 py-2 text-sm text-danger">
-          Could not load habits: {habitsError.message}
+          Không tải được thói quen: {habitsError.message}
         </p>
       ) : (
         <HabitGridManager

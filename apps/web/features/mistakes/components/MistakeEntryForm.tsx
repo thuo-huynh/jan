@@ -49,7 +49,7 @@ function LinkSelect<T extends { id: string }>({
             onClick={() => onSelect(null)}
             className="shrink-0 text-xs font-medium text-muted-foreground transition-colors hover:text-danger"
           >
-            Unlink
+            Bỏ liên kết
           </button>
         </div>
       ) : (
@@ -66,7 +66,7 @@ function LinkSelect<T extends { id: string }>({
           {open && (
             <ul className="absolute z-10 mt-1 max-h-48 w-full overflow-auto rounded-lg border border-border bg-card py-1 text-sm shadow-lg">
               {filtered.length === 0 && (
-                <li className="px-3 py-1.5 text-muted-foreground">No matches</li>
+                <li className="px-3 py-1.5 text-muted-foreground">Không có kết quả</li>
               )}
               {filtered.map((option) => (
                 <li key={option.id}>
@@ -117,7 +117,7 @@ export function MistakeEntryForm({
 
     const parsed = mistakeSchema.safeParse({ content, linkedVocabId, linkedGrammarId });
     if (!parsed.success) {
-      setError(parsed.error.issues[0]?.message ?? 'Invalid entry');
+      setError(parsed.error.issues[0]?.message ?? 'Mục không hợp lệ');
       return;
     }
 
@@ -128,7 +128,7 @@ export function MistakeEntryForm({
     } = await supabase.auth.getUser();
     if (!user) {
       setSubmitting(false);
-      setError('You must be signed in.');
+      setError('Bạn cần đăng nhập.');
       return;
     }
 
@@ -147,7 +147,7 @@ export function MistakeEntryForm({
     setSubmitting(false);
 
     if (dbError || !data) {
-      setError(dbError?.message ?? 'Failed to save mistake');
+      setError(dbError?.message ?? 'Lưu lỗi sai thất bại');
       return;
     }
 
@@ -158,7 +158,7 @@ export function MistakeEntryForm({
     <form onSubmit={handleSubmit} className="card space-y-3 p-4">
       <div>
         <label className="label-field" htmlFor="mistake-content">
-          What went wrong?
+          Bạn đã sai ở đâu?
         </label>
         <textarea
           id="mistake-content"
@@ -166,26 +166,26 @@ export function MistakeEntryForm({
           onChange={(e) => setContent(e.target.value)}
           rows={3}
           required
-          placeholder="e.g. Mixed up 〜わけではない and 〜わけがない in a fill-in-the-blank"
+          placeholder="vd: Nhầm lẫn giữa 〜わけではない và 〜わけがない trong bài điền từ"
           className="textarea-field"
         />
       </div>
       <div className="grid gap-3 sm:grid-cols-2">
         <LinkSelect
-          label="Linked vocab / kanji (optional)"
+          label="Liên kết từ vựng / Hán tự (không bắt buộc)"
           options={vocabOptions}
           selectedId={linkedVocabId}
           renderLabel={(v) => `${v.word} — ${v.meaning}`}
           onSelect={setLinkedVocabId}
-          placeholder="Search vocab…"
+          placeholder="Tìm từ vựng…"
         />
         <LinkSelect
-          label="Linked grammar point (optional)"
+          label="Liên kết điểm ngữ pháp (không bắt buộc)"
           options={grammarOptions}
           selectedId={linkedGrammarId}
           renderLabel={(g) => `${g.pattern} — ${g.meaning}`}
           onSelect={setLinkedGrammarId}
-          placeholder="Search grammar…"
+          placeholder="Tìm ngữ pháp…"
         />
       </div>
 
@@ -193,10 +193,10 @@ export function MistakeEntryForm({
 
       <div className="flex gap-2">
         <button type="submit" disabled={submitting} className="btn-primary">
-          {submitting ? 'Saving…' : 'Add mistake'}
+          {submitting ? 'Đang lưu…' : 'Thêm lỗi sai'}
         </button>
         <button type="button" onClick={onCancel} className="btn-outline">
-          Cancel
+          Hủy
         </button>
       </div>
     </form>

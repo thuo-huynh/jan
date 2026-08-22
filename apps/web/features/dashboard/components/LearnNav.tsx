@@ -15,15 +15,15 @@ import {
 } from 'lucide-react';
 
 const LEARN_TABS = [
-  { href: '/learn/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { href: '/learn/vocab', label: 'Vocab', icon: BookOpen },
-  { href: '/learn/grammar', label: 'Grammar', icon: Languages },
-  { href: '/learn/reading', label: 'Reading', icon: BookText },
-  { href: '/learn/listening', label: 'Listening', icon: Headphones },
-  { href: '/learn/review', label: 'Review', icon: RotateCw },
-  { href: '/learn/study-plan', label: 'Study Plan', icon: CalendarClock },
-  { href: '/learn/mistakes', label: 'Mistakes', icon: AlertTriangle },
-  { href: '/learn/mock-tests', label: 'Mock Tests', icon: ClipboardCheck },
+  { href: '/learn/dashboard', label: 'Tổng quan', icon: LayoutDashboard },
+  { href: '/learn/vocab', label: 'Từ vựng', icon: BookOpen },
+  { href: '/learn/grammar', label: 'Ngữ pháp', icon: Languages },
+  { href: '/learn/reading', label: 'Đọc hiểu', icon: BookText },
+  { href: '/learn/listening', label: 'Nghe hiểu', icon: Headphones },
+  { href: '/learn/review', label: 'Ôn tập', icon: RotateCw },
+  { href: '/learn/study-plan', label: 'Kế hoạch học', icon: CalendarClock },
+  { href: '/learn/mistakes', label: 'Sổ lỗi sai', icon: AlertTriangle },
+  { href: '/learn/mock-tests', label: 'Đề thi thử', icon: ClipboardCheck },
 ];
 
 function isActive(pathname: string, href: string) {
@@ -43,7 +43,7 @@ export function LearnNav() {
   const pathname = usePathname();
 
   return (
-    <nav aria-label="Learn sections" className="-mx-4 overflow-x-auto px-4 sm:mx-0 sm:px-0">
+    <nav aria-label="Các mục học tập" className="-mx-4 overflow-x-auto px-4 sm:mx-0 sm:px-0">
       <div className="flex w-max min-w-full gap-1.5 border-b border-border pb-2 sm:w-full">
         {LEARN_TABS.map((tab) => {
           const active = isActive(pathname, tab.href);

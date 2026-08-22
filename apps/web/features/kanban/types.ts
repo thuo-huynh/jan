@@ -46,4 +46,4 @@ export interface BoardColumn {
   tasks: BoardTask[];
 }
 
-export const DEFAULT_COLUMN_NAMES = ['Todo', 'In Progress', 'In Review', 'Done'] as const;
+export const DEFAULT_COLUMN_NAMES = ['Cần làm', 'Đang làm', 'Đang review', 'Hoàn thành'] as const;

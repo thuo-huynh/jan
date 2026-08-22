@@ -88,7 +88,7 @@ export function Column({ column, onRename, onDelete, onAddTask, onTaskClick }: C
           <h3
             onClick={() => setEditingName(true)}
             className="flex-1 cursor-text truncate text-sm font-semibold text-foreground"
-            title="Click to rename"
+            title="Nhấn để đổi tên"
           >
             {column.name}
           </h3>
@@ -99,7 +99,7 @@ export function Column({ column, onRename, onDelete, onAddTask, onTaskClick }: C
         <button
           type="button"
           onClick={() => onDelete(column.id)}
-          aria-label={`Delete column ${column.name}`}
+          aria-label={`Xóa cột ${column.name}`}
           className="flex h-7 w-7 shrink-0 items-center justify-center rounded text-muted-foreground transition-colors hover:bg-danger/10 hover:text-danger"
         >
           <X className="h-4 w-4" aria-hidden="true" />
@@ -114,7 +114,7 @@ export function Column({ column, onRename, onDelete, onAddTask, onTaskClick }: C
         </SortableContext>
         {column.tasks.length === 0 && (
           <p className="rounded border border-dashed border-border px-2 py-3 text-center text-xs text-muted-foreground">
-            No tasks yet
+            Chưa có công việc nào
           </p>
         )}
       </div>
@@ -132,12 +132,12 @@ export function Column({ column, onRename, onDelete, onAddTask, onTaskClick }: C
                   setTaskTitleDraft('');
                 }
               }}
-              placeholder="Task title"
+              placeholder="Tên công việc"
               className="input-field h-9"
             />
             <div className="flex gap-2">
               <button type="submit" className="btn-primary h-8 px-3 text-xs">
-                Add
+                Thêm
               </button>
               <button
                 type="button"
@@ -147,7 +147,7 @@ export function Column({ column, onRename, onDelete, onAddTask, onTaskClick }: C
                 }}
                 className="btn-ghost h-8 px-3 text-xs"
               >
-                Cancel
+                Hủy
               </button>
             </div>
           </form>
@@ -157,7 +157,7 @@ export function Column({ column, onRename, onDelete, onAddTask, onTaskClick }: C
             onClick={() => setAddingTask(true)}
             className="w-full rounded px-2 py-1.5 text-left text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
           >
-            + Add task
+            + Thêm công việc
           </button>
         )}
       </div>
