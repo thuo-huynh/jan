@@ -319,7 +319,7 @@ export function GrammarList({ points: initialPoints, userId, initialSets }: Gram
       )}
       {addMode === 'html' && (
         <GrammarHtmlImportForm
-          existingPatterns={points.map((p) => p.pattern)}
+          existingPatterns={points.filter((p) => p.isCustom).map((p) => p.pattern)}
           existingSets={sets}
           onSetCreated={handleSetCreated}
           onImported={handleImported}

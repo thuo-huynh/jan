@@ -2,11 +2,14 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { ArrowLeftRight, Pencil, Trash2 } from 'lucide-react';
+import { ArrowLeftRight, Lightbulb, Pencil, Trash2 } from 'lucide-react';
 import { createClient } from '@/shared/supabase/client';
 import { useConfirm } from '@/shared/hooks/useConfirm';
 import type { GrammarPointWithProgress, GrammarStatus } from '../types';
 import { GrammarNoteEditor } from './GrammarNoteEditor';
+
+/** Marks a point created from parseGrammarHtml's `.note`/`.tip-box` extraction (GrammarHtmlImportForm) — a general tip, not a pattern to track mastery of. */
+const NOTE_TAG = 'Ghi chú';
 
 interface GrammarPointRowProps {
   point: GrammarPointWithProgress;
@@ -52,12 +55,17 @@ export function GrammarPointRow({
   const [notesOpen, setNotesOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const { confirm, confirmDialog } = useConfirm();
+  const isNote = point.frequencyTag === NOTE_TAG;
 
   async function handleDelete() {
-    const ok = await confirm({
-      title: `Xóa điểm ngữ pháp "${point.pattern}"?`,
-      description: 'Trạng thái và ghi chú của bạn cho điểm này cũng sẽ bị xóa.',
-    });
+    const ok = await confirm(
+      isNote
+        ? { title: 'Xóa ghi chú này?' }
+        : {
+            title: `Xóa điểm ngữ pháp "${point.pattern}"?`,
+            description: 'Trạng thái và ghi chú của bạn cho điểm này cũng sẽ bị xóa.',
+          },
+    );
     if (!ok) return;
     setDeleting(true);
     setError(null);
@@ -95,6 +103,46 @@ export function GrammarPointRow({
       onStatusChange(point.id, previousStatus);
       setError('Không thể lưu trạng thái. Vui lòng thử lại.');
     }
+  }
+
+  if (isNote) {
+    const label = point.pattern.replace(/^Ghi chú\s*—\s*/, '');
+    return (
+      <div className="flex items-start gap-2.5 rounded-lg border-l-4 border-accent bg-accent/10 py-2.5 pl-3 pr-2">
+        {confirmDialog}
+        <Lightbulb className="mt-0.5 h-4 w-4 shrink-0 text-accent" aria-hidden="true" />
+        <div className="min-w-0 flex-1">
+          {label && <p className="text-xs font-semibold text-accent">{label}</p>}
+          <p className="mt-0.5 text-sm text-foreground">{point.meaning}</p>
+          {error && <p className="error-text mt-1">{error}</p>}
+        </div>
+        {point.isCustom && (onEdit || onDeleted) && (
+          <div className="flex shrink-0 items-center gap-1">
+            {onEdit && (
+              <button
+                type="button"
+                onClick={() => onEdit(point.id)}
+                aria-label={`Sửa ghi chú ${label}`}
+                className="flex h-7 w-7 items-center justify-center rounded text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+              >
+                <Pencil className="h-3.5 w-3.5" aria-hidden="true" />
+              </button>
+            )}
+            {onDeleted && (
+              <button
+                type="button"
+                onClick={handleDelete}
+                disabled={deleting}
+                aria-label={`Xóa ghi chú ${label}`}
+                className="flex h-7 w-7 items-center justify-center rounded text-muted-foreground transition-colors hover:bg-danger/10 hover:text-danger disabled:opacity-40"
+              >
+                <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
+              </button>
+            )}
+          </div>
+        )}
+      </div>
+    );
   }
 
   return (

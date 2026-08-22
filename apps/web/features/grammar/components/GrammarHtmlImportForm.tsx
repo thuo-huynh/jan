@@ -8,7 +8,14 @@ import type { GrammarPointRecord } from '../lib/mapGrammarPoint';
 import type { GrammarSet } from '../types';
 
 interface GrammarHtmlImportFormProps {
-  /** Patterns the caller already has (global + own) — used to skip re-importing the same point on a repeat paste. */
+  /**
+   * The caller's own custom patterns (never the global catalog) — used to
+   * skip re-importing the same point on a repeat paste. Deliberately
+   * excludes global entries: a common pattern like あげる may well already
+   * exist in the admin-curated N2 catalog, but that shouldn't block the
+   * caller from also keeping their own worked example/note for it — the two
+   * rows serve different purposes.
+   */
   existingPatterns: string[];
   existingSets: GrammarSet[];
   onSetCreated: (set: GrammarSet) => void;
