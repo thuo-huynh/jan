@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { ArrowLeftRight, FileCode2, Pencil, Plus, Search, SearchX, Trash2, X } from 'lucide-react';
+import { ArrowLeftRight, BookOpen, FileCode2, Pencil, Plus, Search, SearchX, Trash2, X } from 'lucide-react';
 import { createClient } from '@/shared/supabase/client';
 import { useConfirm } from '@/shared/hooks/useConfirm';
 import { mapGrammarPoint, type GrammarPointRecord } from '../lib/mapGrammarPoint';
@@ -328,10 +328,16 @@ export function GrammarList({ points: initialPoints, userId, initialSets }: Gram
       {visiblePoints.length === 0 ? (
         <div className="flex flex-col items-center gap-3 rounded-lg border border-dashed border-border p-10 text-center">
           <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
-            <SearchX className="h-6 w-6 text-primary" aria-hidden="true" />
+            {points.length === 0 ? (
+              <BookOpen className="h-6 w-6 text-primary" aria-hidden="true" />
+            ) : (
+              <SearchX className="h-6 w-6 text-primary" aria-hidden="true" />
+            )}
           </div>
           <p className="max-w-xs text-sm text-muted-foreground">
-            Không có điểm ngữ pháp nào khớp với tìm kiếm/bộ lọc. Thử xóa bộ lọc ở trên.
+            {points.length === 0
+              ? 'Chưa có điểm ngữ pháp nào — dùng nút "Thêm điểm ngữ pháp" hoặc "Nhập từ HTML" ở trên để bắt đầu.'
+              : 'Không có điểm ngữ pháp nào khớp với tìm kiếm/bộ lọc. Thử xóa bộ lọc ở trên.'}
           </p>
         </div>
       ) : (

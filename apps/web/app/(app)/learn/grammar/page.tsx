@@ -1,5 +1,4 @@
 import { redirect } from 'next/navigation';
-import { BookOpen } from 'lucide-react';
 import { createClient, getAuthedUser } from '@/shared/supabase/server';
 import { GrammarList } from '@/features/grammar/components/GrammarList';
 import { mapGrammarPoint, type GrammarPointRecord, type UserGrammarStatusRecord } from '@/features/grammar/lib/mapGrammarPoint';
@@ -73,18 +72,7 @@ export default async function GrammarListPage() {
         </p>
       </div>
 
-      {combined.length === 0 ? (
-        <div className="flex flex-col items-center gap-3 rounded-lg border border-dashed border-border p-10 text-center">
-          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
-            <BookOpen className="h-6 w-6 text-primary" aria-hidden="true" />
-          </div>
-          <p className="max-w-xs text-sm text-muted-foreground">
-            Chưa có điểm ngữ pháp nào. Quay lại sau khi kho ngữ pháp N2 được cập nhật.
-          </p>
-        </div>
-      ) : (
-        <GrammarList points={combined} userId={user.id} initialSets={sets} />
-      )}
+      <GrammarList points={combined} userId={user.id} initialSets={sets} />
     </div>
   );
 }
