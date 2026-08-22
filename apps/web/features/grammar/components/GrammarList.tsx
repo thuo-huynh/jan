@@ -201,6 +201,30 @@ export function GrammarList({ points: initialPoints, userId, initialSets }: Gram
     setPoints((prev) => prev.map((p) => (p.setId === group.key ? { ...p, setId: null } : p)));
   }
 
+  /**
+   * "Chưa thuộc set nào" isn't a real grammar_sets row, so there's nothing
+   * to rename/ungroup for it the way handleDeleteGroup works for a real
+   * set — the only cleanup action that makes sense here is permanently
+   * deleting the leftover points themselves (e.g. after a set they used to
+   * belong to was deleted).
+   */
+  async function handleDeleteAllUnset(group: Group) {
+    const ok = await confirm({
+      title: `Xóa vĩnh viễn ${group.points.length} điểm ngữ pháp chưa thuộc set nào?`,
+      description: 'Khác với xóa set (chỉ gỡ nhóm) — thao tác này xóa hẳn các điểm này, không thể khôi phục.',
+    });
+    if (!ok) return;
+    const supabase = createClient();
+    const ids = group.points.map((p) => p.id);
+    const { error } = await supabase.from('grammar_points').delete().in('id', ids);
+    if (error) {
+      setGroupError(error.message);
+      return;
+    }
+    const idSet = new Set(ids);
+    setPoints((prev) => prev.filter((p) => !idSet.has(p.id)));
+  }
+
   return (
     <div className="space-y-4">
       {confirmDialog}
@@ -395,6 +419,18 @@ export function GrammarList({ points: initialPoints, userId, initialSets }: Gram
                         type="button"
                         onClick={() => handleDeleteGroup(group)}
                         aria-label={`Xóa set ${group.name}`}
+                        className="flex h-7 w-7 items-center justify-center rounded text-muted-foreground transition-colors hover:bg-danger/10 hover:text-danger"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
+                      </button>
+                    </div>
+                  )}
+                  {group.key === UNSET_GROUP_KEY && group.points.length > 0 && (
+                    <div className="flex shrink-0 items-center gap-1">
+                      <button
+                        type="button"
+                        onClick={() => handleDeleteAllUnset(group)}
+                        aria-label="Xóa tất cả điểm chưa thuộc set nào"
                         className="flex h-7 w-7 items-center justify-center rounded text-muted-foreground transition-colors hover:bg-danger/10 hover:text-danger"
                       >
                         <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
