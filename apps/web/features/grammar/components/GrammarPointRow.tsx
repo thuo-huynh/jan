@@ -148,7 +148,7 @@ export function GrammarPointRow({
   return (
     <div className="card p-4">
       {confirmDialog}
-      <div className="flex flex-wrap items-start justify-between gap-4">
+      <div className="flex flex-wrap items-start justify-between gap-3 sm:gap-4">
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
             <h3 className="font-jp text-lg font-semibold text-foreground">{point.pattern}</h3>
@@ -193,7 +193,7 @@ export function GrammarPointRow({
           )}
         </div>
 
-        <div className="flex flex-shrink-0 flex-col items-end gap-2">
+        <div className="flex flex-shrink-0 flex-wrap items-center justify-end gap-2">
           <div
             className="inline-flex overflow-hidden rounded border border-border"
             role="group"
