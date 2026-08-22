@@ -118,6 +118,7 @@ export function GrammarHtmlImportForm({
         meaning: row.meaning,
         example_sentences: row.exampleSentences,
         jlpt_level: jlptLevel.trim() || 'N2',
+        frequency_tag: row.kind === 'note' ? 'Ghi chú' : null,
         set_id: setIdByLabel.get(group.label),
       })),
     );
@@ -150,9 +151,10 @@ export function GrammarHtmlImportForm({
         />
         <p className="helper-text flex items-start gap-1.5">
           <Info className="mt-0.5 h-3.5 w-3.5 shrink-0" aria-hidden="true" />
-          Chỉ nhận diện được các bảng có cấu trúc mẫu ngữ pháp (dòng có cột &quot;pattern&quot; +
-          ví dụ) — phần đọc hiểu, từ vựng, hoặc văn xuôi sẽ bị bỏ qua. Mỗi tab trong file sẽ tự
-          động thành 1 set riêng; bạn có thể thêm tay những mục còn thiếu sau khi nhập.
+          Nhận diện được các bảng có cấu trúc mẫu ngữ pháp (dòng có cột &quot;pattern&quot; + ví
+          dụ) và các khối lưu ý/mẹo ghi nhớ chung — phần đọc hiểu, từ vựng, hoặc văn xuôi khác sẽ
+          bị bỏ qua. Mỗi tab trong file sẽ tự động thành 1 set riêng; bạn có thể thêm tay những
+          mục còn thiếu sau khi nhập.
         </p>
       </div>
 
@@ -188,7 +190,11 @@ export function GrammarHtmlImportForm({
               <ul className="max-h-32 space-y-1 overflow-y-auto text-sm">
                 {group.rows.map((row, i) => (
                   <li key={i} className="flex items-baseline gap-2 truncate text-foreground">
-                    <span className="font-jp font-medium">{row.pattern}</span>
+                    {row.kind === 'note' ? (
+                      <span className="badge-neutral shrink-0">Ghi chú</span>
+                    ) : (
+                      <span className="font-jp shrink-0 font-medium">{row.pattern}</span>
+                    )}
                     <span className="truncate text-muted-foreground">— {row.meaning}</span>
                   </li>
                 ))}
