@@ -53,6 +53,11 @@ export type TaskInput = z.infer<typeof taskSchema>;
 // Vocab / kanji (vocab_entries — custom entry form, T052)
 // ---------------------------------------------------------------------------
 
+export const vocabSetSchema = z.object({
+  name: z.string().trim().min(1, 'Tên set là bắt buộc').max(100),
+});
+export type VocabSetInput = z.infer<typeof vocabSetSchema>;
+
 export const vocabEntrySchema = z.object({
   word: z.string().trim().min(1, 'Từ là bắt buộc').max(200),
   reading: z.string().trim().max(200).optional().nullable(),

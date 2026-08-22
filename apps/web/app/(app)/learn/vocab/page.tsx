@@ -6,6 +6,7 @@ import {
   type CustomVocabEntry,
 } from '@/features/vocab-srs/components/CustomVocabManager';
 import { loadDueReviewQueue } from '@/features/vocab-srs/lib/queue';
+import type { VocabSet } from '@/features/vocab-srs/types';
 
 /**
  * Vocab/kanji deck management page (T051) — browse the global N2 reference
@@ -45,10 +46,18 @@ export default async function VocabDeckPage({ searchParams }: VocabPageProps) {
   const { data: customEntries } = user
     ? await supabase
         .from('vocab_entries')
-        .select('id, word, reading, meaning, example, jlpt_level, is_kanji')
+        .select('id, word, reading, meaning, example, jlpt_level, is_kanji, set_id')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false })
     : { data: [] as CustomVocabEntry[] };
+
+  const { data: vocabSets } = user
+    ? await supabase
+        .from('vocab_sets')
+        .select('id, name, created_at')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: true })
+    : { data: [] as VocabSet[] };
 
   // "X due today" summary (below) reuses the same due/weak logic the review
   // session's API route runs, so this count never drifts from what actually
@@ -102,7 +111,10 @@ export default async function VocabDeckPage({ searchParams }: VocabPageProps) {
         </div>
       )}
 
-      <CustomVocabManager initialEntries={(customEntries ?? []) as CustomVocabEntry[]} />
+      <CustomVocabManager
+        initialEntries={(customEntries ?? []) as CustomVocabEntry[]}
+        initialSets={(vocabSets ?? []) as VocabSet[]}
+      />
 
       <div className="space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-4">

@@ -3,6 +3,8 @@
 import { useState, type FormEvent } from 'react';
 import { createClient } from '@/shared/supabase/client';
 import { vocabEntrySchema, type VocabEntryInput } from '@/shared/validation/schemas';
+import { SetSelect } from './SetSelect';
+import type { VocabSet } from '../types';
 
 /**
  * Custom vocab/kanji entry form (T052) — used both to create a new custom
@@ -25,12 +27,15 @@ export interface CustomVocabEntry {
   example: string | null;
   jlpt_level: string | null;
   is_kanji: boolean;
+  set_id: string | null;
 }
 
 interface VocabEntryFormProps {
   mode: 'create' | 'edit';
   entryId?: string;
-  initialValues?: Partial<VocabEntryInput>;
+  initialValues?: Partial<VocabEntryInput> & { setId?: string | null };
+  sets: VocabSet[];
+  onSetCreated: (set: VocabSet) => void;
   onSaved: (entry: CustomVocabEntry) => void;
   onCancel?: () => void;
 }
@@ -39,6 +44,8 @@ export function VocabEntryForm({
   mode,
   entryId,
   initialValues,
+  sets,
+  onSetCreated,
   onSaved,
   onCancel,
 }: VocabEntryFormProps) {
@@ -48,12 +55,18 @@ export function VocabEntryForm({
   const [example, setExample] = useState(initialValues?.example ?? '');
   const [jlptLevel, setJlptLevel] = useState(initialValues?.jlptLevel ?? 'N2');
   const [isKanji, setIsKanji] = useState(initialValues?.isKanji ?? false);
+  const [setId, setSetId] = useState<string | null>(initialValues?.setId ?? null);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError(null);
+
+    if (!setId) {
+      setError('Vui lòng chọn một set.');
+      return;
+    }
 
     const parsed = vocabEntrySchema.safeParse({
       word,
@@ -86,6 +99,7 @@ export function VocabEntryForm({
       example: parsed.data.example ?? null,
       jlpt_level: parsed.data.jlptLevel ?? null,
       is_kanji: parsed.data.isKanji ?? false,
+      set_id: setId,
     };
 
     const { data, error: dbError } =
@@ -93,14 +107,14 @@ export function VocabEntryForm({
         ? await supabase
             .from('vocab_entries')
             .insert({ ...payload, user_id: user.id })
-            .select('id, word, reading, meaning, example, jlpt_level, is_kanji')
+            .select('id, word, reading, meaning, example, jlpt_level, is_kanji, set_id')
             .single()
         : await supabase
             .from('vocab_entries')
             .update(payload)
             .eq('id', entryId!)
             .eq('user_id', user.id)
-            .select('id, word, reading, meaning, example, jlpt_level, is_kanji')
+            .select('id, word, reading, meaning, example, jlpt_level, is_kanji, set_id')
             .single();
 
     setSubmitting(false);
@@ -122,6 +136,7 @@ export function VocabEntryForm({
 
   return (
     <form onSubmit={handleSubmit} className="card space-y-3 p-4">
+      <SetSelect sets={sets} value={setId} onChange={setSetId} onSetCreated={onSetCreated} />
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <div>
           <label className="label-field" htmlFor="vocab-word">

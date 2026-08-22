@@ -4,6 +4,8 @@ import { useMemo, useState } from 'react';
 import { AlertCircle, CheckCircle2 } from 'lucide-react';
 import { createClient } from '@/shared/supabase/client';
 import { parseBulkVocabInput } from '../lib/bulkParse';
+import { SetSelect } from './SetSelect';
+import type { VocabSet } from '../types';
 import type { CustomVocabEntry } from './VocabEntryForm';
 
 const PLACEHOLDER = `食べる\tたべる\tto eat
@@ -11,6 +13,8 @@ const PLACEHOLDER = `食べる\tたべる\tto eat
 走る - to run`;
 
 interface BulkVocabAddFormProps {
+  sets: VocabSet[];
+  onSetCreated: (set: VocabSet) => void;
   onImported: (entries: CustomVocabEntry[]) => void;
   onCancel: () => void;
 }
@@ -21,8 +25,9 @@ interface BulkVocabAddFormProps {
  * so they see exactly what will be created (and what couldn't be parsed)
  * before committing a single insert.
  */
-export function BulkVocabAddForm({ onImported, onCancel }: BulkVocabAddFormProps) {
+export function BulkVocabAddForm({ sets, onSetCreated, onImported, onCancel }: BulkVocabAddFormProps) {
   const [text, setText] = useState('');
+  const [setId, setSetId] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
@@ -30,6 +35,10 @@ export function BulkVocabAddForm({ onImported, onCancel }: BulkVocabAddFormProps
 
   async function handleImport() {
     if (entries.length === 0) return;
+    if (!setId) {
+      setSubmitError('Vui lòng chọn một set.');
+      return;
+    }
     setSubmitting(true);
     setSubmitError(null);
 
@@ -45,8 +54,8 @@ export function BulkVocabAddForm({ onImported, onCancel }: BulkVocabAddFormProps
 
     const { data, error } = await supabase
       .from('vocab_entries')
-      .insert(entries.map((e) => ({ ...e, user_id: user.id, is_kanji: false })))
-      .select('id, word, reading, meaning, example, jlpt_level, is_kanji');
+      .insert(entries.map((e) => ({ ...e, user_id: user.id, is_kanji: false, set_id: setId })))
+      .select('id, word, reading, meaning, example, jlpt_level, is_kanji, set_id');
 
     setSubmitting(false);
     if (error || !data) {
@@ -60,6 +69,7 @@ export function BulkVocabAddForm({ onImported, onCancel }: BulkVocabAddFormProps
 
   return (
     <div className="card space-y-3 p-4">
+      <SetSelect sets={sets} value={setId} onChange={setSetId} onSetCreated={onSetCreated} />
       <div>
         <label className="label-field" htmlFor="bulk-vocab-input">
           Dán danh sách từ vào đây
@@ -120,7 +130,7 @@ export function BulkVocabAddForm({ onImported, onCancel }: BulkVocabAddFormProps
       <div className="flex gap-2">
         <button
           type="button"
-          disabled={submitting || entries.length === 0}
+          disabled={submitting || entries.length === 0 || !setId}
           onClick={handleImport}
           className="btn-primary"
         >
