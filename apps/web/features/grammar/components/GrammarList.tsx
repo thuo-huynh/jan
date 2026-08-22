@@ -1,9 +1,10 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { ArrowLeftRight, Plus, Search, SearchX, X } from 'lucide-react';
+import { ArrowLeftRight, FileCode2, Plus, Search, SearchX, X } from 'lucide-react';
 import { mapGrammarPoint, type GrammarPointRecord } from '../lib/mapGrammarPoint';
 import type { GrammarPointWithProgress, GrammarStatus } from '../types';
+import { GrammarHtmlImportForm } from './GrammarHtmlImportForm';
 import { GrammarPointForm, type GrammarPointFormValues } from './GrammarPointForm';
 import { GrammarPointRow } from './GrammarPointRow';
 
@@ -29,7 +30,7 @@ export function GrammarList({ points: initialPoints, userId }: GrammarListProps)
   const [levelFilter, setLevelFilter] = useState('');
   const [onlyConfusable, setOnlyConfusable] = useState(false);
   const [query, setQuery] = useState('');
-  const [addOpen, setAddOpen] = useState(false);
+  const [addMode, setAddMode] = useState<'none' | 'single' | 'html'>('none');
   const [editingId, setEditingId] = useState<string | null>(null);
 
   const counts = useMemo(() => {
@@ -73,7 +74,11 @@ export function GrammarList({ points: initialPoints, userId }: GrammarListProps)
 
   function handleCreated(row: GrammarPointRecord) {
     setPoints((prev) => [mapGrammarPoint(row, undefined, []), ...prev]);
-    setAddOpen(false);
+    setAddMode('none');
+  }
+
+  function handleImported(rows: GrammarPointRecord[]) {
+    setPoints((prev) => [...rows.map((row) => mapGrammarPoint(row, undefined, [])), ...prev]);
   }
 
   function handleUpdated(row: GrammarPointRecord) {
@@ -109,23 +114,42 @@ export function GrammarList({ points: initialPoints, userId }: GrammarListProps)
               </button>
             )}
           </div>
-          <button
-            type="button"
-            onClick={() => setAddOpen((v) => !v)}
-            className="btn-primary h-9 px-3 text-sm"
-          >
-            {addOpen ? (
-              <>
-                <X className="h-4 w-4" aria-hidden="true" />
-                Đóng
-              </>
-            ) : (
-              <>
-                <Plus className="h-4 w-4" aria-hidden="true" />
-                Thêm điểm ngữ pháp
-              </>
-            )}
-          </button>
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={() => setAddMode((m) => (m === 'html' ? 'none' : 'html'))}
+              className="btn-outline h-9 px-3 text-sm"
+            >
+              {addMode === 'html' ? (
+                <>
+                  <X className="h-4 w-4" aria-hidden="true" />
+                  Đóng
+                </>
+              ) : (
+                <>
+                  <FileCode2 className="h-4 w-4" aria-hidden="true" />
+                  Nhập từ HTML
+                </>
+              )}
+            </button>
+            <button
+              type="button"
+              onClick={() => setAddMode((m) => (m === 'single' ? 'none' : 'single'))}
+              className="btn-primary h-9 px-3 text-sm"
+            >
+              {addMode === 'single' ? (
+                <>
+                  <X className="h-4 w-4" aria-hidden="true" />
+                  Đóng
+                </>
+              ) : (
+                <>
+                  <Plus className="h-4 w-4" aria-hidden="true" />
+                  Thêm điểm ngữ pháp
+                </>
+              )}
+            </button>
+          </div>
         </div>
 
         <div className="flex flex-wrap items-center gap-3">
@@ -173,8 +197,15 @@ export function GrammarList({ points: initialPoints, userId }: GrammarListProps)
         </div>
       </div>
 
-      {addOpen && (
-        <GrammarPointForm mode="create" onSaved={handleCreated} onCancel={() => setAddOpen(false)} />
+      {addMode === 'single' && (
+        <GrammarPointForm mode="create" onSaved={handleCreated} onCancel={() => setAddMode('none')} />
+      )}
+      {addMode === 'html' && (
+        <GrammarHtmlImportForm
+          existingPatterns={points.map((p) => p.pattern)}
+          onImported={handleImported}
+          onCancel={() => setAddMode('none')}
+        />
       )}
 
       {visiblePoints.length === 0 ? (
