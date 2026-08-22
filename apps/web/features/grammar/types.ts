@@ -7,6 +7,13 @@
 
 export type GrammarStatus = 'not_started' | 'learning' | 'mastered';
 
+/** A user's own Quizlet-style "study set" grouping their custom grammar points. */
+export interface GrammarSet {
+  id: string;
+  name: string;
+  created_at: string;
+}
+
 export interface ConfusablePairRef {
   pairId: string;
   partnerId: string;
@@ -30,4 +37,6 @@ export interface GrammarPointWithProgress {
   confusablePairs: ConfusablePairRef[];
   /** True for a point the caller added themselves (`grammar_points.user_id` = caller) — editable/deletable, unlike the global admin-curated catalog. */
   isCustom: boolean;
+  /** Only meaningful when `isCustom` — which of the caller's grammar_sets this point belongs to, if any. */
+  setId: string | null;
 }

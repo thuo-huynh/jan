@@ -1,9 +1,11 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { ArrowLeftRight, FileCode2, Plus, Search, SearchX, X } from 'lucide-react';
+import { ArrowLeftRight, FileCode2, Pencil, Plus, Search, SearchX, Trash2, X } from 'lucide-react';
+import { createClient } from '@/shared/supabase/client';
+import { useConfirm } from '@/shared/hooks/useConfirm';
 import { mapGrammarPoint, type GrammarPointRecord } from '../lib/mapGrammarPoint';
-import type { GrammarPointWithProgress, GrammarStatus } from '../types';
+import type { GrammarPointWithProgress, GrammarSet, GrammarStatus } from '../types';
 import { GrammarHtmlImportForm } from './GrammarHtmlImportForm';
 import { GrammarPointForm, type GrammarPointFormValues } from './GrammarPointForm';
 import { GrammarPointRow } from './GrammarPointRow';
@@ -11,27 +13,37 @@ import { GrammarPointRow } from './GrammarPointRow';
 interface GrammarListProps {
   points: GrammarPointWithProgress[];
   userId: string;
+  initialSets: GrammarSet[];
 }
 
 /**
  * Client-side list wrapper for the grammar tracker page (T041): owns the
- * level filter, a pattern/meaning text search (needed once the catalog is
- * ~100-200 points — status/level filters alone don't get you to a specific
- * point like として quickly), an "only confusable pairs" toggle so that
- * first-class feature is discoverable from the list itself rather than only
- * stumbled into row-by-row, the "lifted" copy of each point's status/note so
- * the mastery-progress summary stays in sync when a row mutates without a
- * full page reload, and the caller's own custom-point add/edit/delete flow
- * (GrammarPointForm). Filtering happens client-side over the already-fetched
- * (~96-row) dataset rather than a route round-trip.
+ * level filter, a set filter (grammar_sets, 0025_grammar_sets.sql — only
+ * ever matches the caller's own custom points, since global catalog points
+ * never belong to a set), a pattern/meaning text search (needed once the
+ * catalog is ~100-200 points — status/level filters alone don't get you to
+ * a specific point like として quickly), an "only confusable pairs" toggle
+ * so that first-class feature is discoverable from the list itself rather
+ * than only stumbled into row-by-row, the "lifted" copy of each point's
+ * status/note so the mastery-progress summary stays in sync when a row
+ * mutates without a full page reload, and the caller's own custom-point
+ * add/edit/delete flow (GrammarPointForm + GrammarHtmlImportForm).
+ * Filtering happens client-side over the already-fetched (~96-row) dataset
+ * rather than a route round-trip.
  */
-export function GrammarList({ points: initialPoints, userId }: GrammarListProps) {
+export function GrammarList({ points: initialPoints, userId, initialSets }: GrammarListProps) {
   const [points, setPoints] = useState(initialPoints);
+  const [sets, setSets] = useState(initialSets);
   const [levelFilter, setLevelFilter] = useState('');
+  const [setFilter, setSetFilter] = useState('');
   const [onlyConfusable, setOnlyConfusable] = useState(false);
   const [query, setQuery] = useState('');
   const [addMode, setAddMode] = useState<'none' | 'single' | 'html'>('none');
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [renamingSet, setRenamingSet] = useState(false);
+  const [renameDraft, setRenameDraft] = useState('');
+  const [setError, setSetError] = useState<string | null>(null);
+  const { confirm, confirmDialog } = useConfirm();
 
   const counts = useMemo(() => {
     return points.reduce(
@@ -48,21 +60,22 @@ export function GrammarList({ points: initialPoints, userId }: GrammarListProps)
     [points],
   );
 
-  const levelOptions = useMemo(
-    () => Array.from(new Set(points.map((p) => p.jlptLevel))).sort(),
-    [points],
-  );
+  const levelOptions = useMemo(() => Array.from(new Set(points.map((p) => p.jlptLevel))).sort(), [points]);
+
+  const setNameById = useMemo(() => new Map(sets.map((s) => [s.id, s.name])), [sets]);
 
   const visiblePoints = useMemo(() => {
     let list = points;
     if (levelFilter) list = list.filter((p) => p.jlptLevel === levelFilter);
+    if (setFilter) list = list.filter((p) => p.setId === setFilter);
     if (onlyConfusable) list = list.filter((p) => p.confusablePairs.length > 0);
     const q = query.trim().toLowerCase();
     if (q) list = list.filter((p) => p.pattern.toLowerCase().includes(q) || p.meaning.toLowerCase().includes(q));
     return list;
-  }, [points, levelFilter, onlyConfusable, query]);
+  }, [points, levelFilter, setFilter, onlyConfusable, query]);
 
-  const hasActiveFilter = levelFilter !== '' || onlyConfusable || query.trim().length > 0;
+  const hasActiveFilter = levelFilter !== '' || setFilter !== '' || onlyConfusable || query.trim().length > 0;
+  const selectedSet = setFilter ? sets.find((s) => s.id === setFilter) : undefined;
 
   function handleStatusChange(pointId: string, status: GrammarStatus) {
     setPoints((prev) => prev.map((p) => (p.id === pointId ? { ...p, status } : p)));
@@ -70,6 +83,10 @@ export function GrammarList({ points: initialPoints, userId }: GrammarListProps)
 
   function handleNoteChange(pointId: string, notesUser: string | null) {
     setPoints((prev) => prev.map((p) => (p.id === pointId ? { ...p, notesUser } : p)));
+  }
+
+  function handleSetCreated(set: GrammarSet) {
+    setSets((prev) => (prev.some((s) => s.id === set.id) ? prev : [...prev, set]));
   }
 
   function handleCreated(row: GrammarPointRecord) {
@@ -92,8 +109,47 @@ export function GrammarList({ points: initialPoints, userId }: GrammarListProps)
     setPoints((prev) => prev.filter((p) => p.id !== pointId));
   }
 
+  async function handleRenameSet() {
+    const name = renameDraft.trim();
+    if (!name || !selectedSet) {
+      setRenamingSet(false);
+      return;
+    }
+    const supabase = createClient();
+    const { error } = await supabase.from('grammar_sets').update({ name }).eq('id', selectedSet.id);
+    if (!error) {
+      setSets((prev) => prev.map((s) => (s.id === selectedSet.id ? { ...s, name } : s)));
+    } else {
+      setSetError(error.message);
+    }
+    setRenamingSet(false);
+  }
+
+  async function handleDeleteSet() {
+    if (!selectedSet) return;
+    const count = points.filter((p) => p.setId === selectedSet.id).length;
+    const ok = await confirm({
+      title: `Xóa set "${selectedSet.name}"?`,
+      description:
+        count > 0
+          ? `${count} điểm ngữ pháp trong set sẽ không bị xóa, chỉ mất nhóm (chuyển vào không thuộc set nào).`
+          : undefined,
+    });
+    if (!ok) return;
+    const supabase = createClient();
+    const { error } = await supabase.from('grammar_sets').delete().eq('id', selectedSet.id);
+    if (error) {
+      setSetError(error.message);
+      return;
+    }
+    setSets((prev) => prev.filter((s) => s.id !== selectedSet.id));
+    setPoints((prev) => prev.map((p) => (p.setId === selectedSet.id ? { ...p, setId: null } : p)));
+    setSetFilter('');
+  }
+
   return (
     <div className="space-y-4">
+      {confirmDialog}
       <div className="card space-y-3 p-4">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div className="flex flex-wrap items-center gap-2 text-sm">
@@ -180,12 +236,64 @@ export function GrammarList({ points: initialPoints, userId }: GrammarListProps)
               </option>
             ))}
           </select>
+          {sets.length > 0 && (
+            <select
+              value={setFilter}
+              onChange={(e) => setSetFilter(e.target.value)}
+              aria-label="Lọc theo set"
+              className="input-field h-9 w-auto"
+            >
+              <option value="">Tất cả set</option>
+              {sets.map((set) => (
+                <option key={set.id} value={set.id}>
+                  {set.name}
+                </option>
+              ))}
+            </select>
+          )}
+          {selectedSet &&
+            (renamingSet ? (
+              <input
+                autoFocus
+                value={renameDraft}
+                onChange={(e) => setRenameDraft(e.target.value)}
+                onBlur={handleRenameSet}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') handleRenameSet();
+                  if (e.key === 'Escape') setRenamingSet(false);
+                }}
+                className="input-field h-9 w-40"
+              />
+            ) : (
+              <div className="flex items-center gap-1">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setRenamingSet(true);
+                    setRenameDraft(selectedSet.name);
+                  }}
+                  aria-label={`Đổi tên set ${selectedSet.name}`}
+                  className="flex h-9 w-9 items-center justify-center rounded text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                >
+                  <Pencil className="h-3.5 w-3.5" aria-hidden="true" />
+                </button>
+                <button
+                  type="button"
+                  onClick={handleDeleteSet}
+                  aria-label={`Xóa set ${selectedSet.name}`}
+                  className="flex h-9 w-9 items-center justify-center rounded text-muted-foreground transition-colors hover:bg-danger/10 hover:text-danger"
+                >
+                  <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
+                </button>
+              </div>
+            ))}
           {hasActiveFilter && (
             <button
               type="button"
               onClick={() => {
                 setQuery('');
                 setLevelFilter('');
+                setSetFilter('');
                 setOnlyConfusable(false);
               }}
               className="btn-ghost h-9 px-2.5 text-xs"
@@ -195,14 +303,23 @@ export function GrammarList({ points: initialPoints, userId }: GrammarListProps)
             </button>
           )}
         </div>
+        {setError && <p className="error-text">{setError}</p>}
       </div>
 
       {addMode === 'single' && (
-        <GrammarPointForm mode="create" onSaved={handleCreated} onCancel={() => setAddMode('none')} />
+        <GrammarPointForm
+          mode="create"
+          sets={sets}
+          onSetCreated={handleSetCreated}
+          onSaved={handleCreated}
+          onCancel={() => setAddMode('none')}
+        />
       )}
       {addMode === 'html' && (
         <GrammarHtmlImportForm
           existingPatterns={points.map((p) => p.pattern)}
+          existingSets={sets}
+          onSetCreated={handleSetCreated}
           onImported={handleImported}
           onCancel={() => setAddMode('none')}
         />
@@ -226,6 +343,8 @@ export function GrammarList({ points: initialPoints, userId }: GrammarListProps)
                   mode="edit"
                   pointId={point.id}
                   initialValues={toFormValues(point)}
+                  sets={sets}
+                  onSetCreated={handleSetCreated}
                   onSaved={handleUpdated}
                   onCancel={() => setEditingId(null)}
                 />
@@ -235,6 +354,7 @@ export function GrammarList({ points: initialPoints, userId }: GrammarListProps)
                 <GrammarPointRow
                   point={point}
                   userId={userId}
+                  setName={point.setId ? (setNameById.get(point.setId) ?? null) : null}
                   onStatusChange={handleStatusChange}
                   onNoteChange={handleNoteChange}
                   onEdit={point.isCustom ? setEditingId : undefined}
@@ -264,5 +384,6 @@ function toFormValues(point: GrammarPointWithProgress): GrammarPointFormValues {
     jlptLevel: point.jlptLevel,
     frequencyTag: point.frequencyTag ?? '',
     n3Overlap: point.n3Overlap,
+    setId: point.setId,
   };
 }

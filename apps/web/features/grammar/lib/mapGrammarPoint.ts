@@ -12,6 +12,7 @@ export interface GrammarPointRecord {
   jlpt_level: string;
   frequency_tag: string | null;
   n3_overlap: boolean;
+  set_id: string | null;
 }
 
 /** Shape of a row selected from `user_grammar_status` (only the fields the UI needs). */
@@ -46,5 +47,6 @@ export function mapGrammarPoint(
     notesUser: status?.notes_user ?? null,
     confusablePairs,
     isCustom: point.user_id !== null,
+    setId: point.set_id,
   };
 }

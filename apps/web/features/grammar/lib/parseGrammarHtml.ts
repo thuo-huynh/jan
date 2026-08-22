@@ -2,6 +2,8 @@ export interface ParsedGrammarRow {
   pattern: string;
   meaning: string;
   exampleSentences: string[];
+  /** Visible label of the tab this row was found under (from a `.tab-btn[data-tab]` matching the row's nearest `.tab-panel` ancestor), or null if the pasted markup has no tab wrapper. Used to auto-group an import into one set per source tab. */
+  sourceTabLabel: string | null;
 }
 
 /**
@@ -26,6 +28,24 @@ export function parseGrammarHtml(html: string): ParsedGrammarRow[] {
   const doc = new DOMParser().parseFromString(html, 'text/html');
   const rows: ParsedGrammarRow[] = [];
   const seen = new Set<string>();
+
+  // Map each tab-panel id to its button's visible label (e.g.
+  // <button class="tab-btn" data-tab="so-sanh">Mẫu so sánh</button> ->
+  // { "so-sanh": "Mẫu so sánh" }), so a row nested inside
+  // <div id="so-sanh" class="tab-panel"> can be traced back to a
+  // human-readable tab name for grouping.
+  const tabLabelById = new Map<string, string>();
+  doc.querySelectorAll<HTMLElement>('[data-tab]').forEach((btn) => {
+    const tabId = btn.dataset.tab;
+    const label = (btn.textContent ?? '').trim();
+    if (tabId && label) tabLabelById.set(tabId, label);
+  });
+
+  function sourceTabLabelFor(el: Element): string | null {
+    const panel = el.closest('.tab-panel[id]');
+    const panelId = panel?.id;
+    return panelId ? (tabLabelById.get(panelId) ?? null) : null;
+  }
 
   doc.querySelectorAll('tr').forEach((tr) => {
     const patternCell = tr.querySelector('td.pattern');
@@ -52,7 +72,12 @@ export function parseGrammarHtml(html: string): ParsedGrammarRow[] {
     }
 
     seen.add(pattern);
-    rows.push({ pattern, meaning: meaningParts.join(' — ') || pattern, exampleSentences });
+    rows.push({
+      pattern,
+      meaning: meaningParts.join(' — ') || pattern,
+      exampleSentences,
+      sourceTabLabel: sourceTabLabelFor(tr),
+    });
   });
 
   return rows;

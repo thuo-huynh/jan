@@ -3,7 +3,9 @@
 import { useState, type FormEvent } from 'react';
 import { createClient } from '@/shared/supabase/client';
 import { grammarPointSchema } from '@/shared/validation/schemas';
+import { GrammarSetSelect } from './GrammarSetSelect';
 import type { GrammarPointRecord } from '../lib/mapGrammarPoint';
+import type { GrammarSet } from '../types';
 
 /**
  * Custom grammar-point form (create + edit) — the grammar equivalent of
@@ -23,20 +25,31 @@ export interface GrammarPointFormValues {
   jlptLevel: string;
   frequencyTag: string;
   n3Overlap: boolean;
+  setId: string | null;
 }
 
 interface GrammarPointFormProps {
   mode: 'create' | 'edit';
   pointId?: string;
   initialValues?: Partial<GrammarPointFormValues>;
+  sets: GrammarSet[];
+  onSetCreated: (set: GrammarSet) => void;
   onSaved: (row: GrammarPointRecord) => void;
   onCancel: () => void;
 }
 
 const GRAMMAR_RECORD_COLUMNS =
-  'id, user_id, pattern, meaning, connection_form, formality_nuance, example_sentences, jlpt_level, frequency_tag, n3_overlap';
+  'id, user_id, pattern, meaning, connection_form, formality_nuance, example_sentences, jlpt_level, frequency_tag, n3_overlap, set_id';
 
-export function GrammarPointForm({ mode, pointId, initialValues, onSaved, onCancel }: GrammarPointFormProps) {
+export function GrammarPointForm({
+  mode,
+  pointId,
+  initialValues,
+  sets,
+  onSetCreated,
+  onSaved,
+  onCancel,
+}: GrammarPointFormProps) {
   const [pattern, setPattern] = useState(initialValues?.pattern ?? '');
   const [connectionForm, setConnectionForm] = useState(initialValues?.connectionForm ?? '');
   const [meaning, setMeaning] = useState(initialValues?.meaning ?? '');
@@ -45,12 +58,18 @@ export function GrammarPointForm({ mode, pointId, initialValues, onSaved, onCanc
   const [jlptLevel, setJlptLevel] = useState(initialValues?.jlptLevel ?? 'N2');
   const [frequencyTag, setFrequencyTag] = useState(initialValues?.frequencyTag ?? '');
   const [n3Overlap, setN3Overlap] = useState(initialValues?.n3Overlap ?? false);
+  const [setId, setSetId] = useState<string | null>(initialValues?.setId ?? null);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError(null);
+
+    if (!setId) {
+      setError('Vui lòng chọn một set.');
+      return;
+    }
 
     const parsed = grammarPointSchema.safeParse({
       pattern,
@@ -90,6 +109,7 @@ export function GrammarPointForm({ mode, pointId, initialValues, onSaved, onCanc
       jlpt_level: parsed.data.jlptLevel,
       frequency_tag: parsed.data.frequencyTag ?? null,
       n3_overlap: parsed.data.n3Overlap,
+      set_id: setId,
     };
 
     const { data, error: dbError } =
@@ -119,6 +139,7 @@ export function GrammarPointForm({ mode, pointId, initialValues, onSaved, onCanc
 
   return (
     <form onSubmit={handleSubmit} className="card space-y-3 p-4">
+      <GrammarSetSelect sets={sets} value={setId} onChange={setSetId} onSetCreated={onSetCreated} />
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <div>
           <label className="label-field">Mẫu câu (文型)</label>

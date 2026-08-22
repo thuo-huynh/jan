@@ -3,7 +3,7 @@ import { BookOpen } from 'lucide-react';
 import { createClient, getAuthedUser } from '@/shared/supabase/server';
 import { GrammarList } from '@/features/grammar/components/GrammarList';
 import { mapGrammarPoint, type GrammarPointRecord, type UserGrammarStatusRecord } from '@/features/grammar/lib/mapGrammarPoint';
-import type { ConfusablePairRef, GrammarPointWithProgress } from '@/features/grammar/types';
+import type { ConfusablePairRef, GrammarPointWithProgress, GrammarSet } from '@/features/grammar/types';
 
 /**
  * Grammar list page (T041): browses the global N2 `grammar_points` catalog
@@ -23,16 +23,17 @@ export default async function GrammarListPage() {
     redirect('/login');
   }
 
-  const [pointsResult, statusesResult, pairsResult] = await Promise.all([
+  const [pointsResult, statusesResult, pairsResult, setsResult] = await Promise.all([
     supabase
       .from('grammar_points')
       .select(
-        'id, user_id, pattern, meaning, connection_form, formality_nuance, example_sentences, jlpt_level, frequency_tag, n3_overlap',
+        'id, user_id, pattern, meaning, connection_form, formality_nuance, example_sentences, jlpt_level, frequency_tag, n3_overlap, set_id',
       )
       .or(`user_id.is.null,user_id.eq.${user.id}`)
       .order('pattern', { ascending: true }),
     supabase.from('user_grammar_status').select('grammar_point_id, status, notes_user').eq('user_id', user.id),
     supabase.from('grammar_confusable_pairs').select('id, grammar_point_id_a, grammar_point_id_b'),
+    supabase.from('grammar_sets').select('id, name, created_at').eq('user_id', user.id).order('created_at', { ascending: true }),
   ]);
 
   if (pointsResult.error) {
@@ -60,6 +61,7 @@ export default async function GrammarListPage() {
   const combined: GrammarPointWithProgress[] = points.map((point) =>
     mapGrammarPoint(point, statusByPointId.get(point.id), pairsByPointId.get(point.id) ?? []),
   );
+  const sets = (setsResult.data ?? []) as GrammarSet[];
 
   return (
     <div className="space-y-6">
@@ -81,7 +83,7 @@ export default async function GrammarListPage() {
           </p>
         </div>
       ) : (
-        <GrammarList points={combined} userId={user.id} />
+        <GrammarList points={combined} userId={user.id} initialSets={sets} />
       )}
     </div>
   );

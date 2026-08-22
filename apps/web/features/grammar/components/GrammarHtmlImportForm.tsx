@@ -3,18 +3,22 @@
 import { useMemo, useState } from 'react';
 import { CheckCircle2, Info } from 'lucide-react';
 import { createClient } from '@/shared/supabase/client';
-import { parseGrammarHtml } from '../lib/parseGrammarHtml';
+import { parseGrammarHtml, type ParsedGrammarRow } from '../lib/parseGrammarHtml';
 import type { GrammarPointRecord } from '../lib/mapGrammarPoint';
+import type { GrammarSet } from '../types';
 
 interface GrammarHtmlImportFormProps {
   /** Patterns the caller already has (global + own) — used to skip re-importing the same point on a repeat paste. */
   existingPatterns: string[];
+  existingSets: GrammarSet[];
+  onSetCreated: (set: GrammarSet) => void;
   onImported: (rows: GrammarPointRecord[]) => void;
   onCancel: () => void;
 }
 
 const GRAMMAR_RECORD_COLUMNS =
-  'id, user_id, pattern, meaning, connection_form, formality_nuance, example_sentences, jlpt_level, frequency_tag, n3_overlap';
+  'id, user_id, pattern, meaning, connection_form, formality_nuance, example_sentences, jlpt_level, frequency_tag, n3_overlap, set_id';
+const UNGROUPED_LABEL = 'Chưa phân loại';
 
 /**
  * Paste-a-whole-HTML-page import for grammar points — the bulk-add
@@ -24,24 +28,49 @@ const GRAMMAR_RECORD_COLUMNS =
  * (parseGrammarHtml, DOMParser) so nothing is ever sent anywhere or rendered
  * as HTML — only extracted plain text is inserted, same safety property as
  * every other custom-entry form in this app.
+ *
+ * Each source tab becomes its own set automatically (parseGrammarHtml's
+ * `sourceTabLabel`), reusing an existing set of the same name if the caller
+ * already imported from this doc before — so re-pasting the same file after
+ * the source has grown doesn't create duplicate sets or duplicate points.
  */
-export function GrammarHtmlImportForm({ existingPatterns, onImported, onCancel }: GrammarHtmlImportFormProps) {
+export function GrammarHtmlImportForm({
+  existingPatterns,
+  existingSets,
+  onSetCreated,
+  onImported,
+  onCancel,
+}: GrammarHtmlImportFormProps) {
   const [html, setHtml] = useState('');
   const [jlptLevel, setJlptLevel] = useState('N2');
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
-  const existingSet = useMemo(() => new Set(existingPatterns), [existingPatterns]);
+  const existingPatternSet = useMemo(() => new Set(existingPatterns), [existingPatterns]);
 
-  const { toImport, skipped } = useMemo(() => {
-    if (!html.trim()) return { toImport: [], skipped: 0 };
+  const { groups, skipped } = useMemo(() => {
+    if (!html.trim()) return { groups: [] as { label: string; rows: ParsedGrammarRow[] }[], skipped: 0 };
     const parsed = parseGrammarHtml(html);
-    const fresh = parsed.filter((row) => !existingSet.has(row.pattern));
-    return { toImport: fresh, skipped: parsed.length - fresh.length };
-  }, [html, existingSet]);
+    const fresh = parsed.filter((row) => !existingPatternSet.has(row.pattern));
+
+    const byLabel = new Map<string, ParsedGrammarRow[]>();
+    for (const row of fresh) {
+      const label = row.sourceTabLabel ?? UNGROUPED_LABEL;
+      const list = byLabel.get(label) ?? [];
+      list.push(row);
+      byLabel.set(label, list);
+    }
+
+    return {
+      groups: Array.from(byLabel.entries()).map(([label, rows]) => ({ label, rows })),
+      skipped: parsed.length - fresh.length,
+    };
+  }, [html, existingPatternSet]);
+
+  const totalToImport = groups.reduce((sum, g) => sum + g.rows.length, 0);
 
   async function handleImport() {
-    if (toImport.length === 0) return;
+    if (totalToImport === 0) return;
     setSubmitting(true);
     setSubmitError(null);
 
@@ -55,18 +84,45 @@ export function GrammarHtmlImportForm({ existingPatterns, onImported, onCancel }
       return;
     }
 
-    const { data, error } = await supabase
-      .from('grammar_points')
-      .insert(
-        toImport.map((row) => ({
-          user_id: user.id,
-          pattern: row.pattern,
-          meaning: row.meaning,
-          example_sentences: row.exampleSentences,
-          jlpt_level: jlptLevel.trim() || 'N2',
-        })),
-      )
-      .select(GRAMMAR_RECORD_COLUMNS);
+    // Resolve one set id per group — reuse an existing set with the exact
+    // same name (case-sensitive) if this isn't the first import from this
+    // doc, otherwise create it.
+    const existingByName = new Map(existingSets.map((s) => [s.name, s]));
+    const setIdByLabel = new Map<string, string>();
+
+    for (const group of groups) {
+      const existing = existingByName.get(group.label);
+      if (existing) {
+        setIdByLabel.set(group.label, existing.id);
+        continue;
+      }
+      const { data: newSet, error: setError } = await supabase
+        .from('grammar_sets')
+        .insert({ user_id: user.id, name: group.label })
+        .select('id, name, created_at')
+        .single();
+      if (setError || !newSet) {
+        setSubmitting(false);
+        setSubmitError(setError?.message ?? `Không thể tạo set "${group.label}"`);
+        return;
+      }
+      setIdByLabel.set(group.label, newSet.id);
+      existingByName.set(group.label, newSet as GrammarSet);
+      onSetCreated(newSet as GrammarSet);
+    }
+
+    const insertPayload = groups.flatMap((group) =>
+      group.rows.map((row) => ({
+        user_id: user.id,
+        pattern: row.pattern,
+        meaning: row.meaning,
+        example_sentences: row.exampleSentences,
+        jlpt_level: jlptLevel.trim() || 'N2',
+        set_id: setIdByLabel.get(group.label),
+      })),
+    );
+
+    const { data, error } = await supabase.from('grammar_points').insert(insertPayload).select(GRAMMAR_RECORD_COLUMNS);
 
     setSubmitting(false);
     if (error || !data) {
@@ -95,8 +151,8 @@ export function GrammarHtmlImportForm({ existingPatterns, onImported, onCancel }
         <p className="helper-text flex items-start gap-1.5">
           <Info className="mt-0.5 h-3.5 w-3.5 shrink-0" aria-hidden="true" />
           Chỉ nhận diện được các bảng có cấu trúc mẫu ngữ pháp (dòng có cột &quot;pattern&quot; +
-          ví dụ) — phần đọc hiểu, từ vựng, hoặc văn xuôi sẽ bị bỏ qua. Bạn có thể thêm tay những
-          mục còn thiếu sau khi nhập.
+          ví dụ) — phần đọc hiểu, từ vựng, hoặc văn xuôi sẽ bị bỏ qua. Mỗi tab trong file sẽ tự
+          động thành 1 set riêng; bạn có thể thêm tay những mục còn thiếu sau khi nhập.
         </p>
       </div>
 
@@ -106,11 +162,11 @@ export function GrammarHtmlImportForm({ existingPatterns, onImported, onCancel }
       </div>
 
       {html.trim() && (
-        <div className="space-y-2 rounded-lg border border-border p-3">
-          {toImport.length > 0 ? (
+        <div className="space-y-3 rounded-lg border border-border p-3">
+          {totalToImport > 0 ? (
             <div className="flex items-center gap-1.5 text-sm text-success">
               <CheckCircle2 className="h-4 w-4 shrink-0" aria-hidden="true" />
-              {toImport.length} điểm ngữ pháp sẵn sàng để nhập
+              {totalToImport} điểm ngữ pháp trong {groups.length} set sẵn sàng để nhập
               {skipped > 0 && <span className="text-muted-foreground">({skipped} đã có, bỏ qua)</span>}
             </div>
           ) : (
@@ -120,16 +176,25 @@ export function GrammarHtmlImportForm({ existingPatterns, onImported, onCancel }
                 : 'Không nhận diện được điểm ngữ pháp nào trong nội dung này.'}
             </p>
           )}
-          {toImport.length > 0 && (
-            <ul className="max-h-48 space-y-1 overflow-y-auto text-sm">
-              {toImport.map((row, i) => (
-                <li key={i} className="flex items-baseline gap-2 truncate text-foreground">
-                  <span className="font-jp font-medium">{row.pattern}</span>
-                  <span className="truncate text-muted-foreground">— {row.meaning}</span>
-                </li>
-              ))}
-            </ul>
-          )}
+          {groups.map((group) => (
+            <div key={group.label} className="space-y-1">
+              <p className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                {group.label}
+                <span className="badge-neutral">{group.rows.length}</span>
+                {existingSets.some((s) => s.name === group.label) && (
+                  <span className="text-[10px] font-normal normal-case text-muted-foreground">(set có sẵn)</span>
+                )}
+              </p>
+              <ul className="max-h-32 space-y-1 overflow-y-auto text-sm">
+                {group.rows.map((row, i) => (
+                  <li key={i} className="flex items-baseline gap-2 truncate text-foreground">
+                    <span className="font-jp font-medium">{row.pattern}</span>
+                    <span className="truncate text-muted-foreground">— {row.meaning}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
         </div>
       )}
 
@@ -138,11 +203,11 @@ export function GrammarHtmlImportForm({ existingPatterns, onImported, onCancel }
       <div className="flex gap-2">
         <button
           type="button"
-          disabled={submitting || toImport.length === 0}
+          disabled={submitting || totalToImport === 0}
           onClick={handleImport}
           className="btn-primary"
         >
-          {submitting ? 'Đang nhập…' : toImport.length > 0 ? `Nhập ${toImport.length} điểm` : 'Nhập'}
+          {submitting ? 'Đang nhập…' : totalToImport > 0 ? `Nhập ${totalToImport} điểm` : 'Nhập'}
         </button>
         <button type="button" onClick={onCancel} className="btn-outline">
           Hủy
