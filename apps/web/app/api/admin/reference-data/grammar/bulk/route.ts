@@ -3,27 +3,21 @@ import { z } from 'zod';
 import { requireAdmin } from '@/shared/supabase/admin-guard';
 
 /**
- * POST /api/admin/reference-data/vocab/bulk — bulk-insert global
- * (`user_id IS NULL`) vocab_entries rows in one request. The N2 catalog
- * otherwise has no way to grow past one row at a time via the single-entry
- * POST in ../route.ts.
- *
- * One row per entry with its own full field set (word/reading/meaning/
- * example/jlptLevel/isKanji) — this is the sink for the CSV/Markdown/HTML
- * tabular import panel (features/admin/components/TabularImportPanel.tsx),
- * where each source row can specify its own level/kanji flag, unlike a
- * single batch-wide default. The client parses/validates with
- * parseTabularText + a per-row mapper before calling this — this route
- * re-validates every entry itself (never trust client input), same
- * defense-in-depth posture as the single POST.
+ * POST /api/admin/reference-data/grammar/bulk — bulk-insert global
+ * (`user_id IS NULL`) grammar_points rows in one request, the grammar
+ * counterpart to ../../vocab/bulk/route.ts — sink for the same
+ * CSV/Markdown/HTML tabular import panel
+ * (features/admin/components/TabularImportPanel.tsx).
  */
 const bulkEntrySchema = z.object({
-  word: z.string().trim().min(1).max(200),
-  reading: z.string().trim().max(200).nullable(),
+  pattern: z.string().trim().min(1).max(200),
   meaning: z.string().trim().min(1).max(1000),
-  example: z.string().trim().max(2000).nullable().optional(),
+  connectionForm: z.string().trim().max(500).nullable().optional(),
+  formalityNuance: z.string().trim().max(1000).nullable().optional(),
+  exampleSentences: z.array(z.string().trim().min(1).max(500)).max(20).optional(),
   jlptLevel: z.string().trim().max(10).nullable().optional(),
-  isKanji: z.boolean().optional(),
+  frequencyTag: z.string().trim().max(20).nullable().optional(),
+  n3Overlap: z.boolean().optional(),
 });
 
 const bulkRequestSchema = z.object({
@@ -42,16 +36,18 @@ export async function POST(request: NextRequest) {
   }
 
   const { data, error } = await admin
-    .from('vocab_entries')
+    .from('grammar_points')
     .insert(
       parsed.data.entries.map((e) => ({
         user_id: null,
-        word: e.word,
-        reading: e.reading,
+        pattern: e.pattern,
         meaning: e.meaning,
-        example: e.example ?? null,
+        connection_form: e.connectionForm ?? null,
+        formality_nuance: e.formalityNuance ?? null,
+        example_sentences: e.exampleSentences ?? [],
         jlpt_level: e.jlptLevel?.trim() || 'N2',
-        is_kanji: e.isKanji ?? false,
+        frequency_tag: e.frequencyTag ?? null,
+        n3_overlap: e.n3Overlap ?? false,
       })),
     )
     .select();

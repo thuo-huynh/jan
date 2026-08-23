@@ -1,21 +1,11 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import {
-  AlertCircle,
-  BookMarked,
-  CheckCircle2,
-  GitCompare,
-  Palette,
-  Pencil,
-  PackageOpen,
-  Trash2,
-  Upload,
-  X,
-} from 'lucide-react';
+import { useCallback, useEffect, useState } from 'react';
+import { BookMarked, GitCompare, Palette, Pencil, PackageOpen, Trash2 } from 'lucide-react';
 import { TableSkeletonRows } from '@/shared/components/TableSkeletonRows';
 import { useConfirm } from '@/shared/hooks/useConfirm';
-import { parseBulkVocabInput } from '@/features/vocab-srs/lib/bulkParse';
+import { TabularImportPanel } from '@/features/admin/components/TabularImportPanel';
+import { parseBooleanCell } from '@/shared/import/parseTabularImport';
 
 function EmptyTableState({ icon: Icon, message }: { icon: typeof PackageOpen; message: string }) {
   return (
@@ -168,6 +158,39 @@ const emptyVocabForm = {
   isKanji: false,
 };
 
+interface VocabBulkEntry {
+  word: string;
+  reading: string | null;
+  meaning: string;
+  example: string | null;
+  jlptLevel: string | null;
+  isKanji: boolean;
+}
+
+const VOCAB_IMPORT_TEMPLATES = {
+  csv: 'word,reading,meaning,example,jlptLevel,isKanji\n食べる,たべる,to eat,ご飯を食べる,N2,false\n漢字,かんじ,kanji character,,N2,true',
+  markdown:
+    '| word | reading | meaning | example | jlptLevel | isKanji |\n|---|---|---|---|---|---|\n| 食べる | たべる | to eat | ご飯を食べる | N2 | false |\n| 漢字 | かんじ | kanji character | | N2 | true |',
+  html: '<table>\n  <tr><th>word</th><th>reading</th><th>meaning</th><th>example</th><th>jlptLevel</th><th>isKanji</th></tr>\n  <tr><td>食べる</td><td>たべる</td><td>to eat</td><td>ご飯を食べる</td><td>N2</td><td>false</td></tr>\n</table>',
+};
+
+function mapVocabRecord(record: Record<string, string>): { entry: VocabBulkEntry } | { error: string } {
+  const word = record.word?.trim();
+  const meaning = record.meaning?.trim();
+  if (!word) return { error: 'Thiếu cột "word"' };
+  if (!meaning) return { error: 'Thiếu cột "meaning"' };
+  return {
+    entry: {
+      word,
+      reading: record.reading?.trim() || null,
+      meaning,
+      example: record.example?.trim() || null,
+      jlptLevel: record.jlptLevel?.trim() || null,
+      isKanji: parseBooleanCell(record.isKanji),
+    },
+  };
+}
+
 function VocabTab() {
   const [query, setQuery] = useState('');
   const [page, setPage] = useState(1);
@@ -178,12 +201,7 @@ function VocabTab() {
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState(emptyVocabForm);
   const [bulkOpen, setBulkOpen] = useState(false);
-  const [bulkText, setBulkText] = useState('');
-  const [bulkSubmitting, setBulkSubmitting] = useState(false);
-  const [bulkError, setBulkError] = useState<string | null>(null);
   const { confirm, confirmDialog } = useConfirm();
-
-  const { entries: bulkEntries, errors: bulkParseErrors } = useMemo(() => parseBulkVocabInput(bulkText), [bulkText]);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -207,27 +225,15 @@ function VocabTab() {
     load();
   }, [load]);
 
-  async function handleBulkImport() {
-    if (bulkEntries.length === 0) return;
-    setBulkSubmitting(true);
-    setBulkError(null);
-    try {
-      const res = await fetch('/api/admin/reference-data/vocab/bulk', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ entries: bulkEntries, jlptLevel: 'N2', isKanji: false }),
-      });
-      const json = await res.json();
-      if (!res.ok) throw new Error(json.error?.formErrors?.[0] ?? json.error ?? 'Nhập thất bại');
-      setBulkText('');
-      setBulkOpen(false);
-      setPage(1);
-      await load();
-    } catch (err) {
-      setBulkError(err instanceof Error ? err.message : 'Nhập thất bại');
-    } finally {
-      setBulkSubmitting(false);
-    }
+  async function handleBulkImport(entries: VocabBulkEntry[]): Promise<string | null> {
+    const res = await fetch('/api/admin/reference-data/vocab/bulk', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ entries }),
+    });
+    const json = await res.json();
+    if (!res.ok) return json.error?.formErrors?.[0] ?? json.error ?? 'Nhập thất bại';
+    return null;
   }
 
   async function handleSubmit() {
@@ -281,17 +287,7 @@ function VocabTab() {
           </h2>
           {!form.id && (
             <button type="button" onClick={() => setBulkOpen((v) => !v)} className={secondaryButtonClass}>
-              {bulkOpen ? (
-                <>
-                  <X className="h-3.5 w-3.5" aria-hidden="true" />
-                  Đóng
-                </>
-              ) : (
-                <>
-                  <Upload className="h-3.5 w-3.5" aria-hidden="true" />
-                  Nhập hàng loạt
-                </>
-              )}
+              {bulkOpen ? 'Đóng' : 'Nhập hàng loạt'}
             </button>
           )}
         </div>
@@ -366,91 +362,24 @@ function VocabTab() {
       </div>
 
       {bulkOpen && (
-        <div className="card space-y-3">
-          <div>
-            <label className={labelClass} htmlFor="vocab-bulk-input">
-              Dán danh sách từ vào đây
-            </label>
-            <textarea
-              id="vocab-bulk-input"
-              value={bulkText}
-              onChange={(e) => setBulkText(e.target.value)}
-              rows={8}
-              placeholder={'食べる\tたべる\tto eat\n飲む\tのむ\tto drink\n走る - to run'}
-              className="textarea-field font-jp"
-            />
-            <p className="helper-text">
-              Mỗi dòng một từ: từ + cách đọc (không bắt buộc) + nghĩa, cách nhau bằng tab (dán từ
-              Excel/Sheets), hoặc từ - nghĩa. Tất cả sẽ được thêm vào kho chung (N2, không phải Hán
-              tự) — sửa cấp độ/Hán tự riêng từng mục sau nếu cần.
-            </p>
-          </div>
-
-          {(bulkEntries.length > 0 || bulkParseErrors.length > 0) && (
-            <div className="space-y-2 rounded-lg border border-border p-3">
-              {bulkEntries.length > 0 && (
-                <div className="flex items-center gap-1.5 text-sm text-success">
-                  <CheckCircle2 className="h-4 w-4 shrink-0" aria-hidden="true" />
-                  {bulkEntries.length} từ sẵn sàng để nhập
-                </div>
-              )}
-              {bulkEntries.length > 0 && (
-                <ul className="max-h-40 space-y-1 overflow-y-auto text-sm">
-                  {bulkEntries.map((e, i) => (
-                    <li key={i} className="flex items-baseline gap-2 truncate text-foreground">
-                      <span className="font-jp font-medium">{e.word}</span>
-                      {e.reading && <span className="font-jp text-xs text-muted-foreground">{e.reading}</span>}
-                      <span className="truncate text-muted-foreground">— {e.meaning}</span>
-                    </li>
-                  ))}
-                </ul>
-              )}
-              {bulkParseErrors.length > 0 && (
-                <div className="space-y-1 border-t border-border pt-2">
-                  <div className="flex items-center gap-1.5 text-sm text-danger">
-                    <AlertCircle className="h-4 w-4 shrink-0" aria-hidden="true" />
-                    {bulkParseErrors.length} dòng không thể phân tích
-                  </div>
-                  <ul className="max-h-24 space-y-0.5 overflow-y-auto text-xs text-muted-foreground">
-                    {bulkParseErrors.map((e) => (
-                      <li key={e.line} className="truncate">
-                        Dòng {e.line}: &quot;{e.raw}&quot; — {e.message}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-            </div>
+        <TabularImportPanel<VocabBulkEntry>
+          entityLabel="từ"
+          templates={VOCAB_IMPORT_TEMPLATES}
+          mapRecord={mapVocabRecord}
+          renderPreview={(entry) => (
+            <>
+              <span className="font-jp font-medium">{entry.word}</span>{' '}
+              {entry.reading && <span className="font-jp text-xs text-muted-foreground">{entry.reading}</span>}{' '}
+              <span className="text-muted-foreground">— {entry.meaning}</span>
+            </>
           )}
-
-          {bulkError && <p className="error-text">{bulkError}</p>}
-
-          <div className="flex gap-2">
-            <button
-              type="button"
-              disabled={bulkSubmitting || bulkEntries.length === 0}
-              onClick={handleBulkImport}
-              className={primaryButtonClass}
-            >
-              {bulkSubmitting
-                ? 'Đang nhập…'
-                : bulkEntries.length > 0
-                  ? `Nhập ${bulkEntries.length} từ`
-                  : 'Nhập'}
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setBulkOpen(false);
-                setBulkText('');
-                setBulkError(null);
-              }}
-              className={secondaryButtonClass}
-            >
-              Hủy
-            </button>
-          </div>
-        </div>
+          onImport={handleBulkImport}
+          onImported={() => {
+            setBulkOpen(false);
+            setPage(1);
+            load();
+          }}
+        />
       )}
 
       <form
@@ -573,6 +502,46 @@ const emptyGrammarForm = {
   n3Overlap: false,
 };
 
+interface GrammarBulkEntry {
+  pattern: string;
+  meaning: string;
+  connectionForm: string | null;
+  formalityNuance: string | null;
+  exampleSentences: string[];
+  jlptLevel: string | null;
+  frequencyTag: string | null;
+  n3Overlap: boolean;
+}
+
+const GRAMMAR_IMPORT_TEMPLATES = {
+  csv: 'pattern,meaning,connectionForm,formalityNuance,exampleSentences,jlptLevel,frequencyTag,n3Overlap\n〜ばかりか,không những... mà còn...,V/A/N + ばかりか,trang trọng,"彼は英語ばかりか中国語も話せる。|勉強ばかりか運動も得意だ。",N2,cao,false',
+  markdown:
+    '| pattern | meaning | connectionForm | formalityNuance | exampleSentences | jlptLevel | frequencyTag | n3Overlap |\n|---|---|---|---|---|---|---|---|\n| 〜ばかりか | không những... mà còn... | V/A/N + ばかりか | trang trọng | 彼は英語ばかりか中国語も話せる。\\|勉強ばかりか運動も得意だ。 | N2 | cao | false |',
+  html: '<table>\n  <tr><th>pattern</th><th>meaning</th><th>connectionForm</th><th>formalityNuance</th><th>exampleSentences</th><th>jlptLevel</th><th>frequencyTag</th><th>n3Overlap</th></tr>\n  <tr><td>〜ばかりか</td><td>không những... mà còn...</td><td>V/A/N + ばかりか</td><td>trang trọng</td><td>彼は英語ばかりか中国語も話せる。|勉強ばかりか運動も得意だ。</td><td>N2</td><td>cao</td><td>false</td></tr>\n</table>',
+};
+
+function mapGrammarRecord(record: Record<string, string>): { entry: GrammarBulkEntry } | { error: string } {
+  const pattern = record.pattern?.trim();
+  const meaning = record.meaning?.trim();
+  if (!pattern) return { error: 'Thiếu cột "pattern"' };
+  if (!meaning) return { error: 'Thiếu cột "meaning"' };
+  return {
+    entry: {
+      pattern,
+      meaning,
+      connectionForm: record.connectionForm?.trim() || null,
+      formalityNuance: record.formalityNuance?.trim() || null,
+      exampleSentences: (record.exampleSentences ?? '')
+        .split('|')
+        .map((s) => s.trim())
+        .filter(Boolean),
+      jlptLevel: record.jlptLevel?.trim() || null,
+      frequencyTag: record.frequencyTag?.trim() || null,
+      n3Overlap: parseBooleanCell(record.n3Overlap),
+    },
+  };
+}
+
 function GrammarTab() {
   const [query, setQuery] = useState('');
   const [page, setPage] = useState(1);
@@ -582,6 +551,7 @@ function GrammarTab() {
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState(emptyGrammarForm);
+  const [bulkOpen, setBulkOpen] = useState(false);
   const { confirm, confirmDialog } = useConfirm();
 
   const load = useCallback(async () => {
@@ -656,13 +626,31 @@ function GrammarTab() {
     }
   }
 
+  async function handleBulkImport(entries: GrammarBulkEntry[]): Promise<string | null> {
+    const res = await fetch('/api/admin/reference-data/grammar/bulk', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ entries }),
+    });
+    const json = await res.json();
+    if (!res.ok) return json.error?.formErrors?.[0] ?? json.error ?? 'Nhập thất bại';
+    return null;
+  }
+
   return (
     <div className="space-y-6">
       {confirmDialog}
       <div className="card">
-        <h2 className="text-sm font-semibold text-foreground">
-          {form.id ? 'Sửa điểm ngữ pháp' : 'Thêm điểm ngữ pháp mới'}
-        </h2>
+        <div className="flex items-center justify-between gap-2">
+          <h2 className="text-sm font-semibold text-foreground">
+            {form.id ? 'Sửa điểm ngữ pháp' : 'Thêm điểm ngữ pháp mới'}
+          </h2>
+          {!form.id && (
+            <button type="button" onClick={() => setBulkOpen((v) => !v)} className={secondaryButtonClass}>
+              {bulkOpen ? 'Đóng' : 'Nhập hàng loạt'}
+            </button>
+          )}
+        </div>
         <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
           <div>
             <label className={labelClass}>Mẫu câu (文型)</label>
@@ -750,6 +738,26 @@ function GrammarTab() {
           )}
         </div>
       </div>
+
+      {bulkOpen && (
+        <TabularImportPanel<GrammarBulkEntry>
+          entityLabel="điểm ngữ pháp"
+          templates={GRAMMAR_IMPORT_TEMPLATES}
+          mapRecord={mapGrammarRecord}
+          renderPreview={(entry) => (
+            <>
+              <span className="font-jp font-medium">{entry.pattern}</span>{' '}
+              <span className="text-muted-foreground">— {entry.meaning}</span>
+            </>
+          )}
+          onImport={handleBulkImport}
+          onImported={() => {
+            setBulkOpen(false);
+            setPage(1);
+            load();
+          }}
+        />
+      )}
 
       <form
         onSubmit={(e) => {
