@@ -1,9 +1,21 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
-import { BookMarked, GitCompare, Palette, Pencil, PackageOpen, Trash2 } from 'lucide-react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import {
+  AlertCircle,
+  BookMarked,
+  CheckCircle2,
+  GitCompare,
+  Palette,
+  Pencil,
+  PackageOpen,
+  Trash2,
+  Upload,
+  X,
+} from 'lucide-react';
 import { TableSkeletonRows } from '@/shared/components/TableSkeletonRows';
 import { useConfirm } from '@/shared/hooks/useConfirm';
+import { parseBulkVocabInput } from '@/features/vocab-srs/lib/bulkParse';
 
 function EmptyTableState({ icon: Icon, message }: { icon: typeof PackageOpen; message: string }) {
   return (
@@ -165,7 +177,13 @@ function VocabTab() {
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState(emptyVocabForm);
+  const [bulkOpen, setBulkOpen] = useState(false);
+  const [bulkText, setBulkText] = useState('');
+  const [bulkSubmitting, setBulkSubmitting] = useState(false);
+  const [bulkError, setBulkError] = useState<string | null>(null);
   const { confirm, confirmDialog } = useConfirm();
+
+  const { entries: bulkEntries, errors: bulkParseErrors } = useMemo(() => parseBulkVocabInput(bulkText), [bulkText]);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -188,6 +206,29 @@ function VocabTab() {
   useEffect(() => {
     load();
   }, [load]);
+
+  async function handleBulkImport() {
+    if (bulkEntries.length === 0) return;
+    setBulkSubmitting(true);
+    setBulkError(null);
+    try {
+      const res = await fetch('/api/admin/reference-data/vocab/bulk', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ entries: bulkEntries, jlptLevel: 'N2', isKanji: false }),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error?.formErrors?.[0] ?? json.error ?? 'Nhập thất bại');
+      setBulkText('');
+      setBulkOpen(false);
+      setPage(1);
+      await load();
+    } catch (err) {
+      setBulkError(err instanceof Error ? err.message : 'Nhập thất bại');
+    } finally {
+      setBulkSubmitting(false);
+    }
+  }
 
   async function handleSubmit() {
     setSaving(true);
@@ -234,9 +275,26 @@ function VocabTab() {
     <div className="space-y-6">
       {confirmDialog}
       <div className="card">
-        <h2 className="text-sm font-semibold text-foreground">
-          {form.id ? 'Sửa mục' : 'Thêm mục mới'}
-        </h2>
+        <div className="flex items-center justify-between gap-2">
+          <h2 className="text-sm font-semibold text-foreground">
+            {form.id ? 'Sửa mục' : 'Thêm mục mới'}
+          </h2>
+          {!form.id && (
+            <button type="button" onClick={() => setBulkOpen((v) => !v)} className={secondaryButtonClass}>
+              {bulkOpen ? (
+                <>
+                  <X className="h-3.5 w-3.5" aria-hidden="true" />
+                  Đóng
+                </>
+              ) : (
+                <>
+                  <Upload className="h-3.5 w-3.5" aria-hidden="true" />
+                  Nhập hàng loạt
+                </>
+              )}
+            </button>
+          )}
+        </div>
         <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
           <div>
             <label className={labelClass}>Từ</label>
@@ -306,6 +364,94 @@ function VocabTab() {
           )}
         </div>
       </div>
+
+      {bulkOpen && (
+        <div className="card space-y-3">
+          <div>
+            <label className={labelClass} htmlFor="vocab-bulk-input">
+              Dán danh sách từ vào đây
+            </label>
+            <textarea
+              id="vocab-bulk-input"
+              value={bulkText}
+              onChange={(e) => setBulkText(e.target.value)}
+              rows={8}
+              placeholder={'食べる\tたべる\tto eat\n飲む\tのむ\tto drink\n走る - to run'}
+              className="textarea-field font-jp"
+            />
+            <p className="helper-text">
+              Mỗi dòng một từ: từ + cách đọc (không bắt buộc) + nghĩa, cách nhau bằng tab (dán từ
+              Excel/Sheets), hoặc từ - nghĩa. Tất cả sẽ được thêm vào kho chung (N2, không phải Hán
+              tự) — sửa cấp độ/Hán tự riêng từng mục sau nếu cần.
+            </p>
+          </div>
+
+          {(bulkEntries.length > 0 || bulkParseErrors.length > 0) && (
+            <div className="space-y-2 rounded-lg border border-border p-3">
+              {bulkEntries.length > 0 && (
+                <div className="flex items-center gap-1.5 text-sm text-success">
+                  <CheckCircle2 className="h-4 w-4 shrink-0" aria-hidden="true" />
+                  {bulkEntries.length} từ sẵn sàng để nhập
+                </div>
+              )}
+              {bulkEntries.length > 0 && (
+                <ul className="max-h-40 space-y-1 overflow-y-auto text-sm">
+                  {bulkEntries.map((e, i) => (
+                    <li key={i} className="flex items-baseline gap-2 truncate text-foreground">
+                      <span className="font-jp font-medium">{e.word}</span>
+                      {e.reading && <span className="font-jp text-xs text-muted-foreground">{e.reading}</span>}
+                      <span className="truncate text-muted-foreground">— {e.meaning}</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+              {bulkParseErrors.length > 0 && (
+                <div className="space-y-1 border-t border-border pt-2">
+                  <div className="flex items-center gap-1.5 text-sm text-danger">
+                    <AlertCircle className="h-4 w-4 shrink-0" aria-hidden="true" />
+                    {bulkParseErrors.length} dòng không thể phân tích
+                  </div>
+                  <ul className="max-h-24 space-y-0.5 overflow-y-auto text-xs text-muted-foreground">
+                    {bulkParseErrors.map((e) => (
+                      <li key={e.line} className="truncate">
+                        Dòng {e.line}: &quot;{e.raw}&quot; — {e.message}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+          )}
+
+          {bulkError && <p className="error-text">{bulkError}</p>}
+
+          <div className="flex gap-2">
+            <button
+              type="button"
+              disabled={bulkSubmitting || bulkEntries.length === 0}
+              onClick={handleBulkImport}
+              className={primaryButtonClass}
+            >
+              {bulkSubmitting
+                ? 'Đang nhập…'
+                : bulkEntries.length > 0
+                  ? `Nhập ${bulkEntries.length} từ`
+                  : 'Nhập'}
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setBulkOpen(false);
+                setBulkText('');
+                setBulkError(null);
+              }}
+              className={secondaryButtonClass}
+            >
+              Hủy
+            </button>
+          </div>
+        </div>
+      )}
 
       <form
         onSubmit={(e) => {
