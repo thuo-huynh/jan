@@ -119,11 +119,18 @@ export function ReadingPassageViewer({ passage }: ReadingPassageViewerProps) {
                         type="button"
                         disabled={answered}
                         onClick={() => handleAnswer(question, i)}
+                        style={
+                          answered && isCorrectChoice
+                            ? { backgroundColor: 'color-mix(in srgb, var(--success) 12%, transparent)' }
+                            : isChosenWrong
+                              ? { backgroundColor: 'color-mix(in srgb, var(--danger) 12%, transparent)' }
+                              : undefined
+                        }
                         className={`flex w-full items-center justify-between gap-2 rounded-lg border px-3 py-2 text-left text-sm transition-colors disabled:cursor-not-allowed ${
                           answered && isCorrectChoice
-                            ? 'border-success bg-success/10 font-medium text-success'
+                            ? 'border-success font-medium text-success'
                             : isChosenWrong
-                              ? 'border-danger bg-danger/10 font-medium text-danger'
+                              ? 'border-danger font-medium text-danger'
                               : answered
                                 ? 'border-border text-muted-foreground opacity-60'
                                 : 'border-border text-foreground hover:bg-muted'
