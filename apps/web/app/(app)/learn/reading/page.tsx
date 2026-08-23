@@ -1,16 +1,19 @@
 import { redirect } from 'next/navigation';
 import { createClient, getAuthedUser } from '@/shared/supabase/server';
-import { ReadingLogManager } from '@/features/reading-listening/components/ReadingLogManager';
-import { PassageTypeBreakdown } from '@/features/reading-listening/components/PassageTypeBreakdown';
-import { SessionStats } from '@/features/reading-listening/components/SessionStats';
-import type { ReadingLog } from '@/features/reading-listening/types';
+import { ReadingTabs } from '@/features/reading-listening/components/ReadingTabs';
+import { mapReadingPassage } from '@/features/reading-listening/lib/mapReadingPassage';
+import type {
+  ReadingPassageQuestionRecord,
+  ReadingPassageRecord,
+} from '@/features/reading-listening/lib/mapReadingPassage';
+import type { ReadingLog, ReadingPassageSet } from '@/features/reading-listening/types';
 
 /**
- * Reading log entry form + history table (T057). Server Component fetches
- * the signed-in user's reading_logs (RLS-scoped); the by-passage-type
- * breakdown (T060) reads from the same data, and the form/history
- * interactivity (including T059's attach-to-SRS action) lives in the client
- * ReadingLogManager.
+ * Reading log entry form + history table (T057) plus the passage-bank tab
+ * (specs/004-reading-comprehension). Server Component fetches the
+ * signed-in user's reading_logs, reading_passages, reading_passage_questions,
+ * and reading_passage_sets (all RLS-scoped); tab switching and all
+ * interactivity lives in the client ReadingTabs.
  */
 export default async function ReadingLogPage() {
   const supabase = createClient();
@@ -20,27 +23,36 @@ export default async function ReadingLogPage() {
     redirect('/login');
   }
 
-  const { data: logs } = await supabase
-    .from('reading_logs')
-    .select('*')
-    .order('practiced_at', { ascending: false });
+  const [{ data: logs }, { data: passageRows }, { data: questionRows }, { data: setRows }] = await Promise.all([
+    supabase.from('reading_logs').select('*').order('practiced_at', { ascending: false }),
+    supabase
+      .from('reading_passages')
+      .select('id, set_id, title, passage_segments, translation_vn, tip')
+      .order('created_at', { ascending: false }),
+    supabase
+      .from('reading_passage_questions')
+      .select('id, passage_id, order_index, question_text, choices, correct_choice_index, explanation'),
+    supabase.from('reading_passage_sets').select('id, name, created_at').order('created_at', { ascending: true }),
+  ]);
 
   const readingLogs = (logs ?? []) as ReadingLog[];
+  const questionRecords = (questionRows ?? []) as ReadingPassageQuestionRecord[];
+  const passages = ((passageRows ?? []) as ReadingPassageRecord[]).map((row) =>
+    mapReadingPassage(row, questionRecords),
+  );
+  const passageSets = (setRows ?? []) as ReadingPassageSet[];
 
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">Nhật ký Đọc hiểu (読解)</h1>
+        <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">Đọc hiểu (読解)</h1>
         <p className="mt-1.5 text-sm text-muted-foreground">
-          Ghi lại các buổi luyện đọc và thêm ngay từ chưa biết vào hàng đợi ôn tập SRS.
+          Ghi lại các buổi luyện đọc, hoặc học từ ngân hàng bài đọc hiểu có sẵn câu hỏi và giải
+          thích.
         </p>
       </div>
 
-      <SessionStats logs={readingLogs} />
-
-      <PassageTypeBreakdown logs={readingLogs} />
-
-      <ReadingLogManager initialLogs={readingLogs} />
+      <ReadingTabs readingLogs={readingLogs} passages={passages} passageSets={passageSets} />
     </div>
   );
 }

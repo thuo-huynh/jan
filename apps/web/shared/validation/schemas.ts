@@ -133,6 +133,53 @@ export const attachToSrsSchema = z.object({
 });
 export type AttachToSrsInput = z.infer<typeof attachToSrsSchema>;
 
+/** Attach a passage's annotated vocab term to SRS (specs/004-reading-comprehension US4). */
+export const attachTermToSrsSchema = z.object({
+  word: z.string().trim().min(1, 'Từ là bắt buộc').max(200),
+  reading: z.string().trim().max(200).optional().nullable(),
+  meaning: z.string().trim().min(1, 'Nghĩa là bắt buộc').max(1000),
+  sourceReadingPassageId: uuid,
+});
+export type AttachTermToSrsInput = z.infer<typeof attachTermToSrsSchema>;
+
+// ---------------------------------------------------------------------------
+// Reading passage bank (reading_passages / reading_passage_questions —
+// specs/004-reading-comprehension)
+// ---------------------------------------------------------------------------
+
+const passageSegmentSchema = z.union([
+  z.object({ type: z.literal('text'), value: z.string().min(1) }),
+  z.object({
+    type: z.literal('term'),
+    term: z.string().trim().min(1),
+    reading: z.string().trim(),
+    meaning: z.string().trim().min(1),
+  }),
+]);
+
+export const readingPassageQuestionSchema = z.object({
+  questionText: z.string().trim().min(1, 'Câu hỏi là bắt buộc').max(1000),
+  choices: z.array(z.string().trim().min(1, 'Đáp án không được để trống').max(500)).length(4, 'Cần đúng 4 đáp án'),
+  correctChoiceIndex: z.number().int().min(0).max(3),
+  explanation: z.string().trim().min(1, 'Giải thích là bắt buộc').max(5000),
+});
+export type ReadingPassageQuestionInput = z.infer<typeof readingPassageQuestionSchema>;
+
+export const readingPassageSchema = z.object({
+  title: z.string().trim().min(1, 'Tiêu đề là bắt buộc').max(300),
+  segments: z.array(passageSegmentSchema).min(1, 'Nội dung bài đọc là bắt buộc'),
+  translationVn: z.string().trim().max(10000).optional().nullable(),
+  tip: z.string().trim().max(5000).optional().nullable(),
+  setId: uuid.optional().nullable(),
+  questions: z.array(readingPassageQuestionSchema).min(1, 'Cần ít nhất 1 câu hỏi').max(20),
+});
+export type ReadingPassageInput = z.infer<typeof readingPassageSchema>;
+
+export const readingPassageSetSchema = z.object({
+  name: z.string().trim().min(1, 'Tên set là bắt buộc').max(100),
+});
+export type ReadingPassageSetInput = z.infer<typeof readingPassageSetSchema>;
+
 // ---------------------------------------------------------------------------
 // Mock tests (mock_test_results — T061) + exam date (study_goals — T063)
 // ---------------------------------------------------------------------------
