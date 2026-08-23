@@ -6,12 +6,13 @@ import { PassageTypeBreakdown } from './PassageTypeBreakdown';
 import { ReadingLogManager } from './ReadingLogManager';
 import { ReadingPassageBank } from './ReadingPassageBank';
 import { SessionStats } from './SessionStats';
-import type { ReadingLog, ReadingPassage, ReadingPassageSet } from '../types';
+import type { QuestionProgress, ReadingLog, ReadingPassage, ReadingPassageSet } from '../types';
 
 interface ReadingTabsProps {
   readingLogs: ReadingLog[];
   passages: ReadingPassage[];
   passageSets: ReadingPassageSet[];
+  passageProgress: Record<string, QuestionProgress>;
 }
 
 type Tab = 'log' | 'bank';
@@ -23,7 +24,7 @@ type Tab = 'log' | 'bank';
  * LearnNav.tsx's sub-nav one level up, kept local to this page rather than
  * promoted to a shared component since no other page needs two tabs yet.
  */
-export function ReadingTabs({ readingLogs, passages, passageSets }: ReadingTabsProps) {
+export function ReadingTabs({ readingLogs, passages, passageSets, passageProgress }: ReadingTabsProps) {
   const [tab, setTab] = useState<Tab>('log');
 
   return (
@@ -60,7 +61,7 @@ export function ReadingTabs({ readingLogs, passages, passageSets }: ReadingTabsP
           <ReadingLogManager initialLogs={readingLogs} />
         </div>
       ) : (
-        <ReadingPassageBank passages={passages} initialSets={passageSets} />
+        <ReadingPassageBank passages={passages} initialSets={passageSets} initialProgress={passageProgress} />
       )}
     </div>
   );

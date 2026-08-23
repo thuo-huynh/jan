@@ -14,7 +14,7 @@ import {
 } from 'lucide-react';
 import { createClient } from '@/shared/supabase/client';
 import { useConfirm } from '@/shared/hooks/useConfirm';
-import type { ReadingPassage, ReadingPassageSet } from '../types';
+import type { QuestionProgress, ReadingPassage, ReadingPassageSet } from '../types';
 import { ReadingHtmlImportForm } from './ReadingHtmlImportForm';
 import { ReadingPassageForm } from './ReadingPassageForm';
 import { ReadingPassageViewer } from './ReadingPassageViewer';
@@ -29,6 +29,7 @@ import { ReadingPassageViewer } from './ReadingPassageViewer';
 interface ReadingPassageBankProps {
   passages: ReadingPassage[];
   initialSets: ReadingPassageSet[];
+  initialProgress: Record<string, QuestionProgress>;
 }
 
 const UNSET_GROUP_KEY = '__unset__';
@@ -40,9 +41,10 @@ interface Group {
   passages: ReadingPassage[];
 }
 
-export function ReadingPassageBank({ passages: initialPassages, initialSets }: ReadingPassageBankProps) {
+export function ReadingPassageBank({ passages: initialPassages, initialSets, initialProgress }: ReadingPassageBankProps) {
   const [passages, setPassages] = useState(initialPassages);
   const [sets, setSets] = useState(initialSets);
+  const [progress, setProgress] = useState(initialProgress);
   const [addMode, setAddMode] = useState<'none' | 'html' | 'manual'>('none');
   const [openPassageId, setOpenPassageId] = useState<string | null>(null);
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
@@ -84,6 +86,10 @@ export function ReadingPassageBank({ passages: initialPassages, initialSets }: R
 
   function handleSetCreated(set: ReadingPassageSet) {
     setSets((prev) => (prev.some((s) => s.id === set.id) ? prev : [...prev, set]));
+  }
+
+  function handleProgressChange(questionId: string, state: QuestionProgress) {
+    setProgress((prev) => ({ ...prev, [questionId]: state }));
   }
 
   function handleImported(imported: ReadingPassage[]) {
@@ -308,7 +314,11 @@ export function ReadingPassageBank({ passages: initialPassages, initialSets }: R
                         </div>
                         {openPassageId === passage.id && (
                           <div className="border-t border-border p-3">
-                            <ReadingPassageViewer passage={passage} />
+                            <ReadingPassageViewer
+                              passage={passage}
+                              progress={progress}
+                              onProgressChange={handleProgressChange}
+                            />
                           </div>
                         )}
                       </div>

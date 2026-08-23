@@ -62,3 +62,9 @@ export interface ReadingPassageSet {
   name: string;
   created_at: string;
 }
+
+/** A user's persisted last answer for one question (user_reading_question_progress) — keyed by question id, hydrates the quiz viewer's highlight so it survives a collapse/reopen or page reload instead of resetting to unanswered. */
+export interface QuestionProgress {
+  chosenIndex: number;
+  isCorrect: boolean;
+}

@@ -6,7 +6,7 @@ import type {
   ReadingPassageQuestionRecord,
   ReadingPassageRecord,
 } from '@/features/reading-listening/lib/mapReadingPassage';
-import type { ReadingLog, ReadingPassageSet } from '@/features/reading-listening/types';
+import type { QuestionProgress, ReadingLog, ReadingPassageSet } from '@/features/reading-listening/types';
 
 /**
  * Reading log entry form + history table (T057) plus the passage-bank tab
@@ -23,17 +23,19 @@ export default async function ReadingLogPage() {
     redirect('/login');
   }
 
-  const [{ data: logs }, { data: passageRows }, { data: questionRows }, { data: setRows }] = await Promise.all([
-    supabase.from('reading_logs').select('*').order('practiced_at', { ascending: false }),
-    supabase
-      .from('reading_passages')
-      .select('id, set_id, title, passage_segments, translation_vn, tip')
-      .order('created_at', { ascending: false }),
-    supabase
-      .from('reading_passage_questions')
-      .select('id, passage_id, order_index, question_text, choices, correct_choice_index, explanation'),
-    supabase.from('reading_passage_sets').select('id, name, created_at').order('created_at', { ascending: true }),
-  ]);
+  const [{ data: logs }, { data: passageRows }, { data: questionRows }, { data: setRows }, { data: progressRows }] =
+    await Promise.all([
+      supabase.from('reading_logs').select('*').order('practiced_at', { ascending: false }),
+      supabase
+        .from('reading_passages')
+        .select('id, set_id, title, passage_segments, translation_vn, tip')
+        .order('created_at', { ascending: false }),
+      supabase
+        .from('reading_passage_questions')
+        .select('id, passage_id, order_index, question_text, choices, correct_choice_index, explanation'),
+      supabase.from('reading_passage_sets').select('id, name, created_at').order('created_at', { ascending: true }),
+      supabase.from('user_reading_question_progress').select('question_id, chosen_choice_index, is_correct'),
+    ]);
 
   const readingLogs = (logs ?? []) as ReadingLog[];
   const questionRecords = (questionRows ?? []) as ReadingPassageQuestionRecord[];
@@ -41,6 +43,14 @@ export default async function ReadingLogPage() {
     mapReadingPassage(row, questionRecords),
   );
   const passageSets = (setRows ?? []) as ReadingPassageSet[];
+  const passageProgress = Object.fromEntries(
+    (progressRows ?? []).map(
+      (row): [string, QuestionProgress] => [
+        row.question_id,
+        { chosenIndex: row.chosen_choice_index, isCorrect: row.is_correct },
+      ],
+    ),
+  );
 
   return (
     <div className="space-y-6">
@@ -52,7 +62,12 @@ export default async function ReadingLogPage() {
         </p>
       </div>
 
-      <ReadingTabs readingLogs={readingLogs} passages={passages} passageSets={passageSets} />
+      <ReadingTabs
+        readingLogs={readingLogs}
+        passages={passages}
+        passageSets={passageSets}
+        passageProgress={passageProgress}
+      />
     </div>
   );
 }
