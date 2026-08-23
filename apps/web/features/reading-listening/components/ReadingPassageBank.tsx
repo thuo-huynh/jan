@@ -41,6 +41,34 @@ interface Group {
   passages: ReadingPassage[];
 }
 
+/**
+ * At-a-glance "have I done this one" indicator for a passage row — badge
+ * only shows once at least one of the passage's questions has a progress
+ * row, colored by how many were right so a user scanning a long list (this
+ * feature's own sample import has 30 passages) doesn't have to open each
+ * one to see what's left to review.
+ */
+function PassageProgressBadge({
+  passage,
+  progress,
+}: {
+  passage: ReadingPassage;
+  progress: Record<string, QuestionProgress>;
+}) {
+  const total = passage.questions.length;
+  const answered = passage.questions.filter((q) => progress[q.id]).length;
+  if (answered === 0) return null;
+
+  const correct = passage.questions.filter((q) => progress[q.id]?.isCorrect).length;
+  const badgeClass = correct === total ? 'badge-success' : correct === 0 ? 'badge-danger' : 'badge-warning';
+
+  return (
+    <span className={`${badgeClass} shrink-0`}>
+      {correct}/{total} đúng
+    </span>
+  );
+}
+
 export function ReadingPassageBank({ passages: initialPassages, initialSets, initialProgress }: ReadingPassageBankProps) {
   const [passages, setPassages] = useState(initialPassages);
   const [sets, setSets] = useState(initialSets);
@@ -302,6 +330,7 @@ export function ReadingPassageBank({ passages: initialPassages, initialSets, ini
                             <span className="shrink-0 text-xs text-muted-foreground">
                               {passage.questions.length} câu hỏi
                             </span>
+                            <PassageProgressBadge passage={passage} progress={progress} />
                           </button>
                           <button
                             type="button"
