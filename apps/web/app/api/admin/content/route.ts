@@ -4,17 +4,28 @@ import { CONTENT_TYPES, isContentType, type ContentType } from './_shared';
 import type { createAdminClient } from '@/shared/supabase/admin';
 
 /**
- * T088 — GET /api/admin/content?type=tasks|notes|vocab|grammar_notes|reading_logs|listening_logs|mistakes&query=&page=
+ * T088 — GET /api/admin/content?type=tasks|notes|vocab|grammar_notes|reading_logs|listening_logs|mistakes&query=&page=&ownerEmail=&dateFrom=&dateTo=
  * Lists/searches user-generated content across all owners for moderation
  * (FR-046). See `./_shared.ts` for the `grammar_notes` mapping decision.
- * Every branch embeds `profiles(email)` (directly, or via `boards` for
+ * Every branch embeds `profiles!inner(email)` (directly, or via `boards` for
  * `tasks`, which has no direct `user_id` column — ownership is denormalized
  * via `board_id`, data-model.md) so the moderation UI can show who owns each
- * item without a second round trip.
+ * item without a second round trip; the `!inner` join (rather than a plain
+ * left join) is required so `ownerEmail` can filter on the joined column via
+ * PostgREST (`.ilike('profiles.email', ...)` only applies to inner joins).
+ * `dateFrom`/`dateTo` filter the same timestamp column each query already
+ * orders by (created_at/updated_at/practiced_at, per type).
  */
 const PAGE_SIZE = 25;
 
 type Admin = ReturnType<typeof createAdminClient>;
+
+/** Owner-email / created-date filters shared by all `query*` functions below. */
+interface ContentFilters {
+  ownerEmail?: string;
+  dateFrom?: string;
+  dateTo?: string;
+}
 
 interface TaskContentRow {
   id: string;
@@ -28,16 +39,25 @@ interface TaskContentRow {
   board: { user_id: string; name: string; profiles: { email: string } | null } | null;
 }
 
-async function queryTasks(admin: Admin, query: string, from: number, to: number) {
+async function queryTasks(
+  admin: Admin,
+  query: string,
+  from: number,
+  to: number,
+  filters: ContentFilters
+) {
   let q = admin
     .from('tasks')
     .select(
-      'id, title, description, tags, due_date, progress_pct, created_at, updated_at, board:boards(user_id, name, profiles(email))',
-      { count: 'exact' },
+      'id, title, description, tags, due_date, progress_pct, created_at, updated_at, board:boards!inner(user_id, name, profiles!inner(email))',
+      { count: 'exact' }
     )
     .order('created_at', { ascending: false })
     .range(from, to);
   if (query) q = q.or(`title.ilike.%${query}%,description.ilike.%${query}%`);
+  if (filters.ownerEmail) q = q.ilike('board.profiles.email', `%${filters.ownerEmail}%`);
+  if (filters.dateFrom) q = q.gte('created_at', filters.dateFrom);
+  if (filters.dateTo) q = q.lte('created_at', `${filters.dateTo}T23:59:59`);
   const { data, error, count } = await q;
   if (error) throw error;
   const items = ((data ?? []) as unknown as TaskContentRow[]).map((row) => ({
@@ -69,16 +89,25 @@ interface NoteContentRow {
   profiles: { email: string } | null;
 }
 
-async function queryNotes(admin: Admin, query: string, from: number, to: number) {
+async function queryNotes(
+  admin: Admin,
+  query: string,
+  from: number,
+  to: number,
+  filters: ContentFilters
+) {
   let q = admin
     .from('notes')
     .select(
-      'id, title, body_markdown, folder, tags, pinned, user_id, created_at, updated_at, profiles(email)',
-      { count: 'exact' },
+      'id, title, body_markdown, folder, tags, pinned, user_id, created_at, updated_at, profiles!inner(email)',
+      { count: 'exact' }
     )
     .order('created_at', { ascending: false })
     .range(from, to);
   if (query) q = q.or(`title.ilike.%${query}%,body_markdown.ilike.%${query}%`);
+  if (filters.ownerEmail) q = q.ilike('profiles.email', `%${filters.ownerEmail}%`);
+  if (filters.dateFrom) q = q.gte('created_at', filters.dateFrom);
+  if (filters.dateTo) q = q.lte('created_at', `${filters.dateTo}T23:59:59`);
   const { data, error, count } = await q;
   if (error) throw error;
   const items = ((data ?? []) as unknown as NoteContentRow[]).map((row) => ({
@@ -109,20 +138,29 @@ interface VocabContentRow {
   profiles: { email: string } | null;
 }
 
-async function queryVocab(admin: Admin, query: string, from: number, to: number) {
+async function queryVocab(
+  admin: Admin,
+  query: string,
+  from: number,
+  to: number,
+  filters: ContentFilters
+) {
   // Only custom (user-authored) entries are user-generated content for
   // moderation purposes; global reference rows (user_id IS NULL) are managed
   // via /api/admin/reference-data/vocab (T090) instead.
   let q = admin
     .from('vocab_entries')
     .select(
-      'id, word, reading, meaning, example, jlpt_level, is_kanji, user_id, created_at, profiles(email)',
-      { count: 'exact' },
+      'id, word, reading, meaning, example, jlpt_level, is_kanji, user_id, created_at, profiles!inner(email)',
+      { count: 'exact' }
     )
     .not('user_id', 'is', null)
     .order('created_at', { ascending: false })
     .range(from, to);
   if (query) q = q.or(`word.ilike.%${query}%,meaning.ilike.%${query}%`);
+  if (filters.ownerEmail) q = q.ilike('profiles.email', `%${filters.ownerEmail}%`);
+  if (filters.dateFrom) q = q.gte('created_at', filters.dateFrom);
+  if (filters.dateTo) q = q.lte('created_at', `${filters.dateTo}T23:59:59`);
   const { data, error, count } = await q;
   if (error) throw error;
   const items = ((data ?? []) as unknown as VocabContentRow[]).map((row) => ({
@@ -151,18 +189,27 @@ interface GrammarNoteContentRow {
   grammar_points: { pattern: string; meaning: string } | null;
 }
 
-async function queryGrammarNotes(admin: Admin, query: string, from: number, to: number) {
+async function queryGrammarNotes(
+  admin: Admin,
+  query: string,
+  from: number,
+  to: number,
+  filters: ContentFilters
+) {
   let q = admin
     .from('user_grammar_status')
     .select(
-      'id, user_id, grammar_point_id, status, notes_user, updated_at, profiles(email), grammar_points(pattern, meaning)',
-      { count: 'exact' },
+      'id, user_id, grammar_point_id, status, notes_user, updated_at, profiles!inner(email), grammar_points(pattern, meaning)',
+      { count: 'exact' }
     )
     .not('notes_user', 'is', null)
     .neq('notes_user', '')
     .order('updated_at', { ascending: false })
     .range(from, to);
   if (query) q = q.ilike('notes_user', `%${query}%`);
+  if (filters.ownerEmail) q = q.ilike('profiles.email', `%${filters.ownerEmail}%`);
+  if (filters.dateFrom) q = q.gte('updated_at', filters.dateFrom);
+  if (filters.dateTo) q = q.lte('updated_at', `${filters.dateTo}T23:59:59`);
   const { data, error, count } = await q;
   if (error) throw error;
   const items = ((data ?? []) as unknown as GrammarNoteContentRow[]).map((row) => ({
@@ -191,16 +238,25 @@ interface ReadingLogContentRow {
   profiles: { email: string } | null;
 }
 
-async function queryReadingLogs(admin: Admin, query: string, from: number, to: number) {
+async function queryReadingLogs(
+  admin: Admin,
+  query: string,
+  from: number,
+  to: number,
+  filters: ContentFilters
+) {
   let q = admin
     .from('reading_logs')
     .select(
-      'id, user_id, source, passage_type, duration_min, comprehension_score, notes, practiced_at, profiles(email)',
-      { count: 'exact' },
+      'id, user_id, source, passage_type, duration_min, comprehension_score, notes, practiced_at, profiles!inner(email)',
+      { count: 'exact' }
     )
     .order('practiced_at', { ascending: false })
     .range(from, to);
   if (query) q = q.or(`source.ilike.%${query}%,notes.ilike.%${query}%`);
+  if (filters.ownerEmail) q = q.ilike('profiles.email', `%${filters.ownerEmail}%`);
+  if (filters.dateFrom) q = q.gte('practiced_at', filters.dateFrom);
+  if (filters.dateTo) q = q.lte('practiced_at', `${filters.dateTo}T23:59:59`);
   const { data, error, count } = await q;
   if (error) throw error;
   const items = ((data ?? []) as unknown as ReadingLogContentRow[]).map((row) => ({
@@ -228,16 +284,25 @@ interface ListeningLogContentRow {
   profiles: { email: string } | null;
 }
 
-async function queryListeningLogs(admin: Admin, query: string, from: number, to: number) {
+async function queryListeningLogs(
+  admin: Admin,
+  query: string,
+  from: number,
+  to: number,
+  filters: ContentFilters
+) {
   let q = admin
     .from('listening_logs')
     .select(
-      'id, user_id, source, duration_min, comprehension_score, notes, practiced_at, profiles(email)',
-      { count: 'exact' },
+      'id, user_id, source, duration_min, comprehension_score, notes, practiced_at, profiles!inner(email)',
+      { count: 'exact' }
     )
     .order('practiced_at', { ascending: false })
     .range(from, to);
   if (query) q = q.or(`source.ilike.%${query}%,notes.ilike.%${query}%`);
+  if (filters.ownerEmail) q = q.ilike('profiles.email', `%${filters.ownerEmail}%`);
+  if (filters.dateFrom) q = q.gte('practiced_at', filters.dateFrom);
+  if (filters.dateTo) q = q.lte('practiced_at', `${filters.dateTo}T23:59:59`);
   const { data, error, count } = await q;
   if (error) throw error;
   const items = ((data ?? []) as unknown as ListeningLogContentRow[]).map((row) => ({
@@ -265,16 +330,25 @@ interface MistakeContentRow {
   profiles: { email: string } | null;
 }
 
-async function queryMistakes(admin: Admin, query: string, from: number, to: number) {
+async function queryMistakes(
+  admin: Admin,
+  query: string,
+  from: number,
+  to: number,
+  filters: ContentFilters
+) {
   let q = admin
     .from('mistake_notebook')
     .select(
-      'id, user_id, source, content, linked_vocab_id, linked_grammar_id, resolved, created_at, profiles(email)',
-      { count: 'exact' },
+      'id, user_id, source, content, linked_vocab_id, linked_grammar_id, resolved, created_at, profiles!inner(email)',
+      { count: 'exact' }
     )
     .order('created_at', { ascending: false })
     .range(from, to);
   if (query) q = q.ilike('content', `%${query}%`);
+  if (filters.ownerEmail) q = q.ilike('profiles.email', `%${filters.ownerEmail}%`);
+  if (filters.dateFrom) q = q.gte('created_at', filters.dateFrom);
+  if (filters.dateTo) q = q.lte('created_at', `${filters.dateTo}T23:59:59`);
   const { data, error, count } = await q;
   if (error) throw error;
   const items = ((data ?? []) as unknown as MistakeContentRow[]).map((row) => ({
@@ -296,6 +370,7 @@ type ContentQueryFn = (
   query: string,
   from: number,
   to: number,
+  filters: ContentFilters
 ) => Promise<{ items: unknown[]; total: number }>;
 
 const QUERY_BY_TYPE: Record<ContentType, ContentQueryFn> = {
@@ -318,7 +393,7 @@ export async function GET(request: NextRequest) {
   if (!isContentType(type)) {
     return NextResponse.json(
       { error: `type must be one of: ${CONTENT_TYPES.join(', ')}` },
-      { status: 400 },
+      { status: 400 }
     );
   }
 
@@ -326,9 +401,14 @@ export async function GET(request: NextRequest) {
   const page = Math.max(1, Number(searchParams.get('page') ?? '1') || 1);
   const from = (page - 1) * PAGE_SIZE;
   const to = from + PAGE_SIZE - 1;
+  const filters: ContentFilters = {
+    ownerEmail: searchParams.get('ownerEmail')?.trim() || undefined,
+    dateFrom: searchParams.get('dateFrom')?.trim() || undefined,
+    dateTo: searchParams.get('dateTo')?.trim() || undefined,
+  };
 
   try {
-    const { items, total } = await QUERY_BY_TYPE[type](admin, query, from, to);
+    const { items, total } = await QUERY_BY_TYPE[type](admin, query, from, to, filters);
     return NextResponse.json({ type, items, total, page, pageSize: PAGE_SIZE });
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unknown error';

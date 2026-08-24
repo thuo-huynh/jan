@@ -58,6 +58,9 @@ function createdAtOf(item: ContentItem): string | null {
 export default function AdminContentPage() {
   const [type, setType] = useState<ContentType>('tasks');
   const [query, setQuery] = useState('');
+  const [ownerEmail, setOwnerEmail] = useState('');
+  const [dateFrom, setDateFrom] = useState('');
+  const [dateTo, setDateTo] = useState('');
   const [page, setPage] = useState(1);
   const [items, setItems] = useState<ContentItem[]>([]);
   const [total, setTotal] = useState(0);
@@ -72,6 +75,9 @@ export default function AdminContentPage() {
     try {
       const params = new URLSearchParams({ type, page: String(page) });
       if (query.trim()) params.set('query', query.trim());
+      if (ownerEmail.trim()) params.set('ownerEmail', ownerEmail.trim());
+      if (dateFrom) params.set('dateFrom', dateFrom);
+      if (dateTo) params.set('dateTo', dateTo);
       const res = await fetch(`/api/admin/content?${params.toString()}`);
       const json = await res.json();
       if (!res.ok) throw new Error(json.error ?? 'Không tải được nội dung');
@@ -82,7 +88,7 @@ export default function AdminContentPage() {
     } finally {
       setLoading(false);
     }
-  }, [type, page, query]);
+  }, [type, page, query, ownerEmail, dateFrom, dateTo]);
 
   useEffect(() => {
     load();
@@ -93,7 +99,7 @@ export default function AdminContentPage() {
     const confirmed = await confirm(
       isNote
         ? { title: 'Xóa ghi chú cá nhân này?' }
-        : { title: 'Xóa mục nội dung này?', description: 'Không thể hoàn tác thao tác này.' },
+        : { title: 'Xóa mục nội dung này?', description: 'Không thể hoàn tác thao tác này.' }
     );
     if (!confirmed) return;
 
@@ -152,7 +158,7 @@ export default function AdminContentPage() {
           setPage(1);
           load();
         }}
-        className="flex gap-2"
+        className="flex flex-wrap items-end gap-2"
       >
         <input
           type="text"
@@ -162,6 +168,36 @@ export default function AdminContentPage() {
           aria-label="Tìm nội dung"
           className="input-field max-w-sm"
         />
+        <input
+          type="text"
+          value={ownerEmail}
+          onChange={(e) => setOwnerEmail(e.target.value)}
+          placeholder="Email chủ sở hữu…"
+          aria-label="Lọc theo email chủ sở hữu"
+          className="input-field max-w-xs"
+        />
+        <div className="flex items-end gap-2">
+          <label className="flex flex-col gap-1">
+            <span className="label-field text-xs">Từ ngày</span>
+            <input
+              type="date"
+              value={dateFrom}
+              onChange={(e) => setDateFrom(e.target.value)}
+              aria-label="Từ ngày"
+              className="input-field"
+            />
+          </label>
+          <label className="flex flex-col gap-1">
+            <span className="label-field text-xs">Đến ngày</span>
+            <input
+              type="date"
+              value={dateTo}
+              onChange={(e) => setDateTo(e.target.value)}
+              aria-label="Đến ngày"
+              className="input-field"
+            />
+          </label>
+        </div>
         <button type="submit" className="btn-outline shrink-0">
           <Search className="h-4 w-4" aria-hidden="true" />
           Tìm
@@ -169,7 +205,7 @@ export default function AdminContentPage() {
       </form>
 
       {error && (
-        <div className="rounded-lg border border-danger/30 bg-danger/10 px-4 py-2 text-sm text-danger">
+        <div className="border-danger/30 bg-danger/10 rounded-lg border px-4 py-2 text-sm text-danger">
           {error}
         </div>
       )}
@@ -205,9 +241,7 @@ export default function AdminContentPage() {
                 const createdAt = createdAtOf(item);
                 return (
                   <tr key={item.id}>
-                    <td className="px-4 py-3 text-muted-foreground">
-                      {item.ownerEmail ?? '—'}
-                    </td>
+                    <td className="px-4 py-3 text-muted-foreground">{item.ownerEmail ?? '—'}</td>
                     <td className="max-w-md truncate px-4 py-3 text-foreground">
                       {summaryOf(type, item) || <span className="text-muted-foreground">—</span>}
                     </td>
@@ -220,7 +254,7 @@ export default function AdminContentPage() {
                           type="button"
                           disabled={busyId === item.id}
                           onClick={() => handleRemove(item)}
-                          className="btn-outline h-8 border-danger/40 px-3 text-xs text-danger hover:bg-danger/10"
+                          className="btn-outline border-danger/40 hover:bg-danger/10 h-8 px-3 text-xs text-danger"
                         >
                           {type === 'grammar_notes' ? 'Xóa ghi chú' : 'Xóa'}
                         </button>
