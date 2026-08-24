@@ -4,7 +4,7 @@ import { CONTENT_TYPES, isContentType, type ContentType } from './_shared';
 import type { createAdminClient } from '@/shared/supabase/admin';
 
 /**
- * T088 — GET /api/admin/content?type=tasks|notes|vocab|grammar_notes|reading_logs|listening_logs|mistakes&query=&page=&ownerEmail=&dateFrom=&dateTo=
+ * T088 — GET /api/admin/content?type=tasks|notes|vocab|grammar_notes|reading_logs|listening_logs|mistakes|reading_passages&query=&page=&ownerEmail=&dateFrom=&dateTo=
  * Lists/searches user-generated content across all owners for moderation
  * (FR-046). See `./_shared.ts` for the `grammar_notes` mapping decision.
  * Every branch embeds `profiles!inner(email)` (directly, or via `boards` for
@@ -365,6 +365,51 @@ async function queryMistakes(
   return { items, total: count ?? 0 };
 }
 
+interface ReadingPassageContentRow {
+  id: string;
+  title: string;
+  translation_vn: string | null;
+  tip: string | null;
+  user_id: string;
+  created_at: string;
+  profiles: { email: string } | null;
+  reading_passage_questions: { count: number }[];
+}
+
+async function queryReadingPassages(
+  admin: Admin,
+  query: string,
+  from: number,
+  to: number,
+  filters: ContentFilters
+) {
+  let q = admin
+    .from('reading_passages')
+    .select(
+      'id, title, translation_vn, tip, user_id, created_at, profiles!inner(email), reading_passage_questions(count)',
+      { count: 'exact' }
+    )
+    .order('created_at', { ascending: false })
+    .range(from, to);
+  if (query) q = q.ilike('title', `%${query}%`);
+  if (filters.ownerEmail) q = q.ilike('profiles.email', `%${filters.ownerEmail}%`);
+  if (filters.dateFrom) q = q.gte('created_at', filters.dateFrom);
+  if (filters.dateTo) q = q.lte('created_at', `${filters.dateTo}T23:59:59`);
+  const { data, error, count } = await q;
+  if (error) throw error;
+  const items = ((data ?? []) as unknown as ReadingPassageContentRow[]).map((row) => ({
+    id: row.id,
+    title: row.title,
+    translationVn: row.translation_vn,
+    tip: row.tip,
+    questionCount: row.reading_passage_questions?.[0]?.count ?? 0,
+    createdAt: row.created_at,
+    ownerId: row.user_id,
+    ownerEmail: row.profiles?.email ?? null,
+  }));
+  return { items, total: count ?? 0 };
+}
+
 type ContentQueryFn = (
   admin: Admin,
   query: string,
@@ -381,6 +426,7 @@ const QUERY_BY_TYPE: Record<ContentType, ContentQueryFn> = {
   reading_logs: queryReadingLogs,
   listening_logs: queryListeningLogs,
   mistakes: queryMistakes,
+  reading_passages: queryReadingPassages,
 };
 
 export async function GET(request: NextRequest) {

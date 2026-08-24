@@ -15,11 +15,12 @@ const TABLE_BY_TYPE: Record<Exclude<ContentType, 'grammar_notes' | 'vocab'>, str
   reading_logs: 'reading_logs',
   listening_logs: 'listening_logs',
   mistakes: 'mistake_notebook',
+  reading_passages: 'reading_passages',
 };
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { type: string; id: string } },
+  { params }: { params: { type: string; id: string } }
 ) {
   const guard = await requireAdmin();
   if (!guard.ok) return guard.response;
@@ -29,7 +30,7 @@ export async function DELETE(
   if (!isContentType(type)) {
     return NextResponse.json(
       { error: `type must be one of: ${CONTENT_TYPES.join(', ')}` },
-      { status: 400 },
+      { status: 400 }
     );
   }
 

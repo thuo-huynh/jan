@@ -21,6 +21,7 @@ const CONTENT_TYPES = [
   { value: 'reading_logs', label: 'Nhật ký đọc' },
   { value: 'listening_logs', label: 'Nhật ký nghe' },
   { value: 'mistakes', label: 'Sổ lỗi sai' },
+  { value: 'reading_passages', label: 'Bài đọc hiểu' },
 ] as const;
 
 type ContentType = (typeof CONTENT_TYPES)[number]['value'];
@@ -45,6 +46,8 @@ function summaryOf(type: ContentType, item: ContentItem): string {
       return `${item.source ?? ''} — ${item.comprehensionScore ?? '?'}%`;
     case 'mistakes':
       return String(item.content ?? '');
+    case 'reading_passages':
+      return `${item.title ?? ''} — ${item.questionCount ?? 0} câu hỏi`;
     default:
       return '';
   }

@@ -22,6 +22,7 @@ export const CONTENT_TYPES = [
   'reading_logs',
   'listening_logs',
   'mistakes',
+  'reading_passages',
 ] as const;
 
 export type ContentType = (typeof CONTENT_TYPES)[number];
