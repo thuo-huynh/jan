@@ -115,14 +115,16 @@ function ReviewSession() {
   }
 
   const accuracy =
-    reviewedCount > 0 ? Math.round(((gradeCounts.good + gradeCounts.easy) / reviewedCount) * 100) : 0;
+    reviewedCount > 0
+      ? Math.round(((gradeCounts.good + gradeCounts.easy) / reviewedCount) * 100)
+      : 0;
 
   return (
-    <div className="mx-auto max-w-2xl space-y-6">
+    <div className="mx-auto max-w-2xl space-y-8">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">Hàng đợi ôn tập</h1>
-          <p className="mt-1.5 text-sm text-muted-foreground">
+          <h1 className="page-heading">Lịch ôn</h1>
+          <p className="page-intro">
             Nhắc bạn ôn lại những mục đã học theo lịch cá nhân
             {allItems !== null && ` — ${allItems.length} mục cần ôn`}.
           </p>
@@ -156,7 +158,7 @@ function ReviewSession() {
 
       {items !== null && items.length === 0 && (
         <div className="flex flex-col items-center gap-3 rounded-lg border border-dashed border-border p-10 text-center">
-          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
+          <div className="bg-primary/10 flex h-12 w-12 items-center justify-center rounded-full">
             <Inbox className="h-6 w-6 text-primary" aria-hidden="true" />
           </div>
           <p className="max-w-xs text-sm text-foreground">
@@ -184,7 +186,7 @@ function ReviewSession() {
 
       {items !== null && items.length > 0 && index >= items.length && (
         <div className="card space-y-4 p-8 text-center">
-          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-success/10">
+          <div className="bg-success/10 mx-auto flex h-12 w-12 items-center justify-center rounded-full">
             <CheckCircle2 className="h-6 w-6 text-success" aria-hidden="true" />
           </div>
           <div>

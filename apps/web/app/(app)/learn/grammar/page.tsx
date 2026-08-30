@@ -1,8 +1,16 @@
 import { redirect } from 'next/navigation';
 import { createClient, getAuthedUser } from '@/shared/supabase/server';
 import { GrammarList } from '@/features/grammar/components/GrammarList';
-import { mapGrammarPoint, type GrammarPointRecord, type UserGrammarStatusRecord } from '@/features/grammar/lib/mapGrammarPoint';
-import type { ConfusablePairRef, GrammarPointWithProgress, GrammarSet } from '@/features/grammar/types';
+import {
+  mapGrammarPoint,
+  type GrammarPointRecord,
+  type UserGrammarStatusRecord,
+} from '@/features/grammar/lib/mapGrammarPoint';
+import type {
+  ConfusablePairRef,
+  GrammarPointWithProgress,
+  GrammarSet,
+} from '@/features/grammar/types';
 
 /**
  * Grammar list page (T041): browses the global N2 `grammar_points` catalog
@@ -26,13 +34,20 @@ export default async function GrammarListPage() {
     supabase
       .from('grammar_points')
       .select(
-        'id, user_id, pattern, meaning, connection_form, formality_nuance, example_sentences, jlpt_level, frequency_tag, n3_overlap, set_id',
+        'id, user_id, pattern, meaning, connection_form, formality_nuance, example_sentences, jlpt_level, frequency_tag, n3_overlap, set_id'
       )
       .or(`user_id.is.null,user_id.eq.${user.id}`)
       .order('pattern', { ascending: true }),
-    supabase.from('user_grammar_status').select('grammar_point_id, status, notes_user').eq('user_id', user.id),
+    supabase
+      .from('user_grammar_status')
+      .select('grammar_point_id, status, notes_user')
+      .eq('user_id', user.id),
     supabase.from('grammar_confusable_pairs').select('id, grammar_point_id_a, grammar_point_id_b'),
-    supabase.from('grammar_sets').select('id, name, created_at').eq('user_id', user.id).order('created_at', { ascending: true }),
+    supabase
+      .from('grammar_sets')
+      .select('id, name, created_at')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: true }),
   ]);
 
   if (pointsResult.error) {
@@ -58,17 +73,16 @@ export default async function GrammarListPage() {
   }
 
   const combined: GrammarPointWithProgress[] = points.map((point) =>
-    mapGrammarPoint(point, statusByPointId.get(point.id), pairsByPointId.get(point.id) ?? []),
+    mapGrammarPoint(point, statusByPointId.get(point.id), pairsByPointId.get(point.id) ?? [])
   );
   const sets = (setsResult.data ?? []) as GrammarSet[];
 
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">Theo dõi Ngữ pháp N2</h1>
-        <p className="mt-1.5 text-sm text-muted-foreground">
-          Duyệt kho ngữ pháp N2, theo dõi mức độ thành thạo, thêm ghi chú cá nhân và so sánh các
-          cặp dễ nhầm.
+        <h1 className="page-heading">Ngữ pháp</h1>
+        <p className="page-intro">
+          Tạo kho mẫu câu theo mục tiêu của bạn, thêm ghi chú riêng và lưu lại các cặp dễ nhầm.
         </p>
       </div>
 

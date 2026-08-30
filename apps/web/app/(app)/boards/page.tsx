@@ -23,10 +23,10 @@ export default async function BoardsPage() {
 
   return (
     <div>
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">Bảng công việc</h1>
-        <p className="mt-1.5 text-sm text-muted-foreground">
-          Sắp xếp công việc của bạn theo từng bảng Kanban.
+      <div className="mb-8">
+        <h1 className="page-heading">Bảng công việc</h1>
+        <p className="page-intro">
+          Sắp xếp công việc theo bảng riêng khi bạn cần một góc quản lý sâu hơn.
         </p>
       </div>
       <BoardList initialBoards={boards ?? []} />

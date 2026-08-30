@@ -72,25 +72,27 @@ export default async function VocabDeckPage({ searchParams }: VocabPageProps) {
   const nextParams = new URLSearchParams({ ...(q ? { q } : {}), page: String(page + 1) });
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-9">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">Kho từ vựng &amp; Hán tự</h1>
-        <p className="mt-1.5 text-sm text-muted-foreground">
-          Tạo kho từ của riêng bạn theo bất kỳ mục tiêu nào; nếu cần, bạn cũng có thể tham khảo
-          kho dùng chung. Các mục sẽ được nhắc ôn lại đúng lúc.
+        <h1 className="page-heading">Từ vựng &amp; Hán tự</h1>
+        <p className="page-intro">
+          Tạo kho từ của riêng bạn theo bất kỳ mục tiêu nào; nếu cần, bạn cũng có thể tham khảo kho
+          dùng chung. Các mục sẽ được nhắc ôn lại đúng lúc.
         </p>
       </div>
 
       {user && (
-        <div className="card flex flex-wrap items-center justify-between gap-4 p-4 sm:p-5">
+        <div className="daily-sheet flex flex-wrap items-center justify-between gap-4 py-5 sm:py-6">
           <div className="flex items-center gap-4">
-            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary/10">
+            <div className="bg-primary/10 flex h-11 w-11 shrink-0 items-center justify-center rounded-full">
               <Layers className="h-5 w-5 text-primary" aria-hidden="true" />
             </div>
             <div>
               <p className="text-2xl font-bold tracking-tight text-foreground">
                 {dueCount}
-                <span className="ml-1.5 text-sm font-normal text-muted-foreground">mục nên ôn lại hôm nay</span>
+                <span className="ml-1.5 text-sm font-normal text-muted-foreground">
+                  mục nên ôn lại hôm nay
+                </span>
               </p>
               {weakCount > 0 && (
                 <p className="mt-0.5 flex items-center gap-1 text-xs text-danger">
@@ -173,12 +175,18 @@ export default async function VocabDeckPage({ searchParams }: VocabPageProps) {
           </span>
           <div className="flex gap-2">
             {page > 1 && (
-              <a href={`/learn/vocab?${prevParams.toString()}`} className="btn-outline h-9 px-3 text-sm">
+              <a
+                href={`/learn/vocab?${prevParams.toString()}`}
+                className="btn-outline h-9 px-3 text-sm"
+              >
                 Trước
               </a>
             )}
             {page < totalPages && (
-              <a href={`/learn/vocab?${nextParams.toString()}`} className="btn-outline h-9 px-3 text-sm">
+              <a
+                href={`/learn/vocab?${nextParams.toString()}`}
+                className="btn-outline h-9 px-3 text-sm"
+              >
                 Sau
               </a>
             )}

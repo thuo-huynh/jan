@@ -33,16 +33,16 @@ export default async function SettingsPage() {
   const initialThemeId = preference?.theme_id ?? defaultThemeId;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">Cài đặt</h1>
-        <p className="mt-1.5 text-sm text-muted-foreground">
-          Chọn giao diện bạn muốn cho JanGo.
+        <h1 className="page-heading">Cài đặt</h1>
+        <p className="page-intro">
+          Chọn giao diện và chế độ hiển thị phù hợp với cách bạn muốn học.
         </p>
       </div>
 
       {themesError ? (
-        <p className="rounded-lg border border-danger/30 bg-danger/10 px-3 py-2 text-sm text-danger">
+        <p className="border-danger/30 bg-danger/10 rounded-lg border px-3 py-2 text-sm text-danger">
           Không tải được giao diện: {themesError.message}
         </p>
       ) : themeList.length === 0 ? (

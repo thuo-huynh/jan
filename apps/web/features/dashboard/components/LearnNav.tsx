@@ -31,7 +31,7 @@ export function LearnNav() {
 
   return (
     <nav aria-label="Các mục học tập" className="-mx-4 overflow-x-auto px-4 sm:mx-0 sm:px-0">
-      <div className="flex w-max min-w-full gap-1.5 border-b border-border pb-2 sm:w-full">
+      <div className="flex w-max min-w-full gap-1 border-b border-border sm:w-full">
         {LEARN_TABS.map((tab) => {
           const active = isActive(pathname, tab.href);
           const Icon = tab.icon;
@@ -40,10 +40,10 @@ export function LearnNav() {
               key={tab.href}
               href={tab.href}
               aria-current={active ? 'page' : undefined}
-              className={`flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium transition-colors duration-200 ${
+              className={`flex shrink-0 items-center gap-1.5 border-b-2 px-3 py-2.5 text-sm font-medium transition-colors duration-200 ${
                 active
-                  ? 'bg-primary text-primary-foreground shadow-sm'
-                  : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+                  ? 'border-primary text-primary'
+                  : 'border-transparent text-muted-foreground hover:text-foreground'
               }`}
             >
               <Icon className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />

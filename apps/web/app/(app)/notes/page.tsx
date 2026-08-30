@@ -56,11 +56,11 @@ export default async function NotesPage({
     new Set(
       (allNotesMeta ?? [])
         .map((n: { folder: string | null }) => n.folder)
-        .filter((f: string | null): f is string => Boolean(f)),
-    ),
+        .filter((f: string | null): f is string => Boolean(f))
+    )
   ).sort();
   const tagOptions = Array.from(
-    new Set((allNotesMeta ?? []).flatMap((n: { tags: string[] }) => n.tags ?? [])),
+    new Set((allNotesMeta ?? []).flatMap((n: { tags: string[] }) => n.tags ?? []))
   ).sort();
 
   const hasActiveFilters = Boolean(q || folder || tag || pinned);
@@ -70,9 +70,9 @@ export default async function NotesPage({
     <div>
       <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">Ghi chú</h1>
-          <p className="mt-1.5 text-sm text-muted-foreground">
-            Ghi chú markdown cho việc học — sắp xếp theo thư mục/thẻ, ghim nội dung quan trọng và liên kết với từ vựng.
+          <h1 className="page-heading">Ghi chú</h1>
+          <p className="page-intro">
+            Lưu ghi chú học tập theo thư mục và thẻ, rồi quay lại đúng lúc bạn cần.
           </p>
         </div>
         <NewNoteButton />
@@ -84,14 +84,14 @@ export default async function NotesPage({
         </Suspense>
 
         {error && (
-          <p className="rounded-lg border border-danger/30 bg-danger/10 px-3 py-2 text-sm text-danger">
+          <p className="border-danger/30 bg-danger/10 rounded-lg border px-3 py-2 text-sm text-danger">
             Không tải được ghi chú: {error.message}
           </p>
         )}
 
         {!error && noteList.length === 0 && (
           <div className="flex flex-col items-center gap-3 rounded-lg border border-dashed border-border p-10 text-center">
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
+            <div className="bg-primary/10 flex h-12 w-12 items-center justify-center rounded-full">
               <StickyNote className="h-6 w-6 text-primary" aria-hidden="true" />
             </div>
             <p className="max-w-xs text-sm text-muted-foreground">

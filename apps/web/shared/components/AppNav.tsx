@@ -16,9 +16,9 @@ import { Menu, X } from 'lucide-react';
  * panel instead. The parent `<header>` must be `position: relative` for the
  * mobile panel to anchor correctly.
  *
- * DESIGN.md "Nav": active link is a tinted primary pill, inactive is muted
- * text that darkens on hover — replaces the earlier "all links look the
- * same regardless of current page" treatment.
+ * Active desktop navigation uses a small underline instead of six competing
+ * pills. The mobile menu retains a clear filled active state because the
+ * vertical list needs a stronger current-location cue.
  */
 export interface NavLinkItem {
   href: string;
@@ -49,7 +49,7 @@ export function AppNav({ links }: AppNavProps) {
         {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
       </button>
 
-      <nav className="hidden items-center gap-1 text-sm font-medium sm:flex">
+      <nav className="hidden h-full items-center gap-1 text-sm font-medium sm:flex">
         {links.map((link) => {
           const active = isActive(pathname, link.href);
           return (
@@ -57,10 +57,10 @@ export function AppNav({ links }: AppNavProps) {
               key={link.href}
               href={link.href}
               aria-current={active ? 'page' : undefined}
-              className={`rounded px-3 py-2 transition-colors ${
+              className={`flex h-full items-center border-b-2 px-3 transition-colors ${
                 active
-                  ? 'bg-primary/10 font-semibold text-primary'
-                  : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+                  ? 'border-primary font-semibold text-primary'
+                  : 'border-transparent text-muted-foreground hover:text-foreground'
               }`}
             >
               {link.label}

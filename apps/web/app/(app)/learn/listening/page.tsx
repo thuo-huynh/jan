@@ -23,11 +23,11 @@ export default async function ListeningLogPage() {
     .order('practiced_at', { ascending: false });
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">Nhật ký Nghe hiểu (聴解)</h1>
-        <p className="mt-1.5 text-sm text-muted-foreground">
-          Ghi lại các buổi luyện nghe/shadowing và theo dõi độ hiểu bài theo thời gian.
+        <h1 className="page-heading">Nghe</h1>
+        <p className="page-intro">
+          Ghi lại buổi nghe, shadowing hoặc podcast để thấy nhịp luyện tập của chính bạn.
         </p>
       </div>
 

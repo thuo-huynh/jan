@@ -6,7 +6,11 @@ import type {
   ReadingPassageQuestionRecord,
   ReadingPassageRecord,
 } from '@/features/reading-listening/lib/mapReadingPassage';
-import type { QuestionProgress, ReadingLog, ReadingPassageSet } from '@/features/reading-listening/types';
+import type {
+  QuestionProgress,
+  ReadingLog,
+  ReadingPassageSet,
+} from '@/features/reading-listening/types';
 
 /**
  * Reading log entry form + history table (T057) plus the passage-bank tab
@@ -23,42 +27,52 @@ export default async function ReadingLogPage() {
     redirect('/login');
   }
 
-  const [{ data: logs }, { data: passageRows }, { data: questionRows }, { data: setRows }, { data: progressRows }] =
-    await Promise.all([
-      supabase.from('reading_logs').select('*').order('practiced_at', { ascending: false }),
-      supabase
-        .from('reading_passages')
-        .select('id, set_id, title, passage_segments, translation_vn, tip')
-        .order('created_at', { ascending: false }),
-      supabase
-        .from('reading_passage_questions')
-        .select('id, passage_id, order_index, question_text, choices, correct_choice_index, explanation'),
-      supabase.from('reading_passage_sets').select('id, name, created_at').order('created_at', { ascending: true }),
-      supabase.from('user_reading_question_progress').select('question_id, chosen_choice_index, is_correct'),
-    ]);
+  const [
+    { data: logs },
+    { data: passageRows },
+    { data: questionRows },
+    { data: setRows },
+    { data: progressRows },
+  ] = await Promise.all([
+    supabase.from('reading_logs').select('*').order('practiced_at', { ascending: false }),
+    supabase
+      .from('reading_passages')
+      .select('id, set_id, title, passage_segments, translation_vn, tip')
+      .order('created_at', { ascending: false }),
+    supabase
+      .from('reading_passage_questions')
+      .select(
+        'id, passage_id, order_index, question_text, choices, correct_choice_index, explanation'
+      ),
+    supabase
+      .from('reading_passage_sets')
+      .select('id, name, created_at')
+      .order('created_at', { ascending: true }),
+    supabase
+      .from('user_reading_question_progress')
+      .select('question_id, chosen_choice_index, is_correct'),
+  ]);
 
   const readingLogs = (logs ?? []) as ReadingLog[];
   const questionRecords = (questionRows ?? []) as ReadingPassageQuestionRecord[];
   const passages = ((passageRows ?? []) as ReadingPassageRecord[]).map((row) =>
-    mapReadingPassage(row, questionRecords),
+    mapReadingPassage(row, questionRecords)
   );
   const passageSets = (setRows ?? []) as ReadingPassageSet[];
   const passageProgress = Object.fromEntries(
-    (progressRows ?? []).map(
-      (row): [string, QuestionProgress] => [
-        row.question_id,
-        { chosenIndex: row.chosen_choice_index, isCorrect: row.is_correct },
-      ],
-    ),
+    (progressRows ?? []).map((row): [string, QuestionProgress] => [
+      row.question_id,
+      { chosenIndex: row.chosen_choice_index, isCorrect: row.is_correct },
+    ])
   );
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">Đọc hiểu (読解)</h1>
-        <p className="mt-1.5 text-sm text-muted-foreground">
-          Ghi lại các buổi luyện đọc, hoặc học từ ngân hàng bài đọc hiểu có sẵn câu hỏi và giải
-          thích.
+        <h1 className="page-heading">Đọc</h1>
+        <p className="page-intro">
+          Lưu bài đọc của riêng bạn, nhập từ HTML, Markdown hoặc CSV, rồi ghi lại những lần bạn đã
+          học.
         </p>
       </div>
 

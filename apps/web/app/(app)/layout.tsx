@@ -46,12 +46,17 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="sticky top-0 z-30 border-b border-border bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/80">
-        <div className="relative mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-4">
-          <div className="flex items-center gap-3 sm:gap-6">
-            <Link href="/learn/dashboard" className="flex items-center gap-2 text-base font-bold tracking-tight text-foreground">
-              <GraduationCap className="h-6 w-6 text-primary" aria-hidden="true" />
-              JanGo
+      <header className="bg-card/95 supports-[backdrop-filter]:bg-card/80 sticky top-0 z-30 border-b border-border backdrop-blur">
+        <div className="relative mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4 sm:px-6">
+          <div className="flex h-full items-center gap-3 sm:gap-6">
+            <Link
+              href="/learn/dashboard"
+              className="flex items-center gap-2 text-base font-bold tracking-[-0.03em] text-foreground"
+            >
+              <span className="bg-primary/10 flex h-8 w-8 items-center justify-center rounded-md">
+                <GraduationCap className="h-[18px] w-[18px] text-primary" aria-hidden="true" />
+              </span>
+              <span>JanGo</span>
             </Link>
             <AppNav links={navLinks} />
           </div>
@@ -68,7 +73,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
           </div>
         </div>
       </header>
-      <main className="mx-auto max-w-6xl px-4 py-6 sm:py-8">{children}</main>
+      <main className="mx-auto max-w-7xl px-4 py-7 sm:px-6 sm:py-10">{children}</main>
     </div>
   );
 }

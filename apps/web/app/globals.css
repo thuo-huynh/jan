@@ -70,12 +70,7 @@
 body {
   color: var(--foreground);
   background: var(--background);
-  font-family:
-    var(--font-sans),
-    var(--font-jp),
-    ui-sans-serif,
-    system-ui,
-    sans-serif;
+  font-family: var(--font-sans), var(--font-jp), ui-sans-serif, system-ui, sans-serif;
 }
 
 @layer utilities {
@@ -139,6 +134,26 @@ body {
     @apply card cursor-pointer transition-shadow duration-200 hover:shadow-md;
   }
 
+  .page-heading {
+    @apply text-3xl font-bold tracking-[-0.035em] text-foreground sm:text-4xl;
+  }
+  .page-intro {
+    @apply mt-2 max-w-2xl text-sm leading-6 text-muted-foreground;
+  }
+  .daily-sheet {
+    @apply relative overflow-hidden rounded-xl border border-border bg-card px-5 py-6 shadow-sm sm:px-8 sm:py-8;
+  }
+  .daily-sheet::before {
+    content: '';
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 5px;
+    background: var(--primary);
+  }
+  .section-link {
+    @apply text-sm font-semibold text-primary transition-opacity hover:opacity-70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background;
+  }
+
   /*
    * Signature texture (DESIGN.md "Signature element"): a faint genkouyoushi
    * (原稿用紙) grid — the squared manuscript paper used to hand-practice
@@ -150,8 +165,16 @@ body {
    */
   .grid-paper {
     background-image:
-      linear-gradient(to right, color-mix(in srgb, var(--border) 70%, transparent) 1px, transparent 1px),
-      linear-gradient(to bottom, color-mix(in srgb, var(--border) 70%, transparent) 1px, transparent 1px);
+      linear-gradient(
+        to right,
+        color-mix(in srgb, var(--border) 70%, transparent) 1px,
+        transparent 1px
+      ),
+      linear-gradient(
+        to bottom,
+        color-mix(in srgb, var(--border) 70%, transparent) 1px,
+        transparent 1px
+      );
     background-size: 28px 28px;
   }
 

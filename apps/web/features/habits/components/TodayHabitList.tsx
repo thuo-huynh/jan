@@ -22,7 +22,11 @@ export function TodayHabitList({ initialHabits, date }: TodayHabitListProps) {
 
     setError(null);
     setPendingIds((ids) => new Set(ids).add(id));
-    setHabits((entries) => entries.map((entry) => (entry.habit.id === id ? { ...entry, completed: !entry.completed } : entry)));
+    setHabits((entries) =>
+      entries.map((entry) =>
+        entry.habit.id === id ? { ...entry, completed: !entry.completed } : entry
+      )
+    );
 
     const supabase = createClient();
     const {
@@ -30,12 +34,22 @@ export function TodayHabitList({ initialHabits, date }: TodayHabitListProps) {
     } = await supabase.auth.getUser();
     const { error: mutationError } = user
       ? current.completed
-        ? await supabase.from('habit_completions').delete().eq('habit_id', id).eq('completion_date', date)
-        : await supabase.from('habit_completions').insert({ habit_id: id, user_id: user.id, completion_date: date })
+        ? await supabase
+            .from('habit_completions')
+            .delete()
+            .eq('habit_id', id)
+            .eq('completion_date', date)
+        : await supabase
+            .from('habit_completions')
+            .insert({ habit_id: id, user_id: user.id, completion_date: date })
       : { error: new Error('Bạn cần đăng nhập để cập nhật thói quen.') };
 
     if (mutationError) {
-      setHabits((entries) => entries.map((entry) => (entry.habit.id === id ? { ...entry, completed: current.completed } : entry)));
+      setHabits((entries) =>
+        entries.map((entry) =>
+          entry.habit.id === id ? { ...entry, completed: current.completed } : entry
+        )
+      );
       setError('Không thể cập nhật thói quen. Vui lòng thử lại.');
     }
     setPendingIds((ids) => {
@@ -46,11 +60,15 @@ export function TodayHabitList({ initialHabits, date }: TodayHabitListProps) {
   }
 
   if (habits.length === 0) {
-    return <p className="text-sm text-muted-foreground">Chưa có thói quen nào. Bắt đầu với một việc nhỏ cho hôm nay.</p>;
+    return (
+      <p className="text-sm leading-6 text-muted-foreground">
+        Chưa có thói quen nào. Thêm một việc nhỏ mà bạn muốn lặp lại hôm nay.
+      </p>
+    );
   }
 
   return (
-    <div className="space-y-2">
+    <div className="bg-background/50 divide-y divide-border rounded-lg border border-border">
       {habits.map(({ habit, completed, streak }) => (
         <button
           key={habit.id}
@@ -58,12 +76,18 @@ export function TodayHabitList({ initialHabits, date }: TodayHabitListProps) {
           aria-pressed={completed}
           disabled={pendingIds.has(habit.id)}
           onClick={() => toggleHabit(habit.id)}
-          className={`flex w-full items-center gap-3 rounded-lg px-3 py-3 text-left transition-colors disabled:opacity-60 ${
-            completed ? 'bg-success/10 text-foreground' : 'bg-background hover:bg-muted'
+          className={`flex w-full items-center gap-3 px-3.5 py-3.5 text-left transition-colors disabled:opacity-60 ${
+            completed ? 'bg-success/10 text-foreground' : 'hover:bg-muted/70'
           }`}
         >
-          <span className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full border ${completed ? 'border-success bg-success text-white' : 'border-border text-muted-foreground'}`}>
-            {completed ? <Check className="h-4 w-4" strokeWidth={2.5} aria-hidden="true" /> : <Circle className="h-3 w-3" aria-hidden="true" />}
+          <span
+            className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full border ${completed ? 'border-success bg-success text-white' : 'border-border text-muted-foreground'}`}
+          >
+            {completed ? (
+              <Check className="h-4 w-4" strokeWidth={2.5} aria-hidden="true" />
+            ) : (
+              <Circle className="h-3 w-3" aria-hidden="true" />
+            )}
           </span>
           <span className="min-w-0 flex-1 truncate text-sm font-medium">{habit.name}</span>
           {streak > 0 && (
