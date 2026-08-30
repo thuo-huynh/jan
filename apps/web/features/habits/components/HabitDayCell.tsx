@@ -47,22 +47,20 @@ export function HabitDayCell({
   }, [completed]);
 
   return (
-    <td className={`p-0.5 text-center ${isWeekend ? 'bg-muted/60' : ''}`}>
-      <button
-        type="button"
-        role="checkbox"
-        aria-checked={completed}
-        aria-label={`${habitName} — ngày ${day}${completed ? ', đã hoàn thành' : ', chưa hoàn thành'}`}
-        disabled={disabled}
-        onClick={onToggle}
-        className={`h-7 w-7 rounded border transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
-          completed
-            ? 'border-primary bg-primary text-primary-foreground'
-            : 'border-border bg-background hover:bg-muted'
-        } ${isToday ? 'ring-2 ring-primary/50 ring-offset-1 ring-offset-card' : ''} ${justCompleted ? 'animate-habit-pop' : ''}`}
-      >
-        {completed && <Check className="mx-auto h-4 w-4" strokeWidth={2.5} aria-hidden="true" />}
-      </button>
-    </td>
+    <button
+      type="button"
+      role="checkbox"
+      aria-checked={completed}
+      aria-label={`${habitName}, ngày ${day}${completed ? ', đã hoàn thành' : ', chưa hoàn thành'}`}
+      disabled={disabled}
+      onClick={onToggle}
+      className={`mx-auto flex h-9 w-9 items-center justify-center rounded-xl border transition-[transform,colors,box-shadow] active:translate-y-px disabled:cursor-not-allowed disabled:opacity-50 ${
+        completed
+          ? 'border-primary bg-primary text-primary-foreground shadow-sm'
+          : 'border-border bg-background text-transparent hover:border-primary hover:bg-primary/5'
+      } ${isToday ? 'ring-2 ring-primary/50 ring-offset-2 ring-offset-card' : ''} ${justCompleted ? 'animate-habit-pop' : ''}`}
+    >
+      {completed && <Check className="h-4 w-4" strokeWidth={2.5} aria-hidden="true" />}
+    </button>
   );
 }

@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState, type CSSProperties } from 'react';
+import { useEffect, useMemo, useState, type CSSProperties } from 'react';
 import { CalendarDays, CalendarRange, Flame, Sparkles, Trophy } from 'lucide-react';
 import { createClient } from '@/shared/supabase/client';
 import { HabitRow } from './HabitRow';
@@ -8,7 +8,7 @@ import { AddHabitForm } from './AddHabitForm';
 import { MonthNav } from './MonthNav';
 import { TodayChecklist } from './TodayChecklist';
 import { CelebrationBanner, type CelebrationMessage } from './CelebrationBanner';
-import { todayIso, weekdayInitial, isWeekend } from '../lib/calendar';
+import { todayIso, weekdayInitial } from '../lib/calendar';
 import { computeHabitStreak, crossedMilestone } from '../lib/streak';
 import type { IsoDate } from '../lib/streak';
 import type { Habit, HabitCompletion } from '../types';
@@ -57,6 +57,18 @@ export function HabitGridManager({ year, month, days, initialHabits, initialComp
   }
 
   const isCurrentMonthView = days.includes(today);
+  const weeks = useMemo(
+    () => Array.from({ length: Math.ceil(days.length / 7) }, (_, index) => days.slice(index * 7, index * 7 + 7)),
+    [days],
+  );
+  const currentWeekIndex = Math.max(0, weeks.findIndex((week) => week.includes(today)));
+  const [selectedWeekIndex, setSelectedWeekIndex] = useState(isCurrentMonthView ? currentWeekIndex : weeks.length - 1);
+
+  useEffect(() => {
+    setSelectedWeekIndex(isCurrentMonthView ? currentWeekIndex : weeks.length - 1);
+  }, [currentWeekIndex, isCurrentMonthView, weeks.length]);
+
+  const selectedWeek = weeks[selectedWeekIndex] ?? weeks[0] ?? [];
 
   const streakByHabit = useMemo(() => {
     const map = new Map<string, number>();
@@ -294,58 +306,61 @@ export function HabitGridManager({ year, month, days, initialHabits, initialComp
             <AddHabitForm onCreated={handleCreated} />
           </div>
 
-          <section className="habit-calendar overflow-x-auto">
-            <div className="flex items-center justify-between gap-4 border-b border-border px-5 py-4">
+          <section className="habit-calendar">
+            <div className="flex flex-wrap items-center justify-between gap-4 border-b border-border px-5 py-4">
               <div>
-                <h2 className="font-semibold text-foreground">Lịch thói quen</h2>
-                <p className="mt-1 text-sm text-muted-foreground">Tích vào một ngày để bổ sung hoặc điều chỉnh lịch đã qua.</p>
+                <h2 className="font-semibold text-foreground">Theo dõi theo tuần</h2>
+                <p className="mt-1 text-sm text-muted-foreground">Mỗi chấm là một ngày bạn đã giữ lời hứa với mình.</p>
+              </div>
+              <span className="rounded-full bg-primary/10 px-3 py-1.5 text-sm font-semibold text-primary">
+                {selectedWeek[0] && selectedWeek[selectedWeek.length - 1]
+                  ? `${Number(selectedWeek[0].slice(-2))}-${Number(selectedWeek[selectedWeek.length - 1].slice(-2))} tháng ${month}`
+                  : ''}
+              </span>
+            </div>
+            <div className="flex gap-2 overflow-x-auto px-5 py-4">
+              {weeks.map((week, index) => (
+                <button
+                  key={week[0]}
+                  type="button"
+                  onClick={() => setSelectedWeekIndex(index)}
+                  className={`shrink-0 rounded-xl px-3 py-2 text-sm font-semibold transition-colors ${
+                    selectedWeekIndex === index
+                      ? 'bg-primary text-primary-foreground shadow-sm'
+                      : 'bg-muted text-muted-foreground hover:bg-primary/10 hover:text-primary'
+                  }`}
+                >
+                  Tuần {index + 1}
+                </button>
+              ))}
+            </div>
+            <div className="overflow-x-auto px-3 pb-3 sm:px-5 sm:pb-5">
+              <div className="habit-week-board min-w-[44rem]">
+                <div className="habit-week-head">
+                  <span className="habit-week-label">Thói quen</span>
+                  {selectedWeek.map((date) => (
+                    <span key={date} className={date === today ? 'text-primary' : undefined}>
+                      <small>{weekdayInitial(date)}</small>
+                      <strong>{Number(date.slice(-2))}</strong>
+                    </span>
+                  ))}
+                  <span className="habit-week-summary">Nhịp tuần</span>
+                </div>
+                {habits.map((habit) => (
+                  <HabitRow
+                    key={habit.id}
+                    habitName={habit.name}
+                    days={selectedWeek}
+                    completedDates={Array.from(completionsByHabit.get(habit.id) ?? [])}
+                    todayIso={today}
+                    onRename={(name) => handleRename(habit.id, name)}
+                    pendingDates={pendingByHabit.get(habit.id) ?? new Set()}
+                    onToggleDay={(date) => handleToggleDay(habit.id, date)}
+                    onDelete={() => handleDelete(habit.id)}
+                  />
+                ))}
               </div>
             </div>
-            <table className="border-collapse text-sm">
-            <thead>
-              <tr className="border-b border-border bg-muted text-muted-foreground">
-                <th
-                  rowSpan={2}
-                  className="sticky left-0 z-10 border-r border-border bg-muted px-2 py-1.5 text-left align-bottom font-medium"
-                >
-                  Thói quen
-                </th>
-                {days.map((date) => (
-                  <th
-                    key={date}
-                    className={`w-7 px-0.5 pt-1.5 text-center text-[10px] font-normal ${isWeekend(date) ? 'bg-muted/60' : ''}`}
-                  >
-                    {weekdayInitial(date)}
-                  </th>
-                ))}
-              </tr>
-              <tr className="border-b border-border bg-muted text-muted-foreground">
-                {days.map((date) => (
-                  <th
-                    key={date}
-                    className={`w-7 px-0.5 pb-1.5 text-center font-medium ${date === today ? 'text-primary' : ''} ${isWeekend(date) ? 'bg-muted/60' : ''}`}
-                  >
-                    {Number(date.slice(-2))}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border">
-              {habits.map((habit) => (
-                <HabitRow
-                  key={habit.id}
-                  habitName={habit.name}
-                  days={days}
-                  completedDates={Array.from(completionsByHabit.get(habit.id) ?? [])}
-                  todayIso={today}
-                  onRename={(name) => handleRename(habit.id, name)}
-                  pendingDates={pendingByHabit.get(habit.id) ?? new Set()}
-                  onToggleDay={(date) => handleToggleDay(habit.id, date)}
-                  onDelete={() => handleDelete(habit.id)}
-                />
-              ))}
-            </tbody>
-            </table>
           </section>
         </>
       )}

@@ -9,11 +9,6 @@ import { computeHabitStreak, countCompletions } from '../lib/streak';
 import { isWeekend } from '../lib/calendar';
 import type { IsoDate } from '../lib/streak';
 
-/**
- * One habit's row in the grid: name (click to rename), a day-cell per
- * visible day (T009), per-habit streak indicator (T005, FR-008), and delete
- * action (T012 — confirms, cascades completions per FR-006).
- */
 interface HabitRowProps {
   habitName: string;
   days: IsoDate[];
@@ -36,33 +31,23 @@ export function HabitRow({
   onDelete,
 }: HabitRowProps) {
   const completedSet = new Set(completedDates);
+  const completedThisWeek = completedDates.filter((date) => days.includes(date));
   const streak = computeHabitStreak(completedDates, new Date(`${todayIso}T00:00:00`));
-  const count = countCompletions(completedDates);
-
+  const count = countCompletions(completedThisWeek);
   const [editing, setEditing] = useState(false);
   const [draftName, setDraftName] = useState(habitName);
   const inputRef = useRef<HTMLInputElement>(null);
   const { confirm, confirmDialog } = useConfirm();
 
-  function startEditing() {
-    setDraftName(habitName);
-    setEditing(true);
-    // Focus after the input mounts.
-    requestAnimationFrame(() => inputRef.current?.select());
-  }
-
   function commitRename() {
     const trimmed = draftName.trim();
     setEditing(false);
-    if (trimmed && trimmed !== habitName) {
-      onRename(trimmed);
-    }
+    if (trimmed && trimmed !== habitName) onRename(trimmed);
   }
 
   function handleNameKeyDown(event: KeyboardEvent<HTMLInputElement>) {
-    if (event.key === 'Enter') {
-      event.currentTarget.blur();
-    } else if (event.key === 'Escape') {
+    if (event.key === 'Enter') event.currentTarget.blur();
+    if (event.key === 'Escape') {
       setDraftName(habitName);
       setEditing(false);
     }
@@ -77,8 +62,8 @@ export function HabitRow({
   }
 
   return (
-    <tr>
-      <th scope="row" className="sticky left-0 z-10 bg-background px-2 py-1.5 text-left font-normal">
+    <div className="habit-week-row">
+      <div className="min-w-0 px-3 py-3 sm:px-4">
         {confirmDialog}
         <div className="flex items-center justify-between gap-2">
           <div className="min-w-0">
@@ -86,17 +71,21 @@ export function HabitRow({
               <input
                 ref={inputRef}
                 value={draftName}
-                onChange={(e) => setDraftName(e.target.value)}
+                onChange={(event) => setDraftName(event.target.value)}
                 onBlur={commitRename}
                 onKeyDown={handleNameKeyDown}
                 autoFocus
-                className="input-field h-7 w-40 px-2 py-0 text-sm font-medium"
+                className="input-field h-8 w-40 px-2 py-0 text-sm font-medium"
               />
             ) : (
               <button
                 type="button"
-                onClick={startEditing}
-                className="max-w-40 truncate rounded text-left text-sm font-medium text-foreground hover:text-primary sm:max-w-none"
+                onClick={() => {
+                  setDraftName(habitName);
+                  setEditing(true);
+                  requestAnimationFrame(() => inputRef.current?.select());
+                }}
+                className="max-w-40 truncate rounded text-left text-sm font-semibold text-foreground hover:text-primary sm:max-w-none"
                 title="Nhấn để đổi tên"
               >
                 {habitName}
@@ -109,45 +98,38 @@ export function HabitRow({
                   <span>ngày liên tiếp</span>
                 </>
               ) : (
-                `${count} lần trong tháng`
+                `${count} ngày trong tuần này`
               )}
             </p>
-            <div
-              className="mt-1 h-1 w-full max-w-40 overflow-hidden rounded-full bg-muted"
-              role="progressbar"
-              aria-label={`${habitName} — ${Math.round((count / days.length) * 100)}% trong tháng`}
-              aria-valuenow={Math.round((count / days.length) * 100)}
-              aria-valuemin={0}
-              aria-valuemax={100}
-            >
-              <div
-                className="h-full rounded-full bg-primary/60 transition-[width]"
-                style={{ width: `${days.length > 0 ? (count / days.length) * 100 : 0}%` }}
-              />
-            </div>
           </div>
           <button
             type="button"
             onClick={handleDelete}
             aria-label={`Xóa ${habitName}`}
-            className="flex h-7 w-7 shrink-0 items-center justify-center rounded text-muted-foreground transition-colors hover:bg-danger/10 hover:text-danger"
+            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-danger/10 hover:text-danger"
           >
             <Trash2 className="h-4 w-4" aria-hidden="true" />
           </button>
         </div>
-      </th>
+      </div>
       {days.map((date) => (
-        <HabitDayCell
-          key={date}
-          habitName={habitName}
-          date={date}
-          completed={completedSet.has(date)}
-          isToday={date === todayIso}
-          isWeekend={isWeekend(date)}
-          disabled={pendingDates.has(date)}
-          onToggle={() => onToggleDay(date)}
-        />
+        <div key={date} className="flex items-center justify-center border-t border-border py-3">
+          <HabitDayCell
+            habitName={habitName}
+            date={date}
+            completed={completedSet.has(date)}
+            isToday={date === todayIso}
+            isWeekend={isWeekend(date)}
+            disabled={pendingDates.has(date)}
+            onToggle={() => onToggleDay(date)}
+          />
+        </div>
       ))}
-    </tr>
+      <div className="habit-week-progress flex items-center justify-center gap-1.5 border-t border-border px-3 py-3" aria-label={`${count} trên ${days.length} ngày trong tuần`}>
+        {days.map((date) => (
+          <span key={date} className={`h-2 w-2 rounded-full ${completedSet.has(date) ? 'bg-primary' : 'bg-muted'}`} aria-hidden="true" />
+        ))}
+      </div>
+    </div>
   );
 }

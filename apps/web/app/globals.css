@@ -243,6 +243,31 @@ body {
   .habit-week-card { @apply p-5 sm:p-6; }
   .habit-today { background: linear-gradient(145deg, color-mix(in srgb, var(--primary) 8%, var(--card)), var(--card) 55%); }
   .habit-week-card { background: linear-gradient(145deg, color-mix(in srgb, var(--accent) 14%, var(--card)), var(--card) 68%); }
+  .habit-week-board {
+    display: grid;
+    grid-template-columns: minmax(12rem, 1.8fr) repeat(7, minmax(2.75rem, .6fr)) minmax(6.5rem, .9fr);
+  }
+  .habit-week-head,
+  .habit-week-row { display: contents; }
+  .habit-week-head > span {
+    display: flex;
+    min-height: 3.5rem;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: var(--muted-foreground);
+    font-size: .75rem;
+    font-weight: 600;
+  }
+  .habit-week-label,
+  .habit-week-summary { align-items: flex-start !important; padding-left: 1rem; }
+  .habit-week-summary,
+  .habit-week-progress { grid-column: 9; }
+  .habit-week-head small { font-size: .65rem; font-weight: 600; }
+  .habit-week-head strong { margin-top: .1rem; font-size: .9rem; }
+  .habit-week-row > * { border-top: 1px solid var(--border); }
+  .habit-week-row > button { align-self: center; }
+  .habit-week-row > div:last-child { align-self: stretch; }
 
   /*
    * Signature texture (DESIGN.md "Signature element"): a faint genkouyoushi
