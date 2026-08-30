@@ -57,10 +57,13 @@ export function HabitGridManager({ year, month, days, initialHabits, initialComp
   }
 
   const isCurrentMonthView = days.includes(today);
-  const weeks = useMemo(
-    () => Array.from({ length: Math.ceil(days.length / 7) }, (_, index) => days.slice(index * 7, index * 7 + 7)),
-    [days],
-  );
+  const weeks = useMemo(() => {
+    const chunks: IsoDate[][] = [];
+    for (let end = days.length; end > 0; end -= 7) {
+      chunks.unshift(days.slice(Math.max(0, end - 7), end));
+    }
+    return chunks;
+  }, [days]);
   const currentWeekIndex = Math.max(0, weeks.findIndex((week) => week.includes(today)));
   const [selectedWeekIndex, setSelectedWeekIndex] = useState(isCurrentMonthView ? currentWeekIndex : weeks.length - 1);
 
