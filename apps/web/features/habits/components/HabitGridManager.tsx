@@ -1,7 +1,7 @@
 'use client';
 
-import { useMemo, useState } from 'react';
-import { CalendarCheck, CalendarDays, ListChecks, Percent } from 'lucide-react';
+import { useMemo, useState, type CSSProperties } from 'react';
+import { CalendarDays, CalendarRange, Flame, Sparkles, Trophy } from 'lucide-react';
 import { createClient } from '@/shared/supabase/client';
 import { HabitRow } from './HabitRow';
 import { AddHabitForm } from './AddHabitForm';
@@ -86,6 +86,20 @@ export function HabitGridManager({ year, month, days, initialHabits, initialComp
   const pendingTodayHabitIds = useMemo(
     () => new Set(habits.filter((h) => pendingByHabit.get(h.id)?.has(today)).map((h) => h.id)),
     [habits, pendingByHabit, today],
+  );
+
+  const recentDays = useMemo(() => {
+    const visibleDays = isCurrentMonthView ? days.filter((date) => date <= today) : days;
+    return visibleDays.slice(-7).map((date) => ({
+      date,
+      completed: habits.filter((habit) => completionsByHabit.get(habit.id)?.has(date)).length,
+    }));
+  }, [completionsByHabit, days, habits, isCurrentMonthView, today]);
+
+  const bestStreak = Math.max(0, ...Array.from(streakByHabit.values()));
+  const completionRatio = habits.length > 0 ? Math.round((stats.doneToday / habits.length) * 100) : 0;
+  const monthLabel = new Intl.DateTimeFormat('vi-VN', { month: 'long', year: 'numeric' }).format(
+    new Date(year, month - 1, 1),
   );
 
   function handleCreated(habit: Habit) {
@@ -190,65 +204,104 @@ export function HabitGridManager({ year, month, days, initialHabits, initialComp
   }
 
   return (
-    <div className="space-y-4">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <MonthNav year={year} month={month} />
-        <AddHabitForm onCreated={handleCreated} />
-      </div>
+    <div className="space-y-6">
+      <section className="habits-hero">
+        <div className="relative z-10 max-w-xl">
+          <p className="inline-flex items-center gap-2 rounded-full bg-card/70 px-3 py-1 text-xs font-bold text-primary">
+            <Sparkles className="h-3.5 w-3.5" aria-hidden="true" /> Nhịp duy trì của bạn
+          </p>
+          <h1 className="mt-4 text-3xl font-bold tracking-[-0.045em] text-foreground sm:text-4xl">
+            Điều nhỏ nào bạn muốn giữ hôm nay?
+          </h1>
+          <p className="mt-3 text-sm leading-6 text-muted-foreground sm:text-base">
+            Mỗi lần tích là một lời hứa được giữ lại. Không cần hoàn hảo, chỉ cần quay lại.
+          </p>
+          <div className="mt-5 flex flex-wrap items-center gap-4 text-sm">
+            <span className="inline-flex items-center gap-1.5 font-semibold text-foreground">
+              <CalendarRange className="h-4 w-4 text-primary" aria-hidden="true" /> {monthLabel}
+            </span>
+            {bestStreak > 0 && (
+              <span className="inline-flex items-center gap-1.5 font-semibold text-primary">
+                <Flame className="h-4 w-4" aria-hidden="true" /> Chuỗi tốt nhất {bestStreak} ngày
+              </span>
+            )}
+          </div>
+        </div>
+        <div
+          className="habit-orbit relative z-10 shrink-0"
+          style={{ '--habit-progress': `${completionRatio * 3.6}deg` } as CSSProperties}
+          role="img"
+          aria-label={`Hoàn thành ${stats.doneToday} trên ${habits.length} thói quen hôm nay`}
+        >
+          <span className="text-2xl font-bold tracking-[-0.05em] text-foreground">{stats.doneToday}</span>
+          <span className="mt-0.5 text-xs font-medium text-muted-foreground">trên {habits.length}</span>
+          <span className="mt-1 text-[0.65rem] font-bold uppercase tracking-[0.12em] text-primary">hôm nay</span>
+        </div>
+      </section>
 
       <CelebrationBanner messages={celebrations} onDismiss={dismissCelebration} />
 
-      {habits.length > 0 && isCurrentMonthView && (
-        <TodayChecklist
-          habits={habits}
-          doneToday={doneTodaySet}
-          streakByHabit={streakByHabit}
-          pendingHabitIds={pendingTodayHabitIds}
-          onToggle={(habitId) => handleToggleDay(habitId, today)}
-        />
-      )}
-
-      {habits.length > 0 && (
-        <div className="grid grid-cols-3 gap-3">
-          <div className="card p-3 sm:p-4">
-            <div className="flex items-center gap-2 text-muted-foreground">
-              <ListChecks className="h-4 w-4" aria-hidden="true" />
-              <p className="text-xs sm:text-sm">Thói quen</p>
-            </div>
-            <p className="mt-1 text-xl font-semibold text-foreground sm:text-2xl">{habits.length}</p>
-          </div>
-          <div className="card p-3 sm:p-4">
-            <div className="flex items-center gap-2 text-muted-foreground">
-              <CalendarCheck className="h-4 w-4" aria-hidden="true" />
-              <p className="text-xs sm:text-sm">Hoàn thành hôm nay</p>
-            </div>
-            <p className="mt-1 text-xl font-semibold text-foreground sm:text-2xl">
-              {stats.doneToday}
-              <span className="text-sm font-normal text-muted-foreground">/{habits.length}</span>
-            </p>
-          </div>
-          <div className="card p-3 sm:p-4">
-            <div className="flex items-center gap-2 text-muted-foreground">
-              <Percent className="h-4 w-4" aria-hidden="true" />
-              <p className="text-xs sm:text-sm">Tháng này</p>
-            </div>
-            <p className="mt-1 text-xl font-semibold text-foreground sm:text-2xl">{stats.completionRate}%</p>
-          </div>
-        </div>
-      )}
-
       {habits.length === 0 ? (
-        <div className="flex flex-col items-center gap-3 rounded-lg border border-dashed border-border p-10 text-center">
+        <div className="flex flex-col items-center gap-3 rounded-2xl border border-dashed border-border bg-card/80 p-10 text-center shadow-sm">
           <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
             <CalendarDays className="h-6 w-6 text-primary" aria-hidden="true" />
           </div>
           <p className="max-w-xs text-sm text-muted-foreground">
             Chưa có thói quen nào. Thêm thói quen đầu tiên ở trên và bắt đầu tích ngày.
           </p>
+          <AddHabitForm onCreated={handleCreated} />
         </div>
       ) : (
-        <div className="overflow-x-auto rounded-lg border border-border">
-          <table className="border-collapse text-sm">
+        <>
+          <div className="grid gap-5 xl:grid-cols-[minmax(0,1.3fr)_minmax(19rem,.7fr)]">
+            {isCurrentMonthView && (
+              <TodayChecklist
+                habits={habits}
+                doneToday={doneTodaySet}
+                streakByHabit={streakByHabit}
+                pendingHabitIds={pendingTodayHabitIds}
+                onToggle={(habitId) => handleToggleDay(habitId, today)}
+              />
+            )}
+            <section className="habit-week-card">
+              <div className="flex items-center gap-2">
+                <Trophy className="h-4 w-4 text-primary" aria-hidden="true" />
+                <h2 className="font-semibold text-foreground">Bảy ngày gần đây</h2>
+              </div>
+              <p className="mt-1 text-sm text-muted-foreground">Mỗi ô là số thói quen bạn đã hoàn thành.</p>
+              <div className="mt-6 grid grid-cols-7 gap-2">
+                {recentDays.map((day) => {
+                  const height = habits.length ? Math.max(14, Math.round((day.completed / habits.length) * 100)) : 14;
+                  return (
+                    <div key={day.date} className="flex h-24 flex-col justify-end gap-2 text-center">
+                      <span className="text-xs font-bold text-primary">{day.completed || ''}</span>
+                      <div className="flex h-14 items-end rounded-xl bg-primary/10 px-1.5 pb-1.5">
+                        <div className="w-full rounded-lg bg-primary transition-[height]" style={{ height: `${height}%` }} />
+                      </div>
+                      <span className="text-[0.65rem] font-semibold text-muted-foreground">
+                        {new Intl.DateTimeFormat('vi-VN', { weekday: 'narrow' }).format(new Date(`${day.date}T00:00:00`))}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+              <p className="mt-5 text-sm font-semibold text-foreground">{stats.completionRate}% nhịp duy trì trong tháng</p>
+            </section>
+          </div>
+
+          <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
+            <MonthNav year={year} month={month} />
+            <AddHabitForm onCreated={handleCreated} />
+          </div>
+
+          <section className="habit-calendar overflow-x-auto">
+            <div className="flex items-center justify-between gap-4 border-b border-border px-5 py-4">
+              <div>
+                <h2 className="font-semibold text-foreground">Lịch thói quen</h2>
+                <p className="mt-1 text-sm text-muted-foreground">Tích vào một ngày để bổ sung hoặc điều chỉnh lịch đã qua.</p>
+              </div>
+            </div>
+            <table className="border-collapse text-sm">
             <thead>
               <tr className="border-b border-border bg-muted text-muted-foreground">
                 <th
@@ -292,8 +345,9 @@ export function HabitGridManager({ year, month, days, initialHabits, initialComp
                 />
               ))}
             </tbody>
-          </table>
-        </div>
+            </table>
+          </section>
+        </>
       )}
     </div>
   );

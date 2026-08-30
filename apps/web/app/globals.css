@@ -207,6 +207,43 @@ body {
   :root.dark .learning-hero-mint { background: linear-gradient(120deg, #184b3a, #1d4354); }
   :root.dark .learning-hero-rose { background: linear-gradient(120deg, #562d43, #534020); }
 
+  .habits-hero {
+    @apply relative flex flex-col gap-6 overflow-hidden rounded-[1.5rem] border border-border px-5 py-6 shadow-sm sm:flex-row sm:items-center sm:justify-between sm:px-8 sm:py-8;
+    background:
+      radial-gradient(circle at 85% 22%, color-mix(in srgb, var(--accent) 30%, transparent), transparent 10rem),
+      linear-gradient(120deg, color-mix(in srgb, var(--primary) 18%, var(--card)), var(--card) 66%);
+  }
+  .habits-hero::after {
+    content: '';
+    position: absolute;
+    right: -5rem;
+    bottom: -6rem;
+    height: 16rem;
+    width: 16rem;
+    border-radius: 9999px;
+    border: 2rem solid color-mix(in srgb, var(--primary) 10%, transparent);
+  }
+  .habit-orbit {
+    display: flex;
+    height: 9rem;
+    width: 9rem;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border-radius: 9999px;
+    background: radial-gradient(closest-side, var(--card) 76%, transparent 77% 100%), conic-gradient(var(--primary) var(--habit-progress), color-mix(in srgb, var(--primary) 13%, transparent) 0);
+    box-shadow: 0 12px 30px -18px color-mix(in srgb, var(--primary) 60%, transparent);
+  }
+  .habit-today,
+  .habit-week-card,
+  .habit-calendar {
+    @apply rounded-2xl border border-border bg-card shadow-sm;
+  }
+  .habit-today,
+  .habit-week-card { @apply p-5 sm:p-6; }
+  .habit-today { background: linear-gradient(145deg, color-mix(in srgb, var(--primary) 8%, var(--card)), var(--card) 55%); }
+  .habit-week-card { background: linear-gradient(145deg, color-mix(in srgb, var(--accent) 14%, var(--card)), var(--card) 68%); }
+
   /*
    * Signature texture (DESIGN.md "Signature element"): a faint genkouyoushi
    * (原稿用紙) grid — the squared manuscript paper used to hand-practice

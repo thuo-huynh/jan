@@ -25,9 +25,12 @@ interface TodayChecklistProps {
 
 export function TodayChecklist({ habits, doneToday, streakByHabit, pendingHabitIds, onToggle }: TodayChecklistProps) {
   return (
-    <div className="card space-y-3">
-      <h2 className="text-sm font-semibold text-foreground">Hôm nay</h2>
-      <div className="flex flex-wrap gap-2">
+    <section className="habit-today space-y-4">
+      <div>
+        <h2 className="text-xl font-semibold tracking-tight text-foreground">Nghi thức hôm nay</h2>
+        <p className="mt-1 text-sm text-muted-foreground">Chạm vào một việc khi bạn đã hoàn thành.</p>
+      </div>
+      <div className="grid gap-2 sm:grid-cols-2">
         {habits.map((habit) => (
           <TodayPill
             key={habit.id}
@@ -39,7 +42,7 @@ export function TodayChecklist({ habits, doneToday, streakByHabit, pendingHabitI
           />
         ))}
       </div>
-    </div>
+    </section>
   );
 }
 
@@ -75,18 +78,18 @@ function TodayPill({
       onClick={onToggle}
       disabled={pending}
       aria-pressed={completed}
-      className={`flex items-center gap-2 rounded-full border px-3.5 py-2 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
+      className={`flex min-h-14 items-center gap-3 rounded-2xl border px-3.5 py-3 text-left text-sm font-semibold transition-[transform,colors,box-shadow] active:translate-y-px disabled:cursor-not-allowed disabled:opacity-50 ${
         completed
-          ? 'border-primary bg-primary text-primary-foreground'
-          : 'border-border bg-background text-foreground hover:bg-muted'
+          ? 'border-primary bg-primary text-primary-foreground shadow-sm'
+          : 'border-border bg-card text-foreground hover:border-primary/50 hover:shadow-sm'
       } ${justCompleted ? 'animate-habit-pop' : ''}`}
     >
       <span
-        className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-full border ${
+        className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full border ${
           completed ? 'border-primary-foreground/70' : 'border-muted-foreground'
         }`}
       >
-        {completed && <Check className="h-3 w-3" strokeWidth={3} aria-hidden="true" />}
+        {completed && <Check className="h-3.5 w-3.5" strokeWidth={3} aria-hidden="true" />}
       </span>
       {name}
       <StreakBadge streak={streak} variant={completed ? 'onFilled' : 'default'} className="text-xs" />

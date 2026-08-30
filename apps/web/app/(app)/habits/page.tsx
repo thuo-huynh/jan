@@ -40,15 +40,7 @@ export default async function HabitsPage({ searchParams }: HabitsPageProps) {
   ]);
 
   return (
-    <div className="space-y-8">
-      <div>
-        <h1 className="page-heading">Thói quen</h1>
-        <p className="page-intro">
-          Ghi lại những việc bạn muốn duy trì. Lịch chỉ là bức tranh tổng thể, hôm nay mới là điểm
-          bắt đầu.
-        </p>
-      </div>
-
+    <div>
       {habitsError ? (
         <p className="bg-danger/10 rounded-lg border border-danger px-3 py-2 text-sm text-danger">
           Không tải được thói quen: {habitsError.message}
