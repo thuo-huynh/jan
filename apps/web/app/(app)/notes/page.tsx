@@ -72,8 +72,7 @@ export default async function NotesPage({
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">Ghi chú</h1>
           <p className="mt-1.5 text-sm text-muted-foreground">
-            Ghi chú markdown tự do — sắp xếp theo thư mục/thẻ, ghim mục yêu thích, liên kết với
-            công việc hoặc từ vựng.
+            Ghi chú markdown cho việc học — sắp xếp theo thư mục/thẻ, ghim nội dung quan trọng và liên kết với từ vựng.
           </p>
         </div>
         <NewNoteButton />

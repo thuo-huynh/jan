@@ -5,8 +5,8 @@ import { createClient, getAuthedUser } from '@/shared/supabase/server';
 import { AppNav, type NavLinkItem } from '@/shared/components/AppNav';
 
 /**
- * Authenticated app shell: top nav (Boards / Learn / Habits / Settings /
- * Notes [/ Admin]) + sign-out. `middleware.ts` already redirects
+ * Authenticated app shell: focused daily-product nav plus sign-out.
+ * `middleware.ts` already redirects
  * unauthenticated requests away from this route group, but this layout also
  * re-checks server-side (defense in depth — never trust that middleware
  * alone gates access, per research.md §1) and reads the profile for
@@ -35,11 +35,12 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   }
 
   const navLinks: NavLinkItem[] = [
-    { href: '/boards', label: 'Bảng công việc' },
-    { href: '/learn/dashboard', label: 'Học tập' },
+    { href: '/learn/dashboard', label: 'Trang chủ' },
     { href: '/habits', label: 'Thói quen' },
+    { href: '/learn', label: 'Học' },
+    { href: '/library', label: 'Thư viện' },
+    { href: '/progress', label: 'Tiến độ' },
     { href: '/settings', label: 'Cài đặt' },
-    { href: '/notes', label: 'Ghi chú' },
     ...(profile?.role === 'admin' ? [{ href: '/admin/users', label: 'Quản trị' }] : []),
   ];
 
@@ -48,7 +49,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       <header className="sticky top-0 z-30 border-b border-border bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/80">
         <div className="relative mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-4">
           <div className="flex items-center gap-3 sm:gap-6">
-            <Link href="/boards" className="flex items-center gap-2 text-base font-bold tracking-tight text-foreground">
+            <Link href="/learn/dashboard" className="flex items-center gap-2 text-base font-bold tracking-tight text-foreground">
               <GraduationCap className="h-6 w-6 text-primary" aria-hidden="true" />
               JanGo
             </Link>

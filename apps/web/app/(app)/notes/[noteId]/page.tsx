@@ -27,9 +27,8 @@ export default async function NoteDetailPage({ params }: { params: { noteId: str
 
   const typedNote = note as Note;
 
-  const [{ data: folderRows }, { data: taskRows }, { data: vocabRows }] = await Promise.all([
+  const [{ data: folderRows }, { data: vocabRows }] = await Promise.all([
     supabase.from('notes').select('folder').not('folder', 'is', null),
-    supabase.from('tasks').select('id, title').order('created_at', { ascending: false }).limit(200),
     supabase
       .from('vocab_entries')
       .select('id, word, meaning')
@@ -49,21 +48,6 @@ export default async function NoteDetailPage({ params }: { params: { noteId: str
   // instead of a bare id, and flag the (normally-impossible-thanks-to-
   // ON-DELETE-SET-NULL, but still handled) case where the id is set but the
   // row it points to is gone.
-  let linkedTaskInfo: LinkedItemInfo | null = null;
-  let linkedTaskMissing = false;
-  if (typedNote.linked_task_id) {
-    const { data } = await supabase
-      .from('tasks')
-      .select('id, title')
-      .eq('id', typedNote.linked_task_id)
-      .maybeSingle();
-    if (data) {
-      linkedTaskInfo = { id: data.id, label: data.title || 'Công việc chưa đặt tên' };
-    } else {
-      linkedTaskMissing = true;
-    }
-  }
-
   let linkedVocabInfo: LinkedItemInfo | null = null;
   let linkedVocabMissing = false;
   if (typedNote.linked_vocab_id) {
@@ -83,11 +67,8 @@ export default async function NoteDetailPage({ params }: { params: { noteId: str
     <NoteEditor
       note={typedNote}
       folderOptions={folderOptions}
-      taskOptions={taskRows ?? []}
       vocabOptions={vocabRows ?? []}
-      linkedTaskInfo={linkedTaskInfo}
       linkedVocabInfo={linkedVocabInfo}
-      linkedTaskMissing={linkedTaskMissing}
       linkedVocabMissing={linkedVocabMissing}
     />
   );

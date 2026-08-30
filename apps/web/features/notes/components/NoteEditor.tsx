@@ -7,7 +7,7 @@ import { ArrowLeft, Trash2 } from 'lucide-react';
 import { createClient } from '@/shared/supabase/client';
 import { useConfirm } from '@/shared/hooks/useConfirm';
 import { noteSchema } from '@/shared/validation/schemas';
-import type { LinkedItemInfo, Note, TaskOption, VocabOption } from '../lib/types';
+import type { LinkedItemInfo, Note, VocabOption } from '../lib/types';
 import { FolderTagPicker } from './FolderTagPicker';
 import { NoteLinkPicker } from './NoteLinkPicker';
 import { MarkdownPreview } from './MarkdownPreview';
@@ -28,20 +28,14 @@ import { formatRelativeTime } from '../lib/utils';
 export function NoteEditor({
   note,
   folderOptions,
-  taskOptions,
   vocabOptions,
-  linkedTaskInfo,
   linkedVocabInfo,
-  linkedTaskMissing,
   linkedVocabMissing,
 }: {
   note: Note;
   folderOptions: string[];
-  taskOptions: TaskOption[];
   vocabOptions: VocabOption[];
-  linkedTaskInfo: LinkedItemInfo | null;
   linkedVocabInfo: LinkedItemInfo | null;
-  linkedTaskMissing: boolean;
   linkedVocabMissing: boolean;
 }) {
   const router = useRouter();
@@ -50,7 +44,6 @@ export function NoteEditor({
   const [bodyMarkdown, setBodyMarkdown] = useState(note.body_markdown);
   const [folder, setFolder] = useState<string | null>(note.folder);
   const [tags, setTags] = useState<string[]>(note.tags);
-  const [linkedTaskId, setLinkedTaskId] = useState<string | null>(note.linked_task_id);
   const [linkedVocabId, setLinkedVocabId] = useState<string | null>(note.linked_vocab_id);
   const [mode, setMode] = useState<'edit' | 'preview'>('edit');
   const [status, setStatus] = useState<'idle' | 'saved' | 'error'>('idle');
@@ -64,9 +57,8 @@ export function NoteEditor({
       bodyMarkdown !== note.body_markdown ||
       folder !== note.folder ||
       JSON.stringify(tags) !== JSON.stringify(note.tags) ||
-      linkedTaskId !== note.linked_task_id ||
       linkedVocabId !== note.linked_vocab_id,
-    [title, bodyMarkdown, folder, tags, linkedTaskId, linkedVocabId, note],
+    [title, bodyMarkdown, folder, tags, linkedVocabId, note],
   );
 
   function handleSave() {
@@ -75,7 +67,7 @@ export function NoteEditor({
       bodyMarkdown,
       folder,
       tags,
-      linkedTaskId,
+      linkedTaskId: null,
       linkedVocabId,
     });
 
@@ -94,7 +86,7 @@ export function NoteEditor({
           body_markdown: parsed.data.bodyMarkdown,
           folder: parsed.data.folder ?? null,
           tags: parsed.data.tags,
-          linked_task_id: parsed.data.linkedTaskId ?? null,
+          linked_task_id: null,
           linked_vocab_id: parsed.data.linkedVocabId ?? null,
         })
         .eq('id', note.id);
@@ -176,11 +168,8 @@ export function NoteEditor({
       />
 
       <NoteLinkPicker
-        taskOptions={taskOptions}
         vocabOptions={vocabOptions}
-        linkedTaskId={linkedTaskId}
         linkedVocabId={linkedVocabId}
-        onLinkedTaskChange={setLinkedTaskId}
         onLinkedVocabChange={setLinkedVocabId}
       />
 
@@ -192,19 +181,9 @@ export function NoteEditor({
         target was deleted between the note fetch and the link-target fetch
         server-side; in the steady state these banners simply don't render.
       */}
-      {linkedTaskMissing && (
-        <p className="rounded-lg border border-warning/30 bg-warning/10 px-3 py-2 text-sm text-warning">
-          Ghi chú này từng liên kết với một công việc hiện không còn tồn tại.
-        </p>
-      )}
       {linkedVocabMissing && (
         <p className="rounded-lg border border-warning/30 bg-warning/10 px-3 py-2 text-sm text-warning">
           Ghi chú này từng liên kết với một mục từ vựng/Hán tự hiện không còn tồn tại.
-        </p>
-      )}
-      {linkedTaskInfo && (
-        <p className="text-sm text-muted-foreground">
-          Công việc liên kết: <span className="font-medium text-foreground">{linkedTaskInfo.label}</span>
         </p>
       )}
       {linkedVocabInfo && (

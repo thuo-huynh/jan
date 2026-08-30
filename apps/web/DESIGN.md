@@ -5,10 +5,24 @@ learning tools (vocab/grammar SRS, reading/listening logs, mock tests, mistake n
 notes, habit tracker, settings, and the admin panel — should read as one product built from
 these tokens and component conventions, not a per-page reinvention.
 
-Style: clean, minimal productivity/dashboard UI with real elevation (cards actually lift off
-the page) and subtle micro-interactions (150–300ms color/opacity/shadow transitions, **no
-layout-shifting hover transforms** — important around the Kanban drag-and-drop surface). SVG
-icons only, one library (Lucide) — no emoji, no hand-rolled icon paths.
+Style: a calm personal learning companion: warm paper surfaces, soft vintage blue for primary
+actions, and deliberately small moments of encouragement. Keep the information hierarchy
+quiet and useful: today’s next action first, summaries second, history/detail last. Use
+subtle 150–300ms color/opacity/shadow transitions; never use layout-shifting hover transforms.
+SVG icons only, one library (Lucide) — no emoji or hand-rolled icon paths.
+
+## Current direction (2026-08, "Soft Vintage Blue")
+
+The primary experience is now **Habit tracker + Personal learning companion**. The default
+landing space for signed-in users is `/learn/dashboard`, with daily habits and the next study
+action above analytics. Keep primary navigation to six destinations: Trang chủ, Thói quen, Học,
+Thư viện, Tiến độ, and Cài đặt. Kanban remains available as a legacy route, but is no longer a
+primary product surface.
+
+Use the warm neutral background to make the app feel personal rather than corporate. Vintage
+blue is for focus and motion; the muted gold accent is reserved for a small positive highlight,
+not for warnings or competing calls to action. Avoid decorative Japanese motifs: JanGo should
+feel like a focused study journal, not a themed template.
 
 ## Why this palette v2 (2026-08, "Chàm & Son")
 
@@ -63,14 +77,14 @@ Tailwind in `tailwind.config.ts`. **Do not add new color roles without updating 
 
 | Role | Light | Dark | Use |
 |---|---|---|---|
-| `background` | `#F7F7FC` | `#0B0B1A` | page background |
-| `foreground` | `#16162B` | `#EDEDF7` | body text |
-| `card` | `#FFFFFF` | `#14142B` | cards, panels, modals, popovers |
-| `border` | `#DCDCEE` | `#23234A` | dividers, card/input borders |
-| `muted` / `muted-foreground` | `#EFEFF8` / `#5B5B7D` | `#1E1E3D` / `#9A9AC0` | secondary surfaces, helper text, disabled fills |
-| `primary` / `primary-foreground` | `#3B4A8C` / `#F5F3FF` | `#8C97E3` / `#1E1B4B` | primary actions, active nav, focus ring, kanban accents |
-| `secondary` / `secondary-foreground` | `#0F766E` / `#F0FDFA` | `#2DD4BF` / `#042F2B` | supporting accent, secondary buttons |
-| `accent` / `accent-foreground` | `#C0392E` / `#FDF3F0` | `#F0836F` / `#3A0E0A` | hanko-stamp badge, CTA emphasis, due/urgent badges, exam countdown |
+| `background` | `#F5F3EE` | `#0B0B1A` | warm-paper page background |
+| `foreground` | `#30383F` | `#EDEDF7` | body text |
+| `card` | `#FBFAF7` | `#14142B` | cards, panels, modals, popovers |
+| `border` | `#DEDDD7` | `#23234A` | dividers, card/input borders |
+| `muted` / `muted-foreground` | `#E8E6DF` / `#65717A` | `#1E1E3D` / `#9A9AC0` | secondary surfaces, helper text, disabled fills |
+| `primary` / `primary-foreground` | `#6F8FAF` / `#1F303D` | `#8C97E3` / `#1E1B4B` | primary actions, active nav, focus ring |
+| `secondary` / `secondary-foreground` | `#A8BED1` / `#263944` | `#2DD4BF` / `#042F2B` | gentle emphasis and learning CTA |
+| `accent` / `accent-foreground` | `#C2A36B` / `#3E2C0E` | `#F0836F` / `#3A0E0A` | restrained positive highlight |
 | `success` | `#15803D` | `#4ADE80` | mastery/streak-met, positive states |
 | `warning` | `#C2410C` | `#FB923C` | due-soon, needs-attention |
 | `danger` | `#DC2626` | `#F87171` | overdue/mistake, destructive actions, errors |

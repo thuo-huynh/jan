@@ -21,7 +21,7 @@ export function computeHabitStreak(completionDates: IsoDate[], asOf: Date = new 
   cursor.setHours(0, 0, 0, 0);
 
   for (;;) {
-    const key = cursor.toISOString().slice(0, 10);
+    const key = `${cursor.getFullYear()}-${String(cursor.getMonth() + 1).padStart(2, '0')}-${String(cursor.getDate()).padStart(2, '0')}`;
     if (!dates.has(key)) break;
     streak += 1;
     cursor.setDate(cursor.getDate() - 1);

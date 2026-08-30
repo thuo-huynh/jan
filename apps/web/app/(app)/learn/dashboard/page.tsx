@@ -1,231 +1,76 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
-import { ArrowRight, BookMarked, CalendarClock, Layers, Sparkles, Target } from 'lucide-react';
+import { ArrowRight, BookOpen, Brain, ChartNoAxesColumnIncreasing, Headphones, Library, Sparkles } from 'lucide-react';
 import { createClient, getAuthedUser } from '@/shared/supabase/server';
-import { loadDashboardData } from '@/features/dashboard/lib/aggregate';
-import { aggregateDailyActivity, fillTrailingDays } from '@/features/study-plan/lib/heatmap';
-import { StreakHeatmap } from '@/features/study-plan/components/StreakHeatmap';
-import { StudyTimeChart } from '@/features/study-plan/components/StudyTimeChart';
-import type { WeakAreaType } from '@/features/dashboard/lib/weak-areas';
-import { getStreakTier } from '@/features/habits/lib/streak';
+import { TodayHabitList } from '@/features/habits/components/TodayHabitList';
+import { loadHomeSummary } from '@/features/dashboard/lib/home';
 
-const TRAILING_DAYS = 371;
-
-const WEAK_AREA_ICON: Record<WeakAreaType, string> = {
-  reading_passage_type: '読',
-  grammar_confusable: '文',
-  listening: '聴',
-  vocab: '語',
-};
-
-function getGreeting(hour: number): string {
+function greeting(hour: number) {
   if (hour < 12) return 'Chào buổi sáng';
   if (hour < 18) return 'Chào buổi chiều';
   return 'Chào buổi tối';
 }
 
-function getMotivationalSubtitle(streak: number): string {
-  const tier = getStreakTier(streak);
-  if (streak === 0) return "Bắt đầu chuỗi ngày học hôm nay — mỗi lượt ôn tập đều có giá trị.";
-  if (tier) return `Chuỗi ${tier.label.toLowerCase()} — giữ vững phong độ nhé.`;
-  return 'Bạn đang tiến bộ đều — cứ tiếp tục như vậy.';
-}
-
-/**
- * Consolidated progress dashboard (T077) — mastery counters, heatmap
- * (T072), study-time chart (T073), weak-area summary (T076), exam
- * countdown (T064). Server Component; calls loadDashboardData directly
- * (same function GET /api/dashboard uses) plus the raw logs StreakHeatmap/
- * StudyTimeChart need for their own trailing-window rendering.
- *
- * Hero band uses `.grid-paper` + `.hanko-stamp` (DESIGN.md "Signature
- * element") — the genkouyoushi grid + ink-stamp streak badge are the app's
- * one deliberate visual signature, so they only appear here, not on every
- * card.
- */
 export default async function DashboardPage() {
   const supabase = createClient();
   const user = await getAuthedUser();
+  if (!user) redirect('/login');
 
-  if (!user) {
-    redirect('/login');
-  }
-
-  const sinceDate = new Date();
-  sinceDate.setDate(sinceDate.getDate() - TRAILING_DAYS);
-
-  const [dashboard, { data: reviewLogs }, { data: goals }, { data: readingLogs }, { data: listeningLogs }] =
-    await Promise.all([
-      loadDashboardData(supabase, user.id),
-      supabase
-        .from('review_logs')
-        .select('reviewed_at, vocab_id, grammar_id')
-        .eq('user_id', user.id)
-        .gte('reviewed_at', sinceDate.toISOString()),
-      supabase.from('study_goals').select('daily_grammar_target, daily_vocab_target').eq('user_id', user.id).maybeSingle(),
-      supabase.from('reading_logs').select('practiced_at, duration_min').eq('user_id', user.id),
-      supabase.from('listening_logs').select('practiced_at, duration_min').eq('user_id', user.id),
-    ]);
-
-  const activityByDay = aggregateDailyActivity(reviewLogs ?? [], {
-    dailyGrammarTarget: goals?.daily_grammar_target ?? 0,
-    dailyVocabTarget: goals?.daily_vocab_target ?? 0,
-  });
-  const days = fillTrailingDays(activityByDay, TRAILING_DAYS);
-
-  const sessions = [
-    ...(readingLogs ?? []).map((r: { practiced_at: string; duration_min: number }) => ({
-      practicedAt: r.practiced_at,
-      durationMin: r.duration_min,
-    })),
-    ...(listeningLogs ?? []).map((l: { practiced_at: string; duration_min: number }) => ({
-      practicedAt: l.practiced_at,
-      durationMin: l.duration_min,
-    })),
-  ];
-
-  const accuracyLow = dashboard.reviewAccuracy !== null && dashboard.reviewAccuracy < 0.7;
-  const stats = [
-    {
-      key: 'grammar',
-      label: 'Ngữ pháp đã thuộc',
-      value: `${dashboard.grammar.mastered} / ${dashboard.grammar.total}`,
-      href: '/learn/grammar',
-      icon: BookMarked,
-      iconClass: 'bg-primary/10 text-primary',
-    },
-    {
-      key: 'vocab',
-      label: 'Từ vựng & Hán tự đã học',
-      value: String(dashboard.vocabKanjiLearned),
-      href: '/learn/vocab',
-      icon: Layers,
-      iconClass: 'bg-secondary/10 text-secondary',
-    },
-    {
-      key: 'accuracy',
-      label: 'Độ chính xác ôn tập',
-      value: dashboard.reviewAccuracy === null ? '—' : `${Math.round(dashboard.reviewAccuracy * 100)}%`,
-      href: '/learn/review',
-      icon: Target,
-      iconClass: accuracyLow ? 'bg-warning/10 text-warning' : 'bg-success/10 text-success',
-    },
-  ];
-
-  const streakTier = getStreakTier(dashboard.currentStreak);
-  const formattedDate = new Intl.DateTimeFormat('vi-VN', {
-    weekday: 'long',
-    day: 'numeric',
-    month: 'long',
-  }).format(new Date());
+  const summary = await loadHomeSummary(supabase, user.id);
+  const date = new Intl.DateTimeFormat('vi-VN', { weekday: 'long', day: 'numeric', month: 'long' }).format(new Date());
+  const totalMinutes = summary.readingMinutes + summary.listeningMinutes;
+  const highestActivity = Math.max(1, ...summary.weeklyActivity.map((day) => day.minutes + day.reviews * 5));
 
   return (
-    <div className="space-y-6">
-      <div className="grid-paper relative overflow-hidden rounded-lg border border-border bg-card p-5 sm:p-8">
-        <div className="flex flex-wrap items-center justify-between gap-6">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{formattedDate}</p>
-            <h1 className="mt-1 text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
-              {getGreeting(new Date().getHours())}
-            </h1>
-            <p className="mt-1.5 text-sm text-muted-foreground">{getMotivationalSubtitle(dashboard.currentStreak)}</p>
+    <div className="space-y-8">
+      <section className="relative overflow-hidden rounded-xl bg-primary px-5 py-6 text-primary-foreground shadow-sm sm:px-8 sm:py-8">
+        <div className="relative max-w-2xl">
+          <p className="text-sm font-medium text-primary-foreground/75">{date}</p>
+          <h1 className="mt-2 text-3xl font-bold tracking-tight sm:text-4xl">{greeting(new Date().getHours())}</h1>
+          <p className="mt-2 text-sm leading-6 text-primary-foreground/85">Một bước nhỏ hôm nay cũng nuôi dưỡng nhịp học của bạn.</p>
+          <div className="mt-5 flex flex-wrap gap-3 text-sm">
+            <span className="rounded-full bg-primary-foreground/15 px-3 py-1.5">{summary.habits.completedToday}/{summary.habits.totalHabits} thói quen hôm nay</span>
+            {summary.habits.currentStreak > 0 && <span className="rounded-full bg-primary-foreground/15 px-3 py-1.5">Chuỗi {summary.habits.currentStreak} ngày</span>}
           </div>
-          {dashboard.currentStreak > 0 && (
-            <div className="flex flex-col items-center gap-1.5">
-              <div className="hanko-stamp">
-                <span className="text-xl font-extrabold">{dashboard.currentStreak}</span>
-                <span className="text-[9px] font-bold uppercase tracking-wide">ngày</span>
-              </div>
-              {streakTier && <span className="text-xs font-semibold text-muted-foreground">{streakTier.label}</span>}
-            </div>
-          )}
         </div>
+        <Sparkles className="absolute bottom-5 right-5 h-16 w-16 text-primary-foreground/15 sm:h-24 sm:w-24" strokeWidth={1.25} aria-hidden="true" />
+      </section>
+
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,1.2fr)_minmax(17rem,.8fr)]">
+        <section className="card p-5 sm:p-6">
+          <div className="mb-4 flex items-start justify-between gap-4"><div><h2 className="text-lg font-semibold tracking-tight text-foreground">Thói quen hôm nay</h2><p className="mt-1 text-sm text-muted-foreground">Giữ nhịp với những việc nhỏ bạn đã chọn.</p></div><Link href="/habits" className="btn-ghost h-9 px-2 text-sm">Xem lịch</Link></div>
+          <TodayHabitList initialHabits={summary.habits.todayHabits} date={summary.habits.today} />
+        </section>
+        <section className="rounded-xl bg-secondary p-5 text-secondary-foreground shadow-sm sm:p-6">
+          <Brain className="h-6 w-6" strokeWidth={1.75} aria-hidden="true" />
+          <h2 className="mt-5 text-xl font-semibold tracking-tight">Tiếp tục học</h2>
+          <p className="mt-2 text-sm leading-6 text-secondary-foreground/80">{summary.dueReviews > 0 ? `${summary.dueReviews} mục đang chờ bạn ôn lại.` : 'Không có mục cần ôn. Hãy chọn một bộ tài liệu để tiếp tục.'}</p>
+          <Link href={summary.dueReviews > 0 ? '/learn/review' : '/learn/vocab'} className="mt-5 inline-flex items-center gap-2 rounded bg-secondary-foreground px-3.5 py-2.5 text-sm font-semibold text-secondary transition-opacity hover:opacity-90">{summary.dueReviews > 0 ? 'Bắt đầu ôn tập' : 'Khám phá bài học'}<ArrowRight className="h-4 w-4" aria-hidden="true" /></Link>
+        </section>
       </div>
 
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-        {stats.map((stat) => {
-          const Icon = stat.icon;
-          return (
-            <Link key={stat.key} href={stat.href} className="card-interactive p-4">
-              <span className={`inline-flex h-8 w-8 items-center justify-center rounded-full ${stat.iconClass}`}>
-                <Icon className="h-4 w-4" aria-hidden="true" />
-              </span>
-              <p className="mt-2.5 text-xs text-muted-foreground">{stat.label}</p>
-              <p className="mt-0.5 text-3xl font-bold tracking-tight text-foreground">{stat.value}</p>
-            </Link>
-          );
-        })}
+      <section>
+        <div className="mb-4"><h2 className="text-lg font-semibold tracking-tight text-foreground">Tổng quan học tập</h2><p className="mt-1 text-sm text-muted-foreground">Các con số được lấy từ tiến độ học thực tế.</p></div>
+        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+          <Metric href="/learn/grammar" icon={BookOpen} label="Ngữ pháp đã thuộc" value={summary.grammarMastered} />
+          <Metric href="/learn/vocab" icon={Library} label="Từ vựng đã học" value={summary.vocabLearned} />
+          <Metric href="/learn/reading" icon={BookOpen} label="Phút đọc tuần này" value={summary.readingMinutes} />
+          <Metric href="/learn/listening" icon={Headphones} label="Phút nghe tuần này" value={summary.listeningMinutes} />
+        </div>
+      </section>
+
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,1.2fr)_minmax(17rem,.8fr)]">
+        <section className="card p-5 sm:p-6"><div className="flex items-start justify-between gap-4"><div><h2 className="text-lg font-semibold tracking-tight text-foreground">Hoạt động tuần này</h2><p className="mt-1 text-sm text-muted-foreground">{totalMinutes} phút đọc và nghe trong 7 ngày gần đây.</p></div><ChartNoAxesColumnIncreasing className="h-5 w-5 text-primary" aria-hidden="true" /></div><div className="mt-6 grid h-32 grid-cols-7 items-end gap-2">{summary.weeklyActivity.map((day) => { const value = day.minutes + day.reviews * 5; const height = value === 0 ? 6 : Math.max(14, Math.round((value / highestActivity) * 100)); return <div key={day.date} className="flex h-full flex-col justify-end gap-2 text-center"><div className="rounded-t bg-primary/75 transition-colors hover:bg-primary" style={{ height: `${height}%` }} title={`${day.minutes} phút, ${day.reviews} lượt ôn`} /><span className="text-xs text-muted-foreground">{day.label}</span></div>; })}</div></section>
+        <section className="card p-5 sm:p-6"><h2 className="text-lg font-semibold tracking-tight text-foreground">Độ đều đặn</h2><p className="mt-1 text-sm text-muted-foreground">Tập trung vào nhịp duy trì, không phải áp lực hoàn hảo.</p><div className="mt-6 space-y-4"><Consistency label="Hoàn thành tuần này" value={`${summary.habits.weeklyCompletionRate}%`} /><Consistency label="Chuỗi hiện tại" value={`${summary.habits.currentStreak} ngày`} /><Consistency label="Chuỗi tốt nhất gần đây" value={`${summary.habits.longestStreak} ngày`} /></div></section>
       </div>
-
-      <div className="card p-4">
-        <h2 className="mb-2 flex items-center gap-1.5 text-sm font-semibold tracking-tight text-foreground">
-          <CalendarClock className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
-          Đếm ngược kỳ thi
-        </h2>
-        {dashboard.examCountdownDays === null ? (
-          <p className="text-sm text-muted-foreground">
-            Đặt ngày thi trong{' '}
-            <a href="/learn/mock-tests" className="font-medium text-primary hover:opacity-80">
-              trang đề thi thử
-            </a>{' '}
-            để xem đếm ngược.
-          </p>
-        ) : (
-          <div className="flex flex-wrap items-baseline gap-2">
-            <span
-              className={`text-3xl font-bold tracking-tight ${
-                dashboard.examCountdownDays <= 14 ? 'text-accent' : 'text-foreground'
-              }`}
-            >
-              {dashboard.examCountdownDays}
-            </span>
-            <span className="text-sm text-muted-foreground">ngày nữa đến kỳ thi</span>
-            {dashboard.examCountdownDays <= 14 && (
-              <span className="badge-accent">
-                {dashboard.examCountdownDays <= 3 ? 'Ngay tuần này!' : 'Nước rút!'}
-              </span>
-            )}
-          </div>
-        )}
-      </div>
-
-      <div className="card p-4">
-        <h2 className="mb-3 text-sm font-semibold tracking-tight text-foreground">Điểm cần cải thiện</h2>
-        {dashboard.weakAreas.length === 0 ? (
-          <div className="flex items-center gap-2.5 py-1 text-sm text-muted-foreground">
-            <Sparkles className="h-4 w-4 shrink-0 text-success" aria-hidden="true" />
-            Chưa có điểm yếu nào — cứ tiếp tục ôn tập, hệ thống sẽ gợi ý ở đây.
-          </div>
-        ) : (
-          <ul className="space-y-1">
-            {dashboard.weakAreas.map((area, i) => (
-              <li key={`${area.type}-${area.label}`}>
-                <Link
-                  href={area.href}
-                  className="flex items-center justify-between gap-2 rounded px-1.5 py-1.5 text-sm transition-colors hover:bg-muted"
-                >
-                  <span className="flex min-w-0 items-center gap-2 text-foreground">
-                    <span className="font-jp text-xs text-muted-foreground">{WEAK_AREA_ICON[area.type]}</span>
-                    <span className="truncate">{area.label}</span>
-                    {i === 0 && <span className="badge-warning shrink-0">Cần chú ý</span>}
-                  </span>
-                  <span className="flex shrink-0 items-center gap-2">
-                    <span className="text-muted-foreground">{Math.round(area.score * 100)}%</span>
-                    <span className="flex items-center gap-0.5 text-xs font-medium text-primary">
-                      Ôn ngay
-                      <ArrowRight className="h-3 w-3" aria-hidden="true" />
-                    </span>
-                  </span>
-                </Link>
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
-
-      <StreakHeatmap days={days} />
-
-      <StudyTimeChart sessions={sessions} />
     </div>
   );
+}
+
+function Metric({ href, icon: Icon, label, value }: { href: string; icon: typeof BookOpen; label: string; value: number }) {
+  return <Link href={href} className="card-interactive p-4"><Icon className="h-5 w-5 text-primary" strokeWidth={1.75} aria-hidden="true" /><p className="mt-4 text-2xl font-semibold tracking-tight text-foreground">{value}</p><p className="mt-1 text-sm text-muted-foreground">{label}</p></Link>;
+}
+
+function Consistency({ label, value }: { label: string; value: string }) {
+  return <div className="flex items-baseline justify-between gap-4"><span className="text-sm text-muted-foreground">{label}</span><span className="text-lg font-semibold text-foreground">{value}</span></div>;
 }

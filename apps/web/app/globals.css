@@ -3,44 +3,37 @@
 @tailwind utilities;
 
 /*
- * Palette: "Chàm & Son" (indigo & vermillion) — aizome indigo (primary),
- * bamboo teal (secondary), shuiro vermillion (accent), replacing the "Japan
- * Blue" indigo/sky/amber pass (see DESIGN.md "Why this palette v2"). Indigo
- * stays the anchor hue (still real: aizome dyeing), but is now inkier/more
- * muted, and amber is replaced by a hanko-stamp red — the app's one
- * signature accent, reserved for the `.hanko-stamp` badge and genuinely
- * urgent CTAs, not decorative use. background/foreground/card/border/muted
- * are unchanged (shared across all theme-picker presets, not part of this
- * pass). Every pair below is WCAG AA-verified (>= 4.5:1 text pairs) — see
- * DESIGN.md for the full contrast table.
+ * Soft vintage blue: dusty blue and warm paper surfaces make the primary
+ * light theme feel like a personal study journal. The semantic names stay
+ * stable because persisted theme preferences override these variables.
  */
 :root {
-  --background: #f7f7fc;
-  --foreground: #16162b;
-  --card: #ffffff;
-  --border: #dcdcee;
-  --muted: #efeff8;
-  --muted-foreground: #5b5b7d;
+  --background: #f5f3ee;
+  --foreground: #30383f;
+  --card: #fbfaf7;
+  --border: #deddd7;
+  --muted: #e8e6df;
+  --muted-foreground: #65717a;
 
-  --primary: #3b4a8c;
-  --primary-foreground: #f5f3ff;
-  --secondary: #0f766e;
-  --secondary-foreground: #f0fdfa;
-  --accent: #c0392e;
-  --accent-foreground: #fdf3f0;
+  --primary: #6f8faf;
+  --primary-foreground: #1f303d;
+  --secondary: #a8bed1;
+  --secondary-foreground: #263944;
+  --accent: #c2a36b;
+  --accent-foreground: #3d3421;
 
-  --success: #15803d;
-  --warning: #c2410c;
-  --danger: #dc2626;
+  --success: #7e9f83;
+  --warning: #c7a66a;
+  --danger: #b97972;
 
   /* SRS review grading (Again/Hard/Good/Easy) — deliberately mirrors
      danger/warning/primary 1:1 (Again=danger, Hard=warning, Good=primary) so
      grading never invents a second meaning for the same hue; Easy gets its
      own blue since nothing else claims that slot. */
-  --srs-again: #dc2626;
-  --srs-hard: #c2410c;
-  --srs-good: #3b4a8c;
-  --srs-easy: #2563eb;
+  --srs-again: #b97972;
+  --srs-hard: #c7a66a;
+  --srs-good: #6f8faf;
+  --srs-easy: #7895b2;
 }
 
 /*

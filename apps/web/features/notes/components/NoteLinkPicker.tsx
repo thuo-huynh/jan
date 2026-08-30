@@ -1,10 +1,10 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import type { TaskOption, VocabOption } from '../lib/types';
+import type { VocabOption } from '../lib/types';
 
 /**
- * Searchable single-select combobox used for both halves of NoteLinkPicker.
+ * Searchable single-select combobox for a vocabulary link.
  * Local-filters the option list already fetched server-side (T079's page
  * passes down the caller's own tasks + readable vocab entries) — no extra
  * client-side Supabase round trip needed for typeahead at this project's
@@ -91,39 +91,21 @@ function LinkSelect<T extends { id: string }>({
 }
 
 /**
- * Task/vocab link picker for a note (T083), writing `linked_task_id` /
- * `linked_vocab_id`.
- *
- * Deviation from tasks.md ("task/vocab/grammar link picker"): data-model.md's
- * `notes` table only defines `linked_task_id` and `linked_vocab_id` columns
- * (no `linked_grammar_id`) — see report. Only task + vocab linking is wired
- * up here, per data-model.md as the authoritative schema.
+ * Vocabulary link picker for a note. Task links are intentionally no longer
+ * part of the personal learning product; existing persisted task links remain
+ * harmless but are not exposed for editing.
  */
 export function NoteLinkPicker({
-  taskOptions,
   vocabOptions,
-  linkedTaskId,
   linkedVocabId,
-  onLinkedTaskChange,
   onLinkedVocabChange,
 }: {
-  taskOptions: TaskOption[];
   vocabOptions: VocabOption[];
-  linkedTaskId: string | null;
   linkedVocabId: string | null;
-  onLinkedTaskChange: (id: string | null) => void;
   onLinkedVocabChange: (id: string | null) => void;
 }) {
   return (
-    <div className="grid gap-3 sm:grid-cols-2">
-      <LinkSelect
-        label="Công việc liên kết"
-        options={taskOptions}
-        selectedId={linkedTaskId}
-        renderLabel={(t) => t.title || 'Công việc chưa đặt tên'}
-        onSelect={onLinkedTaskChange}
-        placeholder="Tìm công việc…"
-      />
+    <div>
       <LinkSelect
         label="Từ vựng / Hán tự liên kết"
         options={vocabOptions}
