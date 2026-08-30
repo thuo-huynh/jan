@@ -465,6 +465,8 @@ body {
   height: 100%;
   transition: transform 0.5s;
   transform-style: preserve-3d;
+  touch-action: pan-y;
+  user-select: none;
 }
 .flashcard-inner.is-flipped {
   transform: rotateY(180deg);

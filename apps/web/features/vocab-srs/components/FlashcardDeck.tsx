@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { type PointerEvent, useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import { CheckCircle2, ChevronLeft, ChevronRight, RotateCcw, Shuffle } from 'lucide-react';
 
@@ -38,6 +38,8 @@ export function FlashcardDeck({ cards }: FlashcardDeckProps) {
   const [order, setOrder] = useState(() => cards.map((_, i) => i));
   const [position, setPosition] = useState(0);
   const [flipped, setFlipped] = useState(false);
+  const gestureStart = useRef<{ x: number; y: number } | null>(null);
+  const didSwipe = useRef(false);
 
   const done = position >= order.length;
   const current = done ? null : cards[order[position]];
@@ -57,6 +59,36 @@ export function FlashcardDeck({ cards }: FlashcardDeckProps) {
     setOrder(reshuffle ? shuffledIndices(cards.length) : cards.map((_, i) => i));
     setPosition(0);
     setFlipped(false);
+  }
+
+  function handlePointerDown(event: PointerEvent<HTMLDivElement>) {
+    if (event.pointerType === 'mouse' && event.button !== 0) return;
+    gestureStart.current = { x: event.clientX, y: event.clientY };
+    didSwipe.current = false;
+  }
+
+  function handlePointerUp(event: PointerEvent<HTMLDivElement>) {
+    const start = gestureStart.current;
+    gestureStart.current = null;
+    if (!start) return;
+
+    const deltaX = event.clientX - start.x;
+    const deltaY = event.clientY - start.y;
+    const isHorizontalSwipe = Math.abs(deltaX) >= 48 && Math.abs(deltaX) > Math.abs(deltaY);
+
+    if (!isHorizontalSwipe) return;
+
+    didSwipe.current = true;
+    if (deltaX < 0) goNext();
+    else goPrev();
+  }
+
+  function handleCardClick() {
+    if (didSwipe.current) {
+      didSwipe.current = false;
+      return;
+    }
+    setFlipped((value) => !value);
   }
 
   useEffect(() => {
@@ -137,10 +169,19 @@ export function FlashcardDeck({ cards }: FlashcardDeckProps) {
       <div className="flashcard-perspective h-64 sm:h-72">
         <div
           className={`flashcard-inner ${flipped ? 'is-flipped' : ''}`}
-          onClick={() => setFlipped((f) => !f)}
+          onClick={handleCardClick}
+          onPointerDown={handlePointerDown}
+          onPointerUp={handlePointerUp}
+          onPointerCancel={() => {
+            gestureStart.current = null;
+          }}
           role="button"
           tabIndex={0}
-          aria-label={flipped ? 'Đang hiện nghĩa — nhấn để lật lại' : 'Đang hiện từ — nhấn để xem nghĩa'}
+          aria-label={
+            flipped
+              ? 'Đang hiện nghĩa — nhấn để lật lại, vuốt ngang để chuyển thẻ'
+              : 'Đang hiện từ — nhấn để xem nghĩa, vuốt ngang để chuyển thẻ'
+          }
           onKeyDown={(e) => {
             if (e.key === ' ' || e.key === 'Enter') e.preventDefault();
           }}
@@ -148,7 +189,7 @@ export function FlashcardDeck({ cards }: FlashcardDeckProps) {
           <div className="flashcard-face card flex cursor-pointer flex-col items-center justify-center gap-2 p-6 text-center">
             <span className="badge-neutral">{current!.source === 'custom' ? 'tự thêm' : 'N2'}</span>
             <p className="font-jp text-4xl text-foreground">{current!.word}</p>
-            <p className="text-xs text-muted-foreground">Nhấn hoặc bấm phím Space để lật thẻ</p>
+            <p className="text-xs text-muted-foreground">Chạm để lật · vuốt ngang để chuyển thẻ</p>
           </div>
           <div className="flashcard-face flashcard-face-back card flex cursor-pointer flex-col items-center justify-center gap-2 p-6 text-center">
             {current!.reading && <p className="font-jp text-lg text-muted-foreground">{current!.reading}</p>}
