@@ -184,6 +184,28 @@ body {
     border-radius: 9999px;
     background: color-mix(in srgb, var(--primary) 10%, transparent);
   }
+  .learning-hero {
+    @apply relative overflow-hidden rounded-[1.5rem] border border-border px-5 py-6 shadow-sm sm:px-7;
+    color: var(--foreground);
+  }
+  .learning-hero::after {
+    content: '';
+    position: absolute;
+    right: -3rem;
+    top: -4rem;
+    height: 13rem;
+    width: 13rem;
+    border-radius: 9999px;
+    background: color-mix(in srgb, white 40%, transparent);
+  }
+  .learning-hero-blue { background: linear-gradient(120deg, #cce7ff, #d8f6f0); }
+  .learning-hero-violet { background: linear-gradient(120deg, #e8dbff, #f5ddf5); }
+  .learning-hero-mint { background: linear-gradient(120deg, #d0f5dd, #d6f1f8); }
+  .learning-hero-rose { background: linear-gradient(120deg, #ffe0e8, #ffe8c5); }
+  :root.dark .learning-hero-blue { background: linear-gradient(120deg, #183f62, #17484b); }
+  :root.dark .learning-hero-violet { background: linear-gradient(120deg, #3b2858, #52264d); }
+  :root.dark .learning-hero-mint { background: linear-gradient(120deg, #184b3a, #1d4354); }
+  :root.dark .learning-hero-rose { background: linear-gradient(120deg, #562d43, #534020); }
 
   /*
    * Signature texture (DESIGN.md "Signature element"): a faint genkouyoushi

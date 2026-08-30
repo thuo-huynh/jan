@@ -1,8 +1,10 @@
 import { redirect } from 'next/navigation';
+import { Headphones } from 'lucide-react';
 import { createClient, getAuthedUser } from '@/shared/supabase/server';
 import { ListeningLogManager } from '@/features/reading-listening/components/ListeningLogManager';
 import { SessionStats } from '@/features/reading-listening/components/SessionStats';
 import type { ListeningLog } from '@/features/reading-listening/types';
+import { LearningHero } from '@/shared/components/LearningHero';
 
 /**
  * Listening log entry form + history table (T058). Server Component fetches
@@ -24,12 +26,13 @@ export default async function ListeningLogPage() {
 
   return (
     <div className="space-y-8">
-      <div>
-        <h1 className="page-heading">Nghe</h1>
-        <p className="page-intro">
-          Ghi lại buổi nghe, shadowing hoặc podcast để thấy nhịp luyện tập của chính bạn.
-        </p>
-      </div>
+      <LearningHero
+        icon={Headphones}
+        title="Nghe"
+        description="Lưu lại podcast, shadowing và những lần lắng nghe để thấy nhịp luyện tập của riêng bạn."
+        tone="blue"
+        meta={`${(logs ?? []).length} buổi nghe đã lưu`}
+      />
 
       <SessionStats logs={(logs ?? []) as ListeningLog[]} />
 

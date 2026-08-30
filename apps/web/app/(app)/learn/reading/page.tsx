@@ -1,4 +1,5 @@
 import { redirect } from 'next/navigation';
+import { BookMarked } from 'lucide-react';
 import { createClient, getAuthedUser } from '@/shared/supabase/server';
 import { ReadingTabs } from '@/features/reading-listening/components/ReadingTabs';
 import { mapReadingPassage } from '@/features/reading-listening/lib/mapReadingPassage';
@@ -11,6 +12,7 @@ import type {
   ReadingLog,
   ReadingPassageSet,
 } from '@/features/reading-listening/types';
+import { LearningHero } from '@/shared/components/LearningHero';
 
 /**
  * Reading log entry form + history table (T057) plus the passage-bank tab
@@ -68,13 +70,13 @@ export default async function ReadingLogPage() {
 
   return (
     <div className="space-y-8">
-      <div>
-        <h1 className="page-heading">Đọc</h1>
-        <p className="page-intro">
-          Lưu bài đọc của riêng bạn, nhập từ HTML, Markdown hoặc CSV, rồi ghi lại những lần bạn đã
-          học.
-        </p>
-      </div>
+      <LearningHero
+        icon={BookMarked}
+        title="Đọc"
+        description="Nhập bài đọc từ HTML, Markdown hoặc CSV; lưu điều đáng nhớ và theo dõi từng lần học."
+        tone="mint"
+        meta={`${passages.length} bài đọc trong thư viện`}
+      />
 
       <ReadingTabs
         readingLogs={readingLogs}

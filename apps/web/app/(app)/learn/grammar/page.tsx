@@ -1,4 +1,5 @@
 import { redirect } from 'next/navigation';
+import { BookOpenCheck } from 'lucide-react';
 import { createClient, getAuthedUser } from '@/shared/supabase/server';
 import { GrammarList } from '@/features/grammar/components/GrammarList';
 import {
@@ -11,6 +12,7 @@ import type {
   GrammarPointWithProgress,
   GrammarSet,
 } from '@/features/grammar/types';
+import { LearningHero } from '@/shared/components/LearningHero';
 
 /**
  * Grammar list page (T041): browses the global N2 `grammar_points` catalog
@@ -79,12 +81,13 @@ export default async function GrammarListPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="page-heading">Ngữ pháp</h1>
-        <p className="page-intro">
-          Tạo kho mẫu câu theo mục tiêu của bạn, thêm ghi chú riêng và lưu lại các cặp dễ nhầm.
-        </p>
-      </div>
+      <LearningHero
+        icon={BookOpenCheck}
+        title="Ngữ pháp"
+        description="Gom các mẫu câu theo mục tiêu riêng, thêm ghi chú và nhận diện những cặp dễ nhầm."
+        tone="violet"
+        meta={`${combined.length} mẫu câu trong kho của bạn`}
+      />
 
       <GrammarList points={combined} userId={user.id} initialSets={sets} />
     </div>

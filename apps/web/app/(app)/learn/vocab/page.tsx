@@ -7,6 +7,7 @@ import {
 } from '@/features/vocab-srs/components/CustomVocabManager';
 import { loadDueReviewQueue } from '@/features/vocab-srs/lib/queue';
 import type { VocabSet } from '@/features/vocab-srs/types';
+import { LearningHero } from '@/shared/components/LearningHero';
 
 /**
  * Vocab/kanji deck management page (T051) — browse the shared reference
@@ -73,13 +74,13 @@ export default async function VocabDeckPage({ searchParams }: VocabPageProps) {
 
   return (
     <div className="space-y-9">
-      <div>
-        <h1 className="page-heading">Từ vựng &amp; Hán tự</h1>
-        <p className="page-intro">
-          Tạo kho từ của riêng bạn theo bất kỳ mục tiêu nào; nếu cần, bạn cũng có thể tham khảo kho
-          dùng chung. Các mục sẽ được nhắc ôn lại đúng lúc.
-        </p>
-      </div>
+      <LearningHero
+        icon={Layers}
+        title="Từ vựng & Hán tự"
+        description="Tạo kho từ theo đúng mục tiêu của bạn, rồi để lịch ôn giúp bạn quay lại đúng lúc."
+        tone="rose"
+        meta={`${dueCount} mục chờ ôn hôm nay`}
+      />
 
       {user && (
         <div className="daily-sheet flex flex-wrap items-center justify-between gap-4 py-5 sm:py-6">
