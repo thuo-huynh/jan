@@ -5,6 +5,7 @@ import {
   BookOpen,
   Brain,
   ChartNoAxesColumnIncreasing,
+  CircleCheck,
   Headphones,
   Library,
 } from 'lucide-react';
@@ -36,15 +37,17 @@ export default async function DashboardPage() {
   );
 
   return (
-    <div className="space-y-10">
+    <div className="space-y-7">
       <section className="daily-sheet">
         <div className="max-w-2xl pl-2">
-          <p className="text-sm font-semibold text-primary">{date}</p>
+          <p className="inline-flex items-center gap-2 rounded-full bg-card/70 px-3 py-1 text-xs font-bold text-primary">
+            <SparkleDot /> {date}
+          </p>
           <h1 className="mt-2 text-3xl font-bold tracking-[-0.04em] text-foreground sm:text-5xl">
             {greeting(new Date().getHours())}
           </h1>
-          <p className="mt-3 text-sm leading-6 text-muted-foreground">
-            Hôm nay, chỉ cần hoàn thành bước kế tiếp của bạn.
+          <p className="mt-3 text-sm leading-6 text-muted-foreground sm:text-base">
+            Chỉ cần hoàn thành bước kế tiếp, JanGo sẽ ghi nhận phần còn lại.
           </p>
           <div className="mt-6 flex flex-wrap gap-x-6 gap-y-2 text-sm text-foreground">
             <span>
@@ -64,7 +67,7 @@ export default async function DashboardPage() {
       </section>
 
       <div className="grid gap-5 lg:grid-cols-[minmax(0,1.25fr)_minmax(18rem,.75fr)]">
-        <section className="card p-5 sm:p-6">
+        <section className="skill-card p-5 sm:p-6">
           <div className="mb-5 flex items-start justify-between gap-4">
             <div>
               <h2 className="text-lg font-semibold tracking-tight text-foreground">
@@ -80,17 +83,18 @@ export default async function DashboardPage() {
           </div>
           <TodayHabitList initialHabits={summary.habits.todayHabits} date={summary.habits.today} />
         </section>
-        <section className="rounded-xl border border-border bg-muted p-5 text-foreground sm:p-6">
+        <section className="relative overflow-hidden rounded-2xl border border-border bg-primary p-5 text-primary-foreground shadow-sm sm:p-6">
+          <div className="absolute right-5 top-5 text-4xl" aria-hidden="true">🦊</div>
           <Brain className="h-6 w-6" strokeWidth={1.75} aria-hidden="true" />
           <h2 className="mt-5 text-xl font-semibold tracking-tight">Tiếp tục học</h2>
-          <p className="mt-2 text-sm leading-6 text-muted-foreground">
+          <p className="mt-2 max-w-[18rem] text-sm leading-6 text-primary-foreground/80">
             {summary.dueReviews > 0
               ? `${summary.dueReviews} mục nên được ôn lại hôm nay.`
               : 'Chưa có mục cần ôn. Chọn một kho cá nhân để bắt đầu.'}
           </p>
           <Link
             href={summary.dueReviews > 0 ? '/learn/review' : '/learn/vocab'}
-            className="btn-primary mt-5"
+            className="mt-5 inline-flex h-10 items-center gap-2 rounded-xl bg-card px-4 text-sm font-bold text-primary transition-transform hover:-translate-y-0.5"
           >
             {summary.dueReviews > 0 ? 'Ôn lại ngay' : 'Mở kho từ'}
             <ArrowRight className="h-4 w-4" aria-hidden="true" />
@@ -103,7 +107,7 @@ export default async function DashboardPage() {
           <h2 className="text-lg font-semibold tracking-tight text-foreground">Nhịp học gần đây</h2>
           <p className="mt-1 text-sm text-muted-foreground">Tổng hợp từ hoạt động bạn đã lưu.</p>
         </div>
-        <div className="grid gap-px overflow-hidden rounded-xl border border-border bg-border sm:grid-cols-2 xl:grid-cols-4">
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
           <Metric
             href="/learn/grammar"
             icon={BookOpen}
@@ -132,7 +136,7 @@ export default async function DashboardPage() {
       </section>
 
       <div className="grid gap-5 lg:grid-cols-[minmax(0,1.2fr)_minmax(18rem,.8fr)]">
-        <section className="card p-5 sm:p-6">
+        <section className="skill-card p-5 sm:p-6">
           <div className="flex items-start justify-between gap-4">
             <div>
               <h2 className="text-lg font-semibold tracking-tight text-foreground">
@@ -162,7 +166,7 @@ export default async function DashboardPage() {
             })}
           </div>
         </section>
-        <section className="card p-5 sm:p-6">
+        <section className="skill-card p-5 sm:p-6">
           <h2 className="text-lg font-semibold tracking-tight text-foreground">Độ đều đặn</h2>
           <p className="mt-1 text-sm text-muted-foreground">
             Tập trung vào nhịp duy trì, không phải áp lực hoàn hảo.
@@ -196,12 +200,18 @@ function Metric({
   value: number;
 }) {
   return (
-    <Link href={href} className="hover:bg-muted/60 bg-card p-5 transition-colors">
-      <Icon className="h-5 w-5 text-primary" strokeWidth={1.75} aria-hidden="true" />
+    <Link href={href} className="skill-card block p-5">
+      <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10">
+        <Icon className="h-5 w-5 text-primary" strokeWidth={1.75} aria-hidden="true" />
+      </span>
       <p className="mt-6 text-3xl font-semibold tracking-[-0.04em] text-foreground">{value}</p>
       <p className="mt-1 text-sm text-muted-foreground">{label}</p>
     </Link>
   );
+}
+
+function SparkleDot() {
+  return <CircleCheck className="h-3.5 w-3.5" strokeWidth={2.5} aria-hidden="true" />;
 }
 
 function Consistency({ label, value }: { label: string; value: string }) {

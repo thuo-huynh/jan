@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation';
 import { GraduationCap, LogOut } from 'lucide-react';
 import { createClient, getAuthedUser } from '@/shared/supabase/server';
 import { AppNav, type NavLinkItem } from '@/shared/components/AppNav';
+import { AppSidebar } from '@/shared/components/AppSidebar';
 
 /**
  * Authenticated app shell: focused daily-product nav plus sign-out.
@@ -45,9 +46,10 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   ];
 
   return (
-    <div className="min-h-screen bg-background">
-      <header className="bg-card/95 supports-[backdrop-filter]:bg-card/80 sticky top-0 z-30 border-b border-border backdrop-blur">
-        <div className="relative mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4 sm:px-6">
+    <div className="study-shell min-h-screen bg-background lg:pl-[17rem]">
+      <AppSidebar links={navLinks} />
+      <header className="bg-card/95 supports-[backdrop-filter]:bg-card/80 sticky top-0 z-30 border-b border-border backdrop-blur lg:hidden">
+        <div className="relative mx-auto flex h-16 items-center justify-between gap-4 px-4 sm:px-6">
           <div className="flex h-full items-center gap-3 sm:gap-6">
             <Link
               href="/learn/dashboard"
@@ -73,7 +75,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
           </div>
         </div>
       </header>
-      <main className="mx-auto max-w-7xl px-4 py-7 sm:px-6 sm:py-10">{children}</main>
+      <main className="mx-auto max-w-7xl px-4 py-7 sm:px-6 sm:py-10 lg:px-10 lg:py-9">{children}</main>
     </div>
   );
 }

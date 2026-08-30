@@ -180,10 +180,8 @@ export const readingPassageSetSchema = z.object({
 });
 export type ReadingPassageSetInput = z.infer<typeof readingPassageSetSchema>;
 
-// ---------------------------------------------------------------------------
-// Mock tests (mock_test_results — T061) + exam date (study_goals — T063)
-// ---------------------------------------------------------------------------
-
+// Kept for the retired feature components while their routes redirect. These
+// are not used by the current learning experience.
 const score = z.number().int().min(0).max(1000).optional().nullable();
 
 export const mockTestResultSchema = z.object({
@@ -199,10 +197,6 @@ export const examDateSchema = z.object({
   examDate: isoDate.optional().nullable(),
 });
 export type ExamDateInput = z.infer<typeof examDateSchema>;
-
-// ---------------------------------------------------------------------------
-// Mistake notebook (mistake_notebook — manual entries, T066)
-// ---------------------------------------------------------------------------
 
 export const mistakeSchema = z.object({
   content: z.string().trim().min(1, 'Nội dung là bắt buộc').max(2000),

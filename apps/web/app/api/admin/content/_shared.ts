@@ -21,7 +21,6 @@ export const CONTENT_TYPES = [
   'grammar_notes',
   'reading_logs',
   'listening_logs',
-  'mistakes',
   'reading_passages',
 ] as const;
 

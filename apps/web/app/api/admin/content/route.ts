@@ -318,53 +318,6 @@ async function queryListeningLogs(
   return { items, total: count ?? 0 };
 }
 
-interface MistakeContentRow {
-  id: string;
-  user_id: string;
-  source: string;
-  content: string;
-  linked_vocab_id: string | null;
-  linked_grammar_id: string | null;
-  resolved: boolean;
-  created_at: string;
-  profiles: { email: string } | null;
-}
-
-async function queryMistakes(
-  admin: Admin,
-  query: string,
-  from: number,
-  to: number,
-  filters: ContentFilters
-) {
-  let q = admin
-    .from('mistake_notebook')
-    .select(
-      'id, user_id, source, content, linked_vocab_id, linked_grammar_id, resolved, created_at, profiles!inner(email)',
-      { count: 'exact' }
-    )
-    .order('created_at', { ascending: false })
-    .range(from, to);
-  if (query) q = q.ilike('content', `%${query}%`);
-  if (filters.ownerEmail) q = q.ilike('profiles.email', `%${filters.ownerEmail}%`);
-  if (filters.dateFrom) q = q.gte('created_at', filters.dateFrom);
-  if (filters.dateTo) q = q.lte('created_at', `${filters.dateTo}T23:59:59`);
-  const { data, error, count } = await q;
-  if (error) throw error;
-  const items = ((data ?? []) as unknown as MistakeContentRow[]).map((row) => ({
-    id: row.id,
-    source: row.source,
-    content: row.content,
-    linkedVocabId: row.linked_vocab_id,
-    linkedGrammarId: row.linked_grammar_id,
-    resolved: row.resolved,
-    createdAt: row.created_at,
-    ownerId: row.user_id,
-    ownerEmail: row.profiles?.email ?? null,
-  }));
-  return { items, total: count ?? 0 };
-}
-
 interface ReadingPassageContentRow {
   id: string;
   title: string;
@@ -425,7 +378,6 @@ const QUERY_BY_TYPE: Record<ContentType, ContentQueryFn> = {
   grammar_notes: queryGrammarNotes,
   reading_logs: queryReadingLogs,
   listening_logs: queryListeningLogs,
-  mistakes: queryMistakes,
   reading_passages: queryReadingPassages,
 };
 

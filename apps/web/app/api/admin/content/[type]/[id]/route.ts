@@ -14,7 +14,6 @@ const TABLE_BY_TYPE: Record<Exclude<ContentType, 'grammar_notes' | 'vocab'>, str
   notes: 'notes',
   reading_logs: 'reading_logs',
   listening_logs: 'listening_logs',
-  mistakes: 'mistake_notebook',
   reading_passages: 'reading_passages',
 };
 

@@ -1,5 +1,5 @@
 import { createClient } from '@/shared/supabase/server';
-import { aggregateDailyActivity, computeStreak } from '@/features/study-plan/lib/heatmap';
+import { aggregateDailyActivity, computeStreak } from './daily-activity';
 import {
   computeWeakAreas,
   listeningWeakArea,
@@ -23,7 +23,6 @@ export interface DashboardData {
   reviewAccuracy: number | null;
   currentStreak: number;
   weakAreas: WeakArea[];
-  examCountdownDays: number | null;
 }
 
 type ServerSupabaseClient = ReturnType<typeof createClient>;
@@ -42,7 +41,6 @@ export async function loadDashboardData(
     { data: listeningLogs },
     { data: confusablePairs },
     { data: grammarPatterns },
-    { data: goals },
   ] = await Promise.all([
     supabase
       .from('grammar_points')
@@ -68,7 +66,6 @@ export async function loadDashboardData(
     supabase.from('listening_logs').select('comprehension_score').eq('user_id', userId),
     supabase.from('grammar_confusable_pairs').select('id, grammar_point_id_a, grammar_point_id_b'),
     supabase.from('grammar_points').select('id, pattern'),
-    supabase.from('study_goals').select('exam_date').eq('user_id', userId).maybeSingle(),
   ]);
 
   const logs = reviewLogs ?? [];
@@ -87,21 +84,11 @@ export async function loadDashboardData(
     vocabWeakArea(logs),
   ]);
 
-  let examCountdownDays: number | null = null;
-  if (goals?.exam_date) {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const target = new Date(`${goals.exam_date}T00:00:00`);
-    const days = Math.round((target.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-    examCountdownDays = days >= 0 ? days : null;
-  }
-
   return {
     grammar: { mastered: grammarMastered ?? 0, total: grammarTotal ?? 0 },
     vocabKanjiLearned: (customVocabLearned ?? 0) + (globalVocabLearned ?? 0),
     reviewAccuracy,
     currentStreak,
     weakAreas,
-    examCountdownDays,
   };
 }

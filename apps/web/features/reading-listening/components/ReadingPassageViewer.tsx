@@ -9,7 +9,7 @@ import type { PassageQuestion, QuestionProgress, ReadingPassage } from '../types
 
 /**
  * Read + click-to-answer quiz for one passage (US1 read-only render, US2
- * grading/retry/Mistake-Notebook logging, US4 tappable vocab terms) — one
+ * grading/retry and US4 tappable vocab terms) — one
  * component because the three stories all operate on the same rendered
  * passage rather than being separable screens (specs/004-reading-comprehension
  * tasks.md Phase 3-6 notes).
@@ -26,12 +26,18 @@ interface ReadingPassageViewerProps {
   onProgressChange: (questionId: string, state: QuestionProgress) => void;
 }
 
-export function ReadingPassageViewer({ passage, progress, onProgressChange }: ReadingPassageViewerProps) {
+export function ReadingPassageViewer({
+  passage,
+  progress,
+  onProgressChange,
+}: ReadingPassageViewerProps) {
   const [answers, setAnswers] = useState<Record<string, AnswerState>>(() => {
     const initial: Record<string, AnswerState> = {};
     for (const q of passage.questions) {
       const p = progress[q.id];
-      initial[q.id] = p ? { chosenIndex: p.chosenIndex, isCorrect: p.isCorrect } : { chosenIndex: null, isCorrect: null };
+      initial[q.id] = p
+        ? { chosenIndex: p.chosenIndex, isCorrect: p.isCorrect }
+        : { chosenIndex: null, isCorrect: null };
     }
     return initial;
   });
@@ -46,35 +52,22 @@ export function ReadingPassageViewer({ passage, progress, onProgressChange }: Re
     await supabase
       .from('user_reading_question_progress')
       .upsert(
-        { user_id: user.id, question_id: questionId, chosen_choice_index: chosenIndex, is_correct: isCorrect },
-        { onConflict: 'user_id,question_id' },
+        {
+          user_id: user.id,
+          question_id: questionId,
+          chosen_choice_index: chosenIndex,
+          is_correct: isCorrect,
+        },
+        { onConflict: 'user_id,question_id' }
       );
-  }
-
-  async function logMistake(question: PassageQuestion, chosenIndex: number) {
-    const supabase = createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    if (!user) return;
-    await supabase.from('mistake_notebook').insert({
-      user_id: user.id,
-      source: 'reading_quiz',
-      content: `${passage.title} — ${question.questionText} — chọn: "${question.choices[chosenIndex]}", đúng: "${question.choices[question.correctChoiceIndex]}"`,
-    });
   }
 
   function handleAnswer(question: PassageQuestion, chosenIndex: number) {
     const graded = gradeAnswer(question, chosenIndex);
     const isCorrect = graded.isCorrect ?? false;
-    // A question with no progress row yet has never been answered before, in this or any past
-    // session — that's the only time a wrong answer should reach the Mistake Notebook.
-    const alreadyAttemptedBefore = Boolean(progress[question.id]);
-
     setAnswers((prev) => ({ ...prev, [question.id]: graded }));
     onProgressChange(question.id, { chosenIndex, isCorrect });
     void persistAnswer(question.id, chosenIndex, isCorrect);
-    if (!isCorrect && !alreadyAttemptedBefore) void logMistake(question, chosenIndex);
   }
 
   function handleRetry(questionId: string) {
@@ -96,7 +89,7 @@ export function ReadingPassageViewer({ passage, progress, onProgressChange }: Re
                 type="button"
                 onClick={() => setOpenTermKey(open ? null : key)}
                 onBlur={() => setTimeout(() => setOpenTermKey((k) => (k === key ? null : k)), 150)}
-                className="border-b border-dashed border-primary/50 text-foreground transition-colors hover:bg-primary/10"
+                className="border-primary/50 hover:bg-primary/10 border-b border-dashed text-foreground transition-colors"
               >
                 {segment.term}
               </button>
@@ -105,7 +98,9 @@ export function ReadingPassageViewer({ passage, progress, onProgressChange }: Re
                   onMouseDown={(e) => e.preventDefault()}
                   className="absolute left-0 top-full z-10 mt-1 w-56 whitespace-normal rounded-lg border border-border bg-card p-3 text-sm normal-case shadow-lg"
                 >
-                  <span className="block font-jp text-foreground">{segment.reading || segment.term}</span>
+                  <span className="block font-jp text-foreground">
+                    {segment.reading || segment.term}
+                  </span>
                   <span className="mt-0.5 block text-muted-foreground">{segment.meaning}</span>
                   <span className="mt-2 block">
                     <AttachTermToSrsButton
@@ -144,9 +139,15 @@ export function ReadingPassageViewer({ passage, progress, onProgressChange }: Re
                         onClick={() => handleAnswer(question, i)}
                         style={
                           answered && isCorrectChoice
-                            ? { backgroundColor: 'color-mix(in srgb, var(--success) 12%, transparent)' }
+                            ? {
+                                backgroundColor:
+                                  'color-mix(in srgb, var(--success) 12%, transparent)',
+                              }
                             : isChosenWrong
-                              ? { backgroundColor: 'color-mix(in srgb, var(--danger) 12%, transparent)' }
+                              ? {
+                                  backgroundColor:
+                                    'color-mix(in srgb, var(--danger) 12%, transparent)',
+                                }
                               : undefined
                         }
                         className={`flex w-full items-center justify-between gap-2 rounded-lg border px-3 py-2 text-left text-sm transition-colors disabled:cursor-not-allowed ${
@@ -160,7 +161,9 @@ export function ReadingPassageViewer({ passage, progress, onProgressChange }: Re
                         }`}
                       >
                         <span>{choice}</span>
-                        {answered && isCorrectChoice && <Check className="h-4 w-4 shrink-0" aria-hidden="true" />}
+                        {answered && isCorrectChoice && (
+                          <Check className="h-4 w-4 shrink-0" aria-hidden="true" />
+                        )}
                         {isChosenWrong && <X className="h-4 w-4 shrink-0" aria-hidden="true" />}
                       </button>
                     </li>
@@ -170,7 +173,7 @@ export function ReadingPassageViewer({ passage, progress, onProgressChange }: Re
 
               {answered && (
                 <>
-                  <div className="rounded-lg bg-muted/50 p-3 text-sm text-muted-foreground">
+                  <div className="bg-muted/50 rounded-lg p-3 text-sm text-muted-foreground">
                     <p className="mb-1 text-xs font-semibold text-foreground">Giải thích</p>
                     {question.explanation}
                   </div>
