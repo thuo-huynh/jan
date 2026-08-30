@@ -67,7 +67,7 @@ export function AttachTermToSrsButton({ term, reading, meaning, readingPassageId
     return (
       <span className="inline-flex items-center gap-1 text-xs font-medium text-success">
         <Check className="h-3 w-3" aria-hidden="true" />
-        Đã thêm vào SRS
+        Đã thêm vào lịch ôn
       </span>
     );
   }
@@ -82,7 +82,7 @@ export function AttachTermToSrsButton({ term, reading, meaning, readingPassageId
         className="btn-outline h-7 px-2 text-xs"
       >
         <Plus className="h-3 w-3" aria-hidden="true" />
-        {status === 'saving' ? 'Đang thêm…' : 'Đính vào SRS'}
+        {status === 'saving' ? 'Đang thêm…' : 'Thêm vào lịch ôn'}
       </button>
       {error && <span className="error-text mt-1 block">{error}</span>}
     </span>

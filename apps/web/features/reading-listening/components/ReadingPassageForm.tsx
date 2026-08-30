@@ -154,7 +154,7 @@ export function ReadingPassageForm({ sets, onSetCreated, onSaved, onCancel }: Re
           placeholder="Dán đoạn văn vào đây. Đánh dấu từ khó bằng cú pháp {từ|cách đọc|nghĩa}, vd: {規則|きそく|quy tắc}"
           className="textarea-field font-jp"
         />
-        <p className="helper-text">Cú pháp {'{từ|cách đọc|nghĩa}'} sẽ hiển thị thành từ có thể bấm vào để xem nghĩa và đính vào SRS.</p>
+        <p className="helper-text">Cú pháp {'{từ|cách đọc|nghĩa}'} sẽ hiển thị thành từ có thể bấm vào để xem nghĩa và thêm vào lịch ôn cá nhân.</p>
       </div>
 
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">

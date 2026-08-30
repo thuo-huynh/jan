@@ -3,7 +3,8 @@
 import { useMemo, useState } from 'react';
 import { CheckCircle2, Info } from 'lucide-react';
 import { createClient } from '@/shared/supabase/client';
-import { parseReadingHtml, type ParsedReadingPassage } from '../lib/parseReadingHtml';
+import { parseReadingImport, type ReadingImportFormat } from '../lib/parseReadingImport';
+import type { ParsedReadingPassage } from '../lib/parseReadingHtml';
 import {
   mapReadingPassage,
   type ReadingPassageQuestionRecord,
@@ -34,13 +35,14 @@ const UNGROUPED_LABEL = 'Chưa phân loại';
  * duplicate passages rather than being skipped (spec.md Edge Cases).
  */
 export function ReadingHtmlImportForm({ existingSets, onSetCreated, onImported, onCancel }: ReadingHtmlImportFormProps) {
-  const [html, setHtml] = useState('');
+  const [content, setContent] = useState('');
+  const [format, setFormat] = useState<ReadingImportFormat>('html');
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
   const groups = useMemo(() => {
-    if (!html.trim()) return [] as { label: string; rows: ParsedReadingPassage[] }[];
-    const parsed = parseReadingHtml(html);
+    if (!content.trim()) return [] as { label: string; rows: ParsedReadingPassage[] }[];
+    const parsed = parseReadingImport(content, format);
     const byLabel = new Map<string, ParsedReadingPassage[]>();
     for (const row of parsed) {
       const label = row.sourceTabLabel ?? UNGROUPED_LABEL;
@@ -49,7 +51,7 @@ export function ReadingHtmlImportForm({ existingSets, onSetCreated, onImported, 
       byLabel.set(label, list);
     }
     return Array.from(byLabel.entries()).map(([label, rows]) => ({ label, rows }));
-  }, [html]);
+  }, [content, format]);
 
   const totalToImport = groups.reduce((sum, g) => sum + g.rows.length, 0);
 
@@ -114,58 +116,70 @@ export function ReadingHtmlImportForm({ existingSets, onSetCreated, onImported, 
           return;
         }
 
-        const { data: questionRows, error: questionError } = await supabase
-          .from('reading_passage_questions')
-          .insert(
-            row.questions.map((q, i) => ({
-              passage_id: passageRow.id,
-              order_index: i,
-              question_text: q.questionText,
-              choices: q.choices,
-              correct_choice_index: q.correctChoiceIndex,
-              explanation: q.explanation,
-            })),
-          )
-          .select('id, passage_id, order_index, question_text, choices, correct_choice_index, explanation');
-        if (questionError || !questionRows) {
+        const questionRows = row.questions.length
+          ? await supabase
+              .from('reading_passage_questions')
+              .insert(
+                row.questions.map((q, i) => ({
+                  passage_id: passageRow.id,
+                  order_index: i,
+                  question_text: q.questionText,
+                  choices: q.choices,
+                  correct_choice_index: q.correctChoiceIndex,
+                  explanation: q.explanation,
+                })),
+              )
+              .select('id, passage_id, order_index, question_text, choices, correct_choice_index, explanation')
+          : { data: [], error: null };
+        if (questionRows.error || !questionRows.data) {
           setSubmitting(false);
-          setSubmitError(questionError?.message ?? `Không thể nhập câu hỏi cho bài "${row.title}"`);
+          setSubmitError(questionRows.error?.message ?? `Không thể nhập câu hỏi cho bài "${row.title}"`);
           return;
         }
 
         created.push(
-          mapReadingPassage(passageRow as ReadingPassageRecord, questionRows as ReadingPassageQuestionRecord[]),
+          mapReadingPassage(passageRow as ReadingPassageRecord, questionRows.data as ReadingPassageQuestionRecord[]),
         );
       }
     }
 
     setSubmitting(false);
     onImported(created);
-    setHtml('');
+    setContent('');
   }
 
   return (
     <div className="card space-y-3 p-4">
       <div>
         <label className="label-field" htmlFor="reading-html-input">
-          Dán toàn bộ nội dung HTML vào đây
+          Nhập bài đọc từ HTML, Markdown hoặc CSV
         </label>
+        <select
+          value={format}
+          onChange={(event) => setFormat(event.target.value as ReadingImportFormat)}
+          aria-label="Định dạng nội dung nhập"
+          className="input-field mb-2 h-9 w-full sm:w-56"
+        >
+          <option value="html">HTML</option>
+          <option value="markdown">Markdown (.md)</option>
+          <option value="csv">CSV</option>
+        </select>
         <textarea
           id="reading-html-input"
-          value={html}
-          onChange={(e) => setHtml(e.target.value)}
+          value={content}
+          onChange={(e) => setContent(e.target.value)}
           rows={8}
-          placeholder="Dán mã HTML từ file ghi chú đọc hiểu của bạn…"
+          placeholder={format === 'csv' ? 'title,content,set\nBài 1,Đây là nội dung,Đọc tháng 8' : 'Dán nội dung từ file của bạn…'}
           className="textarea-field font-mono text-xs"
         />
         <p className="helper-text flex items-start gap-1.5">
           <Info className="mt-0.5 h-3.5 w-3.5 shrink-0" aria-hidden="true" />
-          Nhận diện các khối bài đọc hiểu (đoạn văn + câu hỏi trắc nghiệm + đáp án + giải thích) —
-          nội dung khác sẽ bị bỏ qua. Mỗi tab trong file sẽ tự động thành 1 set riêng.
+          HTML giữ được bài trắc nghiệm theo mẫu cũ. Markdown dùng mỗi tiêu đề cấp 1 (#) cho một bài.
+          CSV cần cột <code>title</code> và <code>content</code>; cột <code>set</code> là tuỳ chọn.
         </p>
       </div>
 
-      {html.trim() && (
+      {content.trim() && (
         <div className="space-y-3 rounded-lg border border-border p-3">
           {totalToImport > 0 ? (
             <div className="flex items-center gap-1.5 text-sm text-success">

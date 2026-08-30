@@ -2,17 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import {
-  AlertTriangle,
-  BookOpen,
-  BookText,
-  CalendarClock,
-  ClipboardCheck,
-  Headphones,
-  LayoutDashboard,
-  Languages,
-  RotateCw,
-} from 'lucide-react';
+import { BookOpen, BookText, Headphones, LayoutDashboard, Languages, RotateCw } from 'lucide-react';
 
 const LEARN_TABS = [
   { href: '/learn/dashboard', label: 'Tổng quan', icon: LayoutDashboard },
@@ -21,9 +11,6 @@ const LEARN_TABS = [
   { href: '/learn/reading', label: 'Đọc hiểu', icon: BookText },
   { href: '/learn/listening', label: 'Nghe hiểu', icon: Headphones },
   { href: '/learn/review', label: 'Ôn tập', icon: RotateCw },
-  { href: '/learn/study-plan', label: 'Kế hoạch học', icon: CalendarClock },
-  { href: '/learn/mistakes', label: 'Sổ lỗi sai', icon: AlertTriangle },
-  { href: '/learn/mock-tests', label: 'Đề thi thử', icon: ClipboardCheck },
 ];
 
 function isActive(pathname: string, href: string) {
@@ -31,11 +18,11 @@ function isActive(pathname: string, href: string) {
 }
 
 /**
- * Secondary tab strip for the eight /learn/* pages. Previously the only way
+ * Secondary tab strip for the core /learn/* pages. Previously the only way
  * between them was the top nav's single "Learn" link (always -> dashboard)
  * plus whatever incidental cross-links a given page happened to have, so
- * e.g. Review or Mock Tests were only reachable via a typed URL. Horizontal
- * scroll (not wrap, not a hamburger like AppNav) on mobile since nine tabs
+ * e.g. Review was only reachable via a typed URL. Horizontal
+ * scroll (not wrap, not a hamburger like AppNav) on mobile since six tabs
  * would eat too much vertical space wrapped, and this is secondary nav
  * rather than the primary app shell AppNav already handles.
  */

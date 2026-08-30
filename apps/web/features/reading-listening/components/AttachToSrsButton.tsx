@@ -85,13 +85,13 @@ export function AttachToSrsButton({ readingLogId }: AttachToSrsButtonProps) {
         ) : (
           <>
             <Plus className="h-3 w-3" aria-hidden="true" />
-            Thêm từ chưa biết vào SRS
+            Thêm từ chưa biết vào lịch ôn
           </>
         )}
       </button>
       {attachedCount > 0 && !open && (
         <span className="ml-2 text-xs text-muted-foreground">
-          Đã thêm {attachedCount} từ vào SRS
+          Đã thêm {attachedCount} từ vào lịch ôn
         </span>
       )}
 
@@ -124,7 +124,7 @@ export function AttachToSrsButton({ readingLogId }: AttachToSrsButtonProps) {
             />
           </div>
           <button type="submit" disabled={submitting} className="btn-primary h-9 px-3 text-sm">
-            {submitting ? 'Đang thêm…' : 'Thêm vào SRS'}
+            {submitting ? 'Đang thêm…' : 'Thêm vào lịch ôn'}
           </button>
           {error && <p className="error-text w-full">{error}</p>}
         </form>

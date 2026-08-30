@@ -53,7 +53,7 @@ export function VocabEntryForm({
   const [reading, setReading] = useState(initialValues?.reading ?? '');
   const [meaning, setMeaning] = useState(initialValues?.meaning ?? '');
   const [example, setExample] = useState(initialValues?.example ?? '');
-  const [jlptLevel, setJlptLevel] = useState(initialValues?.jlptLevel ?? 'N2');
+  const [jlptLevel, setJlptLevel] = useState(initialValues?.jlptLevel ?? '');
   const [isKanji, setIsKanji] = useState(initialValues?.isKanji ?? false);
   const [setId, setSetId] = useState<string | null>(initialValues?.setId ?? null);
   const [error, setError] = useState<string | null>(null);
@@ -189,13 +189,14 @@ export function VocabEntryForm({
       <div className="flex flex-wrap items-end gap-4">
         <div>
           <label className="label-field" htmlFor="vocab-level">
-            Cấp độ JLPT
+            Nhãn hoặc cấp độ (tuỳ chọn)
           </label>
           <input
             id="vocab-level"
             value={jlptLevel ?? ''}
             onChange={(e) => setJlptLevel(e.target.value)}
             className="input-field w-28"
+            placeholder="N3, du lịch…"
           />
         </div>
         <label className="flex items-center gap-2 pb-2 text-sm text-foreground">

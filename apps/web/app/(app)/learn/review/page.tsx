@@ -123,7 +123,7 @@ function ReviewSession() {
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">Hàng đợi ôn tập</h1>
           <p className="mt-1.5 text-sm text-muted-foreground">
-            Gộp chung từ vựng, Hán tự và ngữ pháp N2 cần ôn hôm nay
+            Nhắc bạn ôn lại những mục đã học theo lịch cá nhân
             {allItems !== null && ` — ${allItems.length} mục cần ôn`}.
           </p>
         </div>

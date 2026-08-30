@@ -9,7 +9,7 @@ import { loadDueReviewQueue } from '@/features/vocab-srs/lib/queue';
 import type { VocabSet } from '@/features/vocab-srs/types';
 
 /**
- * Vocab/kanji deck management page (T051) — browse the global N2 reference
+ * Vocab/kanji deck management page (T051) — browse the shared reference
  * deck (read-only, server-rendered, paginated) and manage the caller's own
  * custom entries (add/edit/delete, delegated to the client CustomVocabManager
  * so mutations don't require a full page reload).
@@ -32,7 +32,7 @@ export default async function VocabDeckPage({ searchParams }: VocabPageProps) {
 
   let globalQuery = supabase
     .from('vocab_entries')
-    .select('id, word, reading, meaning, is_kanji', { count: 'exact' })
+    .select('id, word, reading, meaning, jlpt_level, is_kanji', { count: 'exact' })
     .is('user_id', null)
     .order('word', { ascending: true })
     .range(from, to);
@@ -76,8 +76,8 @@ export default async function VocabDeckPage({ searchParams }: VocabPageProps) {
       <div>
         <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">Kho từ vựng &amp; Hán tự</h1>
         <p className="mt-1.5 text-sm text-muted-foreground">
-          Duyệt kho từ N2 chuẩn và quản lý các từ bạn tự thêm — cả hai đều được gộp chung vào
-          hàng đợi ôn tập.
+          Tạo kho từ của riêng bạn theo bất kỳ mục tiêu nào; nếu cần, bạn cũng có thể tham khảo
+          kho dùng chung. Các mục sẽ được nhắc ôn lại đúng lúc.
         </p>
       </div>
 
@@ -90,7 +90,7 @@ export default async function VocabDeckPage({ searchParams }: VocabPageProps) {
             <div>
               <p className="text-2xl font-bold tracking-tight text-foreground">
                 {dueCount}
-                <span className="ml-1.5 text-sm font-normal text-muted-foreground">thẻ cần ôn hôm nay</span>
+                <span className="ml-1.5 text-sm font-normal text-muted-foreground">mục nên ôn lại hôm nay</span>
               </p>
               {weakCount > 0 && (
                 <p className="mt-0.5 flex items-center gap-1 text-xs text-danger">
@@ -105,7 +105,7 @@ export default async function VocabDeckPage({ searchParams }: VocabPageProps) {
               Học bằng flashcard
             </Link>
             <Link href="/learn/review" className={dueCount > 0 ? 'btn-primary' : 'btn-outline'}>
-              {dueCount > 0 ? 'Bắt đầu ôn tập' : 'Hàng đợi ôn tập'}
+              {dueCount > 0 ? 'Bắt đầu ôn lại' : 'Xem lịch ôn'}
             </Link>
           </div>
         </div>
@@ -118,7 +118,7 @@ export default async function VocabDeckPage({ searchParams }: VocabPageProps) {
 
       <div className="space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-4">
-          <h2 className="text-lg font-semibold tracking-tight text-foreground">Kho từ N2 chuẩn</h2>
+          <h2 className="text-lg font-semibold tracking-tight text-foreground">Kho tham khảo</h2>
           <form className="flex items-center gap-2" action="/learn/vocab" method="get">
             <input
               type="text"
@@ -151,7 +151,8 @@ export default async function VocabDeckPage({ searchParams }: VocabPageProps) {
                   <td className="px-3 py-2 font-jp text-muted-foreground">{entry.reading}</td>
                   <td className="px-3 py-2 text-foreground">{entry.meaning}</td>
                   <td className="px-3 py-2 text-muted-foreground">
-                    {entry.is_kanji ? 'hán tự' : 'từ vựng'} · N2
+                    {entry.is_kanji ? 'hán tự' : 'từ vựng'}
+                    {entry.jlpt_level ? ` · ${entry.jlpt_level}` : ''}
                   </td>
                 </tr>
               ))}

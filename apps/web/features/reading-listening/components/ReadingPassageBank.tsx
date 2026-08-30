@@ -139,7 +139,7 @@ export function ReadingPassageBank({ passages: initialPassages, initialSets, ini
   async function handleDelete(passage: ReadingPassage) {
     const ok = await confirm({
       title: `Xóa bài đọc "${passage.title}"?`,
-      description: 'Không thể hoàn tác thao tác này. Các từ đã đính vào SRS hoặc lỗi sai đã ghi từ bài này sẽ không bị xóa.',
+      description: 'Không thể hoàn tác thao tác này. Các từ đã thêm vào lịch ôn hoặc ghi chú từ bài này sẽ không bị xóa.',
     });
     if (!ok) return;
     const supabase = createClient();
@@ -204,7 +204,7 @@ export function ReadingPassageBank({ passages: initialPassages, initialSets, ini
               ) : (
                 <>
                   <FileCode2 className="h-4 w-4" aria-hidden="true" />
-                  Nhập từ HTML
+                  Nhập HTML / MD / CSV
                 </>
               )}
             </button>
@@ -248,7 +248,7 @@ export function ReadingPassageBank({ passages: initialPassages, initialSets, ini
             <BookOpenCheck className="h-6 w-6 text-primary" aria-hidden="true" />
           </div>
           <p className="max-w-xs text-sm text-muted-foreground">
-            Chưa có bài đọc nào — dùng nút &quot;Nhập từ HTML&quot; hoặc &quot;Tạo bài đọc&quot; ở trên để bắt đầu.
+            Chưa có bài đọc nào — nhập từ HTML, Markdown, CSV hoặc tự tạo bài đọc ở trên để bắt đầu.
           </p>
         </div>
       ) : (
