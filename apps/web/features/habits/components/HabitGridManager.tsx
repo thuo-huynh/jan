@@ -1,14 +1,22 @@
 'use client';
 
-import { useMemo, useState, type CSSProperties } from 'react';
-import { CalendarDays, CalendarRange, Flame, Sparkles, Trophy } from 'lucide-react';
+import { useEffect, useMemo, useState, type CSSProperties } from 'react';
+import {
+  CalendarDays,
+  CalendarRange,
+  ChevronLeft,
+  ChevronRight,
+  Flame,
+  Sparkles,
+  Trophy,
+} from 'lucide-react';
 import { createClient } from '@/shared/supabase/client';
 import { HabitRow } from './HabitRow';
 import { AddHabitForm } from './AddHabitForm';
 import { MonthNav } from './MonthNav';
 import { TodayChecklist } from './TodayChecklist';
 import { CelebrationBanner, type CelebrationMessage } from './CelebrationBanner';
-import { todayIso, weekdayInitial } from '../lib/calendar';
+import { shiftIsoDate, todayIso, weekdayInitial } from '../lib/calendar';
 import { computeHabitStreak, crossedMilestone } from '../lib/streak';
 import type { IsoDate } from '../lib/streak';
 import type { Habit, HabitCompletion } from '../types';
@@ -41,9 +49,17 @@ function groupByHabit(completions: HabitCompletion[]): Map<string, Set<IsoDate>>
   return map;
 }
 
-export function HabitGridManager({ year, month, days, initialHabits, initialCompletions }: HabitGridManagerProps) {
+export function HabitGridManager({
+  year,
+  month,
+  days,
+  initialHabits,
+  initialCompletions,
+}: HabitGridManagerProps) {
   const [habits, setHabits] = useState(initialHabits);
-  const [completionsByHabit, setCompletionsByHabit] = useState(() => groupByHabit(initialCompletions));
+  const [completionsByHabit, setCompletionsByHabit] = useState(() =>
+    groupByHabit(initialCompletions)
+  );
   const [pendingByHabit, setPendingByHabit] = useState<Map<string, Set<IsoDate>>>(new Map());
   const [celebrations, setCelebrations] = useState<CelebrationMessage[]>([]);
   const today = todayIso();
@@ -57,17 +73,41 @@ export function HabitGridManager({ year, month, days, initialHabits, initialComp
   }
 
   const isCurrentMonthView = days.includes(today);
-  // The board intentionally shows one complete seven-day period only. The
-  // old month-wide grid made the daily action too dense; month navigation
-  // above selects the historical period to inspect.
-  const selectedWeek = days.slice(-7);
+  // Split from the end of the month so the most recent view is a full seven
+  // days. Earlier weeks remain reachable through the compact arrow control.
+  const weeks = useMemo(() => {
+    const firstWeekLength = days.length % 7 || 7;
+    const leadingDays = Array.from({ length: 7 - firstWeekLength }, (_, index) =>
+      shiftIsoDate(days[0], index - (7 - firstWeekLength))
+    );
+    const fullRange = [...leadingDays, ...days];
+    const chunks: IsoDate[][] = [];
+    for (let index = 0; index < fullRange.length; index += 7) {
+      chunks.push(fullRange.slice(index, index + 7));
+    }
+    return chunks;
+  }, [days]);
+  const [selectedWeekIndex, setSelectedWeekIndex] = useState(weeks.length - 1);
+
+  useEffect(() => {
+    setSelectedWeekIndex(weeks.length - 1);
+  }, [weeks.length, year, month]);
+
+  const selectedWeek = weeks[selectedWeekIndex] ?? weeks[weeks.length - 1] ?? [];
+  const weekRangeLabel =
+    selectedWeek[0] && selectedWeek[selectedWeek.length - 1]
+      ? `${Number(selectedWeek[0].slice(-2))} tháng ${Number(selectedWeek[0].slice(5, 7))} - ${Number(selectedWeek[selectedWeek.length - 1].slice(-2))} tháng ${Number(selectedWeek[selectedWeek.length - 1].slice(5, 7))}`
+      : '';
 
   const streakByHabit = useMemo(() => {
     const map = new Map<string, number>();
     for (const habit of habits) {
       map.set(
         habit.id,
-        computeHabitStreak(Array.from(completionsByHabit.get(habit.id) ?? []), new Date(`${today}T00:00:00`)),
+        computeHabitStreak(
+          Array.from(completionsByHabit.get(habit.id) ?? []),
+          new Date(`${today}T00:00:00`)
+        )
       );
     }
     return map;
@@ -75,21 +115,27 @@ export function HabitGridManager({ year, month, days, initialHabits, initialComp
 
   const stats = useMemo(() => {
     const doneToday = habits.filter((h) => completionsByHabit.get(h.id)?.has(today)).length;
-    const totalDoneThisMonth = Array.from(completionsByHabit.values()).reduce((sum, set) => sum + set.size, 0);
+    const monthDays = new Set(days);
+    const totalDoneThisMonth = Array.from(completionsByHabit.values()).reduce(
+      (sum, set) => sum + Array.from(set).filter((date) => monthDays.has(date)).length,
+      0
+    );
     const totalPossibleThisMonth = habits.length * days.length;
     const completionRate =
-      totalPossibleThisMonth > 0 ? Math.round((totalDoneThisMonth / totalPossibleThisMonth) * 100) : 0;
+      totalPossibleThisMonth > 0
+        ? Math.round((totalDoneThisMonth / totalPossibleThisMonth) * 100)
+        : 0;
     return { doneToday, completionRate };
-  }, [habits, completionsByHabit, today, days.length]);
+  }, [habits, completionsByHabit, today, days]);
 
   const doneTodaySet = useMemo(
     () => new Set(habits.filter((h) => completionsByHabit.get(h.id)?.has(today)).map((h) => h.id)),
-    [habits, completionsByHabit, today],
+    [habits, completionsByHabit, today]
   );
 
   const pendingTodayHabitIds = useMemo(
     () => new Set(habits.filter((h) => pendingByHabit.get(h.id)?.has(today)).map((h) => h.id)),
-    [habits, pendingByHabit, today],
+    [habits, pendingByHabit, today]
   );
 
   const recentDays = useMemo(() => {
@@ -101,9 +147,10 @@ export function HabitGridManager({ year, month, days, initialHabits, initialComp
   }, [completionsByHabit, days, habits, isCurrentMonthView, today]);
 
   const bestStreak = Math.max(0, ...Array.from(streakByHabit.values()));
-  const completionRatio = habits.length > 0 ? Math.round((stats.doneToday / habits.length) * 100) : 0;
+  const completionRatio =
+    habits.length > 0 ? Math.round((stats.doneToday / habits.length) * 100) : 0;
   const monthLabel = new Intl.DateTimeFormat('vi-VN', { month: 'long', year: 'numeric' }).format(
-    new Date(year, month - 1, 1),
+    new Date(year, month - 1, 1)
   );
 
   function handleCreated(habit: Habit) {
@@ -211,7 +258,7 @@ export function HabitGridManager({ year, month, days, initialHabits, initialComp
     <div className="space-y-6">
       <section className="habits-hero">
         <div className="relative z-10 max-w-xl">
-          <p className="inline-flex items-center gap-2 rounded-full bg-card/70 px-3 py-1 text-xs font-bold text-primary">
+          <p className="bg-card/70 inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-bold text-primary">
             <Sparkles className="h-3.5 w-3.5" aria-hidden="true" /> Nhịp duy trì của bạn
           </p>
           <h1 className="mt-4 text-3xl font-bold tracking-[-0.045em] text-foreground sm:text-4xl">
@@ -237,17 +284,23 @@ export function HabitGridManager({ year, month, days, initialHabits, initialComp
           role="img"
           aria-label={`Hoàn thành ${stats.doneToday} trên ${habits.length} thói quen hôm nay`}
         >
-          <span className="text-2xl font-bold tracking-[-0.05em] text-foreground">{stats.doneToday}</span>
-          <span className="mt-0.5 text-xs font-medium text-muted-foreground">trên {habits.length}</span>
-          <span className="mt-1 text-[0.65rem] font-bold uppercase tracking-[0.12em] text-primary">hôm nay</span>
+          <span className="text-2xl font-bold tracking-[-0.05em] text-foreground">
+            {stats.doneToday}
+          </span>
+          <span className="mt-0.5 text-xs font-medium text-muted-foreground">
+            trên {habits.length}
+          </span>
+          <span className="mt-1 text-[0.65rem] font-bold uppercase tracking-[0.12em] text-primary">
+            hôm nay
+          </span>
         </div>
       </section>
 
       <CelebrationBanner messages={celebrations} onDismiss={dismissCelebration} />
 
       {habits.length === 0 ? (
-        <div className="flex flex-col items-center gap-3 rounded-2xl border border-dashed border-border bg-card/80 p-10 text-center shadow-sm">
-          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
+        <div className="bg-card/80 flex flex-col items-center gap-3 rounded-2xl border border-dashed border-border p-10 text-center shadow-sm">
+          <div className="bg-primary/10 flex h-12 w-12 items-center justify-center rounded-full">
             <CalendarDays className="h-6 w-6 text-primary" aria-hidden="true" />
           </div>
           <p className="max-w-xs text-sm text-muted-foreground">
@@ -272,24 +325,38 @@ export function HabitGridManager({ year, month, days, initialHabits, initialComp
                 <Trophy className="h-4 w-4 text-primary" aria-hidden="true" />
                 <h2 className="font-semibold text-foreground">Bảy ngày gần đây</h2>
               </div>
-              <p className="mt-1 text-sm text-muted-foreground">Mỗi ô là số thói quen bạn đã hoàn thành.</p>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Mỗi ô là số thói quen bạn đã hoàn thành.
+              </p>
               <div className="mt-6 grid grid-cols-7 gap-2">
                 {recentDays.map((day) => {
-                  const height = habits.length ? Math.max(14, Math.round((day.completed / habits.length) * 100)) : 14;
+                  const height = habits.length
+                    ? Math.max(14, Math.round((day.completed / habits.length) * 100))
+                    : 14;
                   return (
-                    <div key={day.date} className="flex h-24 flex-col justify-end gap-2 text-center">
+                    <div
+                      key={day.date}
+                      className="flex h-24 flex-col justify-end gap-2 text-center"
+                    >
                       <span className="text-xs font-bold text-primary">{day.completed || ''}</span>
-                      <div className="flex h-14 items-end rounded-xl bg-primary/10 px-1.5 pb-1.5">
-                        <div className="w-full rounded-lg bg-primary transition-[height]" style={{ height: `${height}%` }} />
+                      <div className="bg-primary/10 flex h-14 items-end rounded-xl px-1.5 pb-1.5">
+                        <div
+                          className="w-full rounded-lg bg-primary transition-[height]"
+                          style={{ height: `${height}%` }}
+                        />
                       </div>
                       <span className="text-[0.65rem] font-semibold text-muted-foreground">
-                        {new Intl.DateTimeFormat('vi-VN', { weekday: 'narrow' }).format(new Date(`${day.date}T00:00:00`))}
+                        {new Intl.DateTimeFormat('vi-VN', { weekday: 'narrow' }).format(
+                          new Date(`${day.date}T00:00:00`)
+                        )}
                       </span>
                     </div>
                   );
                 })}
               </div>
-              <p className="mt-5 text-sm font-semibold text-foreground">{stats.completionRate}% nhịp duy trì trong tháng</p>
+              <p className="mt-5 text-sm font-semibold text-foreground">
+                {stats.completionRate}% nhịp duy trì trong tháng
+              </p>
             </section>
           </div>
 
@@ -302,13 +369,35 @@ export function HabitGridManager({ year, month, days, initialHabits, initialComp
             <div className="flex flex-wrap items-center justify-between gap-4 border-b border-border px-5 py-4">
               <div>
                 <h2 className="font-semibold text-foreground">Nhịp của tuần đang xem</h2>
-                <p className="mt-1 text-sm text-muted-foreground">Mỗi chấm là một ngày bạn đã giữ lời hứa với mình.</p>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Mỗi chấm là một ngày bạn đã giữ lời hứa với mình.
+                </p>
               </div>
-              <span className="rounded-full bg-primary/10 px-3 py-1.5 text-sm font-semibold text-primary">
-                {selectedWeek[0] && selectedWeek[selectedWeek.length - 1]
-                  ? `${Number(selectedWeek[0].slice(-2))}-${Number(selectedWeek[selectedWeek.length - 1].slice(-2))} tháng ${month}`
-                  : ''}
-              </span>
+              <div className="bg-primary/10 flex items-center gap-2 rounded-xl p-1">
+                <button
+                  type="button"
+                  onClick={() => setSelectedWeekIndex((index) => Math.max(0, index - 1))}
+                  disabled={selectedWeekIndex === 0}
+                  aria-label="Xem tuần trước"
+                  className="flex h-8 w-8 items-center justify-center rounded-lg text-primary transition-colors hover:bg-card disabled:cursor-not-allowed disabled:opacity-35"
+                >
+                  <ChevronLeft className="h-4 w-4" aria-hidden="true" />
+                </button>
+                <span className="min-w-28 px-1 text-center text-sm font-semibold text-primary">
+                  {weekRangeLabel}
+                </span>
+                <button
+                  type="button"
+                  onClick={() =>
+                    setSelectedWeekIndex((index) => Math.min(weeks.length - 1, index + 1))
+                  }
+                  disabled={selectedWeekIndex === weeks.length - 1}
+                  aria-label="Xem tuần sau"
+                  className="flex h-8 w-8 items-center justify-center rounded-lg text-primary transition-colors hover:bg-card disabled:cursor-not-allowed disabled:opacity-35"
+                >
+                  <ChevronRight className="h-4 w-4" aria-hidden="true" />
+                </button>
+              </div>
             </div>
             <div className="overflow-x-auto px-3 pb-3 pt-4 sm:px-5 sm:pb-5">
               <div className="habit-week-board min-w-[44rem]">

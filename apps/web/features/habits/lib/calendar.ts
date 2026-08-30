@@ -12,6 +12,13 @@ export function getMonthDays(year: number, month: number): IsoDate[] {
   return days;
 }
 
+/** Returns an ISO day shifted by `offset` calendar days without local-time drift. */
+export function shiftIsoDate(date: IsoDate, offset: number): IsoDate {
+  const [year, month, day] = date.split('-').map(Number);
+  const shifted = new Date(Date.UTC(year, month - 1, day + offset));
+  return shifted.toISOString().slice(0, 10);
+}
+
 export function todayIso(): IsoDate {
   return new Date().toISOString().slice(0, 10);
 }

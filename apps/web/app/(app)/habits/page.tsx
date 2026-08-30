@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation';
 import { createClient, getAuthedUser } from '@/shared/supabase/server';
 import { HabitGridManager } from '@/features/habits/components/HabitGridManager';
-import { getMonthDays } from '@/features/habits/lib/calendar';
+import { getMonthDays, shiftIsoDate } from '@/features/habits/lib/calendar';
 import type { Habit, HabitCompletion } from '@/features/habits/types';
 
 /**
@@ -29,13 +29,15 @@ export default async function HabitsPage({ searchParams }: HabitsPageProps) {
   const days = getMonthDays(year, month);
   const monthStart = days[0];
   const monthEnd = days[days.length - 1];
+  const firstWeekLength = days.length % 7 || 7;
+  const calendarStart = shiftIsoDate(monthStart, -(7 - firstWeekLength));
 
   const [{ data: habits, error: habitsError }, { data: completions }] = await Promise.all([
     supabase.from('habits').select('*').order('created_at', { ascending: true }),
     supabase
       .from('habit_completions')
       .select('*')
-      .gte('completion_date', monthStart)
+      .gte('completion_date', calendarStart)
       .lte('completion_date', monthEnd),
   ]);
 
