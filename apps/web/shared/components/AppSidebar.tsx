@@ -8,6 +8,7 @@ import {
   ChartNoAxesColumnIncreasing,
   House,
   Library,
+  ListChecks,
   Settings,
   Sparkles,
   Target,
@@ -16,6 +17,7 @@ import type { NavLinkItem } from './AppNav';
 
 const iconByHref = {
   '/learn/dashboard': House,
+  '/boards': ListChecks,
   '/habits': Target,
   '/learn': BookOpen,
   '/library': Library,
@@ -49,16 +51,19 @@ export function AppSidebar({ links }: { links: NavLinkItem[] }) {
       <nav className="mt-2 space-y-1">
         {links.map((link) => {
           const active = isActive(pathname, link.href);
+          const isDailyTasks = link.href === '/boards';
           const Icon = iconByHref[link.href as keyof typeof iconByHref] ?? BookOpen;
           return (
             <Link
               key={link.href}
               href={link.href}
               aria-current={active ? 'page' : undefined}
-              className={`group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold transition-colors ${
+              className={`group flex min-h-11 items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold transition-colors ${
                 active
                   ? 'bg-primary text-primary-foreground shadow-sm'
-                  : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+                  : isDailyTasks
+                    ? 'border-primary/20 bg-primary/10 hover:bg-primary/15 border text-primary'
+                    : 'text-muted-foreground hover:bg-muted hover:text-foreground'
               }`}
             >
               <Icon className="h-[18px] w-[18px]" strokeWidth={2} aria-hidden="true" />
@@ -69,11 +74,16 @@ export function AppSidebar({ links }: { links: NavLinkItem[] }) {
       </nav>
 
       <div className="mt-auto rounded-2xl bg-muted p-3">
-        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-card text-2xl shadow-sm" aria-hidden="true">
+        <div
+          className="flex h-12 w-12 items-center justify-center rounded-2xl bg-card text-2xl shadow-sm"
+          aria-hidden="true"
+        >
           🦊
         </div>
         <p className="mt-3 text-sm font-semibold text-foreground">Từng bước một nhé</p>
-        <p className="mt-1 text-xs leading-5 text-muted-foreground">Một việc nhỏ hôm nay cũng là tiến bộ.</p>
+        <p className="mt-1 text-xs leading-5 text-muted-foreground">
+          Một việc nhỏ hôm nay cũng là tiến bộ.
+        </p>
       </div>
     </aside>
   );

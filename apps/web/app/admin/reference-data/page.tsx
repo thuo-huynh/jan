@@ -5,6 +5,7 @@ import { BookMarked, GitCompare, Palette, Pencil, PackageOpen, Trash2 } from 'lu
 import { TableSkeletonRows } from '@/shared/components/TableSkeletonRows';
 import { useConfirm } from '@/shared/hooks/useConfirm';
 import { TabularImportPanel } from '@/features/admin/components/TabularImportPanel';
+import { SharedFlashcardDeckManager } from '@/features/admin/components/SharedFlashcardDeckManager';
 import { parseBooleanCell } from '@/shared/import/parseTabularImport';
 
 function EmptyTableState({ icon: Icon, message }: { icon: typeof PackageOpen; message: string }) {
@@ -83,12 +84,14 @@ const secondaryButtonClass = 'btn-outline';
 // Dense variants for table row actions (Edit/Delete), which need to stay
 // compact inside a data-dense admin table row rather than the default h-10.
 const rowButtonClass = 'btn-outline h-8 px-3 text-xs';
-const dangerButtonClass = 'btn-outline h-8 border-danger/40 px-3 text-xs text-danger hover:bg-danger/10';
+const dangerButtonClass =
+  'btn-outline h-8 border-danger/40 px-3 text-xs text-danger hover:bg-danger/10';
 
-type Tab = 'vocab' | 'grammar' | 'pairs' | 'themes';
+type Tab = 'vocab' | 'decks' | 'grammar' | 'pairs' | 'themes';
 
 const TABS: { value: Tab; label: string }[] = [
   { value: 'vocab', label: 'Từ vựng & Hán tự' },
+  { value: 'decks', label: 'Bộ Flashcards' },
   { value: 'grammar', label: 'Điểm ngữ pháp' },
   { value: 'pairs', label: 'Cặp dễ nhầm' },
   { value: 'themes', label: 'Giao diện' },
@@ -104,8 +107,8 @@ export default function AdminReferenceDataPage() {
           Dữ liệu tham chiếu
         </h1>
         <p className="mt-1.5 text-sm text-muted-foreground">
-          Quản lý kho từ vựng, Hán tự, điểm ngữ pháp và cặp dễ nhầm N2 dùng chung/toàn cục — độc
-          lập với các mục tự thêm hoặc ghi chú cá nhân của người dùng.
+          Quản lý kho từ vựng, Hán tự, điểm ngữ pháp và cặp dễ nhầm N2 dùng chung/toàn cục — độc lập
+          với các mục tự thêm hoặc ghi chú cá nhân của người dùng.
         </p>
       </div>
 
@@ -127,6 +130,7 @@ export default function AdminReferenceDataPage() {
       </div>
 
       {tab === 'vocab' && <VocabTab />}
+      {tab === 'decks' && <SharedFlashcardDeckManager />}
       {tab === 'grammar' && <GrammarTab />}
       {tab === 'pairs' && <PairsTab />}
       {tab === 'themes' && <ThemesTab />}
@@ -174,7 +178,9 @@ const VOCAB_IMPORT_TEMPLATES = {
   html: '<table>\n  <tr><th>word</th><th>reading</th><th>meaning</th><th>example</th><th>jlptLevel</th><th>isKanji</th></tr>\n  <tr><td>食べる</td><td>たべる</td><td>to eat</td><td>ご飯を食べる</td><td>N2</td><td>false</td></tr>\n</table>',
 };
 
-function mapVocabRecord(record: Record<string, string>): { entry: VocabBulkEntry } | { error: string } {
+function mapVocabRecord(
+  record: Record<string, string>
+): { entry: VocabBulkEntry } | { error: string } {
   const word = record.word?.trim();
   const meaning = record.meaning?.trim();
   if (!word) return { error: 'Thiếu cột "word"' };
@@ -286,7 +292,11 @@ function VocabTab() {
             {form.id ? 'Sửa mục' : 'Thêm mục mới'}
           </h2>
           {!form.id && (
-            <button type="button" onClick={() => setBulkOpen((v) => !v)} className={secondaryButtonClass}>
+            <button
+              type="button"
+              onClick={() => setBulkOpen((v) => !v)}
+              className={secondaryButtonClass}
+            >
               {bulkOpen ? 'Đóng' : 'Nhập hàng loạt'}
             </button>
           )}
@@ -354,7 +364,11 @@ function VocabTab() {
             {form.id ? 'Lưu thay đổi' : 'Thêm mục'}
           </button>
           {form.id && (
-            <button type="button" onClick={() => setForm(emptyVocabForm)} className={secondaryButtonClass}>
+            <button
+              type="button"
+              onClick={() => setForm(emptyVocabForm)}
+              className={secondaryButtonClass}
+            >
               Hủy
             </button>
           )}
@@ -369,7 +383,9 @@ function VocabTab() {
           renderPreview={(entry) => (
             <>
               <span className="font-jp font-medium">{entry.word}</span>{' '}
-              {entry.reading && <span className="font-jp text-xs text-muted-foreground">{entry.reading}</span>}{' '}
+              {entry.reading && (
+                <span className="font-jp text-xs text-muted-foreground">{entry.reading}</span>
+              )}{' '}
               <span className="text-muted-foreground">— {entry.meaning}</span>
             </>
           )}
@@ -406,7 +422,7 @@ function VocabTab() {
       </form>
 
       {error && (
-        <div className="rounded-lg border border-danger/30 bg-danger/10 px-4 py-2 text-sm text-danger">
+        <div className="border-danger/30 bg-danger/10 rounded-lg border px-4 py-2 text-sm text-danger">
           {error}
         </div>
       )}
@@ -437,7 +453,9 @@ function VocabTab() {
                   <td className="px-4 py-3 font-jp text-foreground">{item.word}</td>
                   <td className="px-4 py-3 font-jp text-muted-foreground">{item.reading}</td>
                   <td className="px-4 py-3 text-muted-foreground">{item.meaning}</td>
-                  <td className="px-4 py-3 text-muted-foreground">{item.is_kanji ? 'Có' : 'Không'}</td>
+                  <td className="px-4 py-3 text-muted-foreground">
+                    {item.is_kanji ? 'Có' : 'Không'}
+                  </td>
                   <td className="px-4 py-3">
                     <div className="flex justify-end gap-2">
                       <button
@@ -458,7 +476,11 @@ function VocabTab() {
                         <Pencil className="h-3.5 w-3.5" aria-hidden="true" />
                         Sửa
                       </button>
-                      <button type="button" className={dangerButtonClass} onClick={() => handleDelete(item.id)}>
+                      <button
+                        type="button"
+                        className={dangerButtonClass}
+                        onClick={() => handleDelete(item.id)}
+                      >
                         <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
                         Xóa
                       </button>
@@ -520,7 +542,9 @@ const GRAMMAR_IMPORT_TEMPLATES = {
   html: '<table>\n  <tr><th>pattern</th><th>meaning</th><th>connectionForm</th><th>formalityNuance</th><th>exampleSentences</th><th>jlptLevel</th><th>frequencyTag</th><th>n3Overlap</th></tr>\n  <tr><td>〜ばかりか</td><td>không những... mà còn...</td><td>V/A/N + ばかりか</td><td>trang trọng</td><td>彼は英語ばかりか中国語も話せる。|勉強ばかりか運動も得意だ。</td><td>N2</td><td>cao</td><td>false</td></tr>\n</table>',
 };
 
-function mapGrammarRecord(record: Record<string, string>): { entry: GrammarBulkEntry } | { error: string } {
+function mapGrammarRecord(
+  record: Record<string, string>
+): { entry: GrammarBulkEntry } | { error: string } {
   const pattern = record.pattern?.trim();
   const meaning = record.meaning?.trim();
   if (!pattern) return { error: 'Thiếu cột "pattern"' };
@@ -646,7 +670,11 @@ function GrammarTab() {
             {form.id ? 'Sửa điểm ngữ pháp' : 'Thêm điểm ngữ pháp mới'}
           </h2>
           {!form.id && (
-            <button type="button" onClick={() => setBulkOpen((v) => !v)} className={secondaryButtonClass}>
+            <button
+              type="button"
+              onClick={() => setBulkOpen((v) => !v)}
+              className={secondaryButtonClass}
+            >
               {bulkOpen ? 'Đóng' : 'Nhập hàng loạt'}
             </button>
           )}
@@ -732,7 +760,11 @@ function GrammarTab() {
             {form.id ? 'Lưu thay đổi' : 'Thêm điểm ngữ pháp'}
           </button>
           {form.id && (
-            <button type="button" onClick={() => setForm(emptyGrammarForm)} className={secondaryButtonClass}>
+            <button
+              type="button"
+              onClick={() => setForm(emptyGrammarForm)}
+              className={secondaryButtonClass}
+            >
               Hủy
             </button>
           )}
@@ -783,7 +815,7 @@ function GrammarTab() {
       </form>
 
       {error && (
-        <div className="rounded-lg border border-danger/30 bg-danger/10 px-4 py-2 text-sm text-danger">
+        <div className="border-danger/30 bg-danger/10 rounded-lg border px-4 py-2 text-sm text-danger">
           {error}
         </div>
       )}
@@ -814,7 +846,9 @@ function GrammarTab() {
                   <td className="px-4 py-3 font-jp text-foreground">{item.pattern}</td>
                   <td className="px-4 py-3 text-muted-foreground">{item.meaning}</td>
                   <td className="px-4 py-3 text-muted-foreground">{item.frequency_tag ?? '—'}</td>
-                  <td className="px-4 py-3 text-muted-foreground">{item.n3_overlap ? 'Có' : 'Không'}</td>
+                  <td className="px-4 py-3 text-muted-foreground">
+                    {item.n3_overlap ? 'Có' : 'Không'}
+                  </td>
                   <td className="px-4 py-3">
                     <div className="flex justify-end gap-2">
                       <button
@@ -837,7 +871,11 @@ function GrammarTab() {
                         <Pencil className="h-3.5 w-3.5" aria-hidden="true" />
                         Sửa
                       </button>
-                      <button type="button" className={dangerButtonClass} onClick={() => handleDelete(item.id)}>
+                      <button
+                        type="button"
+                        className={dangerButtonClass}
+                        onClick={() => handleDelete(item.id)}
+                      >
                         <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
                         Xóa
                       </button>
@@ -1030,7 +1068,11 @@ function PairsTab() {
             {form.id ? 'Lưu thay đổi' : 'Thêm cặp'}
           </button>
           {form.id && (
-            <button type="button" onClick={() => setForm(emptyPairForm)} className={secondaryButtonClass}>
+            <button
+              type="button"
+              onClick={() => setForm(emptyPairForm)}
+              className={secondaryButtonClass}
+            >
               Hủy
             </button>
           )}
@@ -1061,7 +1103,7 @@ function PairsTab() {
       </form>
 
       {error && (
-        <div className="rounded-lg border border-danger/30 bg-danger/10 px-4 py-2 text-sm text-danger">
+        <div className="border-danger/30 bg-danger/10 rounded-lg border px-4 py-2 text-sm text-danger">
           {error}
         </div>
       )}
@@ -1110,7 +1152,11 @@ function PairsTab() {
                         <Pencil className="h-3.5 w-3.5" aria-hidden="true" />
                         Sửa
                       </button>
-                      <button type="button" className={dangerButtonClass} onClick={() => handleDelete(item.id)}>
+                      <button
+                        type="button"
+                        className={dangerButtonClass}
+                        onClick={() => handleDelete(item.id)}
+                      >
                         <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
                         Xóa
                       </button>
@@ -1328,12 +1374,36 @@ function ThemesTab() {
               Chế độ sáng
             </h3>
             <div className="space-y-3">
-              <ColorField label="Màu chính" value={form.primaryLight} onChange={(v) => setForm((f) => ({ ...f, primaryLight: v }))} />
-              <ColorField label="Chữ trên nền chính" value={form.primaryForegroundLight} onChange={(v) => setForm((f) => ({ ...f, primaryForegroundLight: v }))} />
-              <ColorField label="Màu phụ" value={form.secondaryLight} onChange={(v) => setForm((f) => ({ ...f, secondaryLight: v }))} />
-              <ColorField label="Chữ trên nền phụ" value={form.secondaryForegroundLight} onChange={(v) => setForm((f) => ({ ...f, secondaryForegroundLight: v }))} />
-              <ColorField label="Màu nhấn" value={form.accentLight} onChange={(v) => setForm((f) => ({ ...f, accentLight: v }))} />
-              <ColorField label="Chữ trên nền nhấn" value={form.accentForegroundLight} onChange={(v) => setForm((f) => ({ ...f, accentForegroundLight: v }))} />
+              <ColorField
+                label="Màu chính"
+                value={form.primaryLight}
+                onChange={(v) => setForm((f) => ({ ...f, primaryLight: v }))}
+              />
+              <ColorField
+                label="Chữ trên nền chính"
+                value={form.primaryForegroundLight}
+                onChange={(v) => setForm((f) => ({ ...f, primaryForegroundLight: v }))}
+              />
+              <ColorField
+                label="Màu phụ"
+                value={form.secondaryLight}
+                onChange={(v) => setForm((f) => ({ ...f, secondaryLight: v }))}
+              />
+              <ColorField
+                label="Chữ trên nền phụ"
+                value={form.secondaryForegroundLight}
+                onChange={(v) => setForm((f) => ({ ...f, secondaryForegroundLight: v }))}
+              />
+              <ColorField
+                label="Màu nhấn"
+                value={form.accentLight}
+                onChange={(v) => setForm((f) => ({ ...f, accentLight: v }))}
+              />
+              <ColorField
+                label="Chữ trên nền nhấn"
+                value={form.accentForegroundLight}
+                onChange={(v) => setForm((f) => ({ ...f, accentForegroundLight: v }))}
+              />
             </div>
           </div>
           <div>
@@ -1341,12 +1411,36 @@ function ThemesTab() {
               Chế độ tối
             </h3>
             <div className="space-y-3">
-              <ColorField label="Màu chính" value={form.primaryDark} onChange={(v) => setForm((f) => ({ ...f, primaryDark: v }))} />
-              <ColorField label="Chữ trên nền chính" value={form.primaryForegroundDark} onChange={(v) => setForm((f) => ({ ...f, primaryForegroundDark: v }))} />
-              <ColorField label="Màu phụ" value={form.secondaryDark} onChange={(v) => setForm((f) => ({ ...f, secondaryDark: v }))} />
-              <ColorField label="Chữ trên nền phụ" value={form.secondaryForegroundDark} onChange={(v) => setForm((f) => ({ ...f, secondaryForegroundDark: v }))} />
-              <ColorField label="Màu nhấn" value={form.accentDark} onChange={(v) => setForm((f) => ({ ...f, accentDark: v }))} />
-              <ColorField label="Chữ trên nền nhấn" value={form.accentForegroundDark} onChange={(v) => setForm((f) => ({ ...f, accentForegroundDark: v }))} />
+              <ColorField
+                label="Màu chính"
+                value={form.primaryDark}
+                onChange={(v) => setForm((f) => ({ ...f, primaryDark: v }))}
+              />
+              <ColorField
+                label="Chữ trên nền chính"
+                value={form.primaryForegroundDark}
+                onChange={(v) => setForm((f) => ({ ...f, primaryForegroundDark: v }))}
+              />
+              <ColorField
+                label="Màu phụ"
+                value={form.secondaryDark}
+                onChange={(v) => setForm((f) => ({ ...f, secondaryDark: v }))}
+              />
+              <ColorField
+                label="Chữ trên nền phụ"
+                value={form.secondaryForegroundDark}
+                onChange={(v) => setForm((f) => ({ ...f, secondaryForegroundDark: v }))}
+              />
+              <ColorField
+                label="Màu nhấn"
+                value={form.accentDark}
+                onChange={(v) => setForm((f) => ({ ...f, accentDark: v }))}
+              />
+              <ColorField
+                label="Chữ trên nền nhấn"
+                value={form.accentForegroundDark}
+                onChange={(v) => setForm((f) => ({ ...f, accentForegroundDark: v }))}
+              />
             </div>
           </div>
         </div>
@@ -1361,7 +1455,11 @@ function ThemesTab() {
             {form.id ? 'Lưu thay đổi' : 'Thêm giao diện'}
           </button>
           {form.id && (
-            <button type="button" onClick={() => setForm(emptyThemeForm)} className={secondaryButtonClass}>
+            <button
+              type="button"
+              onClick={() => setForm(emptyThemeForm)}
+              className={secondaryButtonClass}
+            >
               Hủy
             </button>
           )}
@@ -1369,7 +1467,7 @@ function ThemesTab() {
       </div>
 
       {error && (
-        <div className="rounded-lg border border-danger/30 bg-danger/10 px-4 py-2 text-sm text-danger">
+        <div className="border-danger/30 bg-danger/10 rounded-lg border px-4 py-2 text-sm text-danger">
           {error}
         </div>
       )}
@@ -1403,7 +1501,9 @@ function ThemesTab() {
                   <td className="px-4 py-3">
                     <div className="space-y-1">
                       <div className="flex items-center gap-1">
-                        <span className="w-8 text-[10px] uppercase text-muted-foreground">Sáng</span>
+                        <span className="w-8 text-[10px] uppercase text-muted-foreground">
+                          Sáng
+                        </span>
                         <span
                           className="h-5 w-5 rounded-full border border-border"
                           style={{ backgroundColor: item.primary_light }}
@@ -1463,7 +1563,11 @@ function ThemesTab() {
                         <Pencil className="h-3.5 w-3.5" aria-hidden="true" />
                         Sửa
                       </button>
-                      <button type="button" className={dangerButtonClass} onClick={() => handleDelete(item.id)}>
+                      <button
+                        type="button"
+                        className={dangerButtonClass}
+                        onClick={() => handleDelete(item.id)}
+                      >
                         <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
                         Xóa
                       </button>

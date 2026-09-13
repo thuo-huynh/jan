@@ -24,9 +24,9 @@ export default async function BoardsPage() {
   return (
     <div>
       <div className="mb-8">
-        <h1 className="page-heading">Bảng công việc</h1>
+        <h1 className="page-heading">Daily Tasks</h1>
         <p className="page-intro">
-          Sắp xếp công việc theo bảng riêng khi bạn cần một góc quản lý sâu hơn.
+          Lên danh sách, theo dõi tiến độ và hoàn thành từng việc học trong ngày của bạn.
         </p>
       </div>
       <BoardList initialBoards={boards ?? []} />

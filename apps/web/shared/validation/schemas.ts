@@ -68,6 +68,35 @@ export const vocabEntrySchema = z.object({
 });
 export type VocabEntryInput = z.infer<typeof vocabEntrySchema>;
 
+const sharedFlashcardDeckLabelSchema = z.string().trim().min(1).max(50);
+
+export const sharedFlashcardDeckSchema = z
+  .object({
+    title: z.string().trim().min(1, 'Tên bộ là bắt buộc').max(160),
+    description: z.string().trim().max(1000).optional().nullable(),
+    jlptLevel: z.string().trim().max(10).optional().nullable(),
+    labels: z.array(sharedFlashcardDeckLabelSchema).max(20).optional().default([]),
+    isPublished: z.boolean().optional().default(false),
+    vocabIds: z.array(uuid).max(1000).optional().default([]),
+  })
+  .superRefine((value, context) => {
+    if (new Set(value.vocabIds).size !== value.vocabIds.length) {
+      context.addIssue({
+        code: 'custom',
+        path: ['vocabIds'],
+        message: 'Mỗi từ chỉ được thêm một lần.',
+      });
+    }
+    if (value.isPublished && value.vocabIds.length === 0) {
+      context.addIssue({
+        code: 'custom',
+        path: ['vocabIds'],
+        message: 'Cần ít nhất một từ để xuất bản bộ.',
+      });
+    }
+  });
+export type SharedFlashcardDeckInput = z.infer<typeof sharedFlashcardDeckSchema>;
+
 // ---------------------------------------------------------------------------
 // Grammar (user_grammar_status — status + personal note, T043/T044)
 // ---------------------------------------------------------------------------
@@ -159,7 +188,9 @@ const passageSegmentSchema = z.union([
 
 export const readingPassageQuestionSchema = z.object({
   questionText: z.string().trim().min(1, 'Câu hỏi là bắt buộc').max(1000),
-  choices: z.array(z.string().trim().min(1, 'Đáp án không được để trống').max(500)).length(4, 'Cần đúng 4 đáp án'),
+  choices: z
+    .array(z.string().trim().min(1, 'Đáp án không được để trống').max(500))
+    .length(4, 'Cần đúng 4 đáp án'),
   correctChoiceIndex: z.number().int().min(0).max(3),
   explanation: z.string().trim().min(1, 'Giải thích là bắt buộc').max(5000),
 });
@@ -220,11 +251,7 @@ export const grammarPointSchema = z.object({
   meaning: z.string().trim().min(1, 'Nghĩa là bắt buộc').max(1000),
   connectionForm: z.string().trim().max(500).optional().nullable(),
   formalityNuance: z.string().trim().max(1000).optional().nullable(),
-  exampleSentences: z
-    .array(z.string().trim().min(1).max(500))
-    .max(20)
-    .optional()
-    .default([]),
+  exampleSentences: z.array(z.string().trim().min(1).max(500)).max(20).optional().default([]),
   jlptLevel: z.string().trim().max(10).optional().default('N2'),
   frequencyTag: z.string().trim().max(20).optional().nullable(),
   n3Overlap: z.boolean().optional().default(false),

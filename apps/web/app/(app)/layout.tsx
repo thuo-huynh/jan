@@ -37,6 +37,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 
   const navLinks: NavLinkItem[] = [
     { href: '/learn/dashboard', label: 'Trang chủ' },
+    { href: '/boards', label: 'Daily Tasks' },
     { href: '/habits', label: 'Thói quen' },
     { href: '/learn', label: 'Học' },
     { href: '/library', label: 'Thư viện' },
@@ -75,7 +76,9 @@ export default async function AppLayout({ children }: { children: React.ReactNod
           </div>
         </div>
       </header>
-      <main className="mx-auto max-w-7xl px-4 py-7 sm:px-6 sm:py-10 lg:px-10 lg:py-9">{children}</main>
+      <main className="mx-auto max-w-7xl px-4 py-7 sm:px-6 sm:py-10 lg:px-10 lg:py-9">
+        {children}
+      </main>
     </div>
   );
 }

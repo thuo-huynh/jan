@@ -4,3 +4,14 @@ export interface VocabSet {
   name: string;
   created_at: string;
 }
+
+/** A published admin-curated deck shown in the learner Flashcard catalog. */
+export interface SharedFlashcardDeckSummary {
+  id: string;
+  title: string;
+  description: string | null;
+  jlptLevel: string | null;
+  labels: string[];
+  cardCount: number;
+  reviewedCount: number;
+}
