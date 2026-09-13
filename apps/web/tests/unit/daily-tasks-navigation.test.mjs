@@ -16,5 +16,5 @@ test('names the Kanban landing page for daily planning', async () => {
   const boardsPage = await readFile(new URL('app/(app)/boards/page.tsx', appRoot), 'utf8');
 
   assert.match(boardsPage, />Daily Tasks</);
-  assert.match(boardsPage, /Lên danh sách, theo dõi tiến độ/);
+  assert.match(boardsPage, /Chọn một ngày để lên kế hoạch/);
 });

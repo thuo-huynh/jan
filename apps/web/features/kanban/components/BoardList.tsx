@@ -60,8 +60,8 @@ export function BoardList({ initialBoards }: BoardListProps) {
 
     const { data: board, error: boardError } = await supabase
       .from('boards')
-      .insert({ user_id: user.id, name: parsed.data.name })
-      .select('id, user_id, name, created_at')
+      .insert({ user_id: user.id, name: parsed.data.name, is_daily: false })
+      .select('id, user_id, name, is_daily, created_at')
       .single();
 
     if (boardError || !board) {
@@ -75,7 +75,7 @@ export function BoardList({ initialBoards }: BoardListProps) {
         board_id: board.id,
         name: columnName,
         position: index,
-      })),
+      }))
     );
 
     setSubmitting(false);
@@ -130,7 +130,7 @@ export function BoardList({ initialBoards }: BoardListProps) {
 
       {boards.length === 0 ? (
         <div className="flex flex-col items-center gap-3 rounded-lg border border-dashed border-border p-10 text-center">
-          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
+          <div className="bg-primary/10 flex h-12 w-12 items-center justify-center rounded-full">
             <LayoutGrid className="h-6 w-6 text-primary" aria-hidden="true" />
           </div>
           <p className="max-w-xs text-sm text-muted-foreground">
@@ -140,9 +140,11 @@ export function BoardList({ initialBoards }: BoardListProps) {
       ) : (
         <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {boards.map((board) => (
-            <li key={board.id} className="card-interactive group relative hover:border-primary/40">
+            <li key={board.id} className="card-interactive hover:border-primary/40 group relative">
               <Link href={`/boards/${board.id}`} className="block">
-                <h3 className="truncate pr-6 text-sm font-semibold text-foreground">{board.name}</h3>
+                <h3 className="truncate pr-6 text-sm font-semibold text-foreground">
+                  {board.name}
+                </h3>
                 <p className="mt-1 text-xs text-muted-foreground">
                   Đã tạo {new Date(board.created_at).toLocaleDateString('vi-VN')}
                 </p>
@@ -152,7 +154,7 @@ export function BoardList({ initialBoards }: BoardListProps) {
                 onClick={() => handleDelete(board.id)}
                 disabled={deletingId === board.id}
                 aria-label={`Xóa bảng ${board.name}`}
-                className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded text-muted-foreground opacity-0 transition-opacity hover:bg-danger/10 hover:text-danger focus-visible:opacity-100 group-hover:opacity-100 disabled:opacity-40"
+                className="hover:bg-danger/10 absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded text-muted-foreground opacity-0 transition-opacity hover:text-danger focus-visible:opacity-100 disabled:opacity-40 group-hover:opacity-100"
               >
                 <Trash2 className="h-4 w-4" aria-hidden="true" />
               </button>

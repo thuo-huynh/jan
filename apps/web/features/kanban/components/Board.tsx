@@ -28,10 +28,12 @@ import { TaskDetailModal } from './TaskDetailModal';
 import { BoardFilters, EMPTY_FILTERS, type BoardFilterState } from './BoardFilters';
 import { getDueUrgency } from '../lib/urgency';
 import type { BoardColumn, BoardTask } from '../types';
+import { DailyTaskCalendar } from './DailyTaskCalendar';
 
 interface BoardProps {
   boardId: string;
   initialColumns: BoardColumn[];
+  dailyMode?: boolean;
 }
 
 /**
@@ -42,7 +44,14 @@ interface BoardProps {
  * and an inline error banner is shown (no toast system exists yet — that's
  * Polish-phase T098).
  */
-export function BoardView({ boardId, initialColumns }: BoardProps) {
+function todayDateKey() {
+  const now = new Date();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+  return `${now.getFullYear()}-${month}-${day}`;
+}
+
+export function BoardView({ boardId, initialColumns, dailyMode = false }: BoardProps) {
   const [columns, setColumns] = useState<BoardColumn[]>(initialColumns);
   const [activeTask, setActiveTask] = useState<BoardTask | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -51,17 +60,18 @@ export function BoardView({ boardId, initialColumns }: BoardProps) {
   const { confirm, confirmDialog } = useConfirm();
   const [newColumnName, setNewColumnName] = useState('');
   const [addingColumn, setAddingColumn] = useState(false);
+  const [dailyDate, setDailyDate] = useState(todayDateKey);
 
   const snapshotRef = useRef<BoardColumn[] | null>(null);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
-    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
   );
 
   const findColumnByTaskId = useCallback(
     (taskId: string) => columns.find((c) => c.tasks.some((t) => t.id === taskId)),
-    [columns],
+    [columns]
   );
 
   const filteredColumns = useMemo(
@@ -69,6 +79,7 @@ export function BoardView({ boardId, initialColumns }: BoardProps) {
       columns.map((c) => ({
         ...c,
         tasks: c.tasks.filter((t) => {
+          if (dailyMode && t.due_date !== dailyDate) return false;
           if (filters.columnId && filters.columnId !== c.id) return false;
           if (filters.tag && !t.tags.includes(filters.tag)) return false;
           if (filters.dueBefore && (!t.due_date || t.due_date > filters.dueBefore)) return false;
@@ -81,7 +92,7 @@ export function BoardView({ boardId, initialColumns }: BoardProps) {
           return true;
         }),
       })),
-    [columns, filters],
+    [columns, dailyDate, dailyMode, filters]
   );
 
   // Board-wide "what's overdue / due today" counts (T039 polish) — computed
@@ -106,7 +117,7 @@ export function BoardView({ boardId, initialColumns }: BoardProps) {
   }
 
   const selectedTask = selectedTaskId
-    ? columns.flatMap((c) => c.tasks).find((t) => t.id === selectedTaskId) ?? null
+    ? (columns.flatMap((c) => c.tasks).find((t) => t.id === selectedTaskId) ?? null)
     : null;
 
   // ---------------------------------------------------------------------
@@ -132,7 +143,9 @@ export function BoardView({ boardId, initialColumns }: BoardProps) {
 
     const activeColumn = findColumnByTaskId(activeId);
     const overColumn =
-      over.data.current?.type === 'task' ? findColumnByTaskId(overId) : columns.find((c) => c.id === overId);
+      over.data.current?.type === 'task'
+        ? findColumnByTaskId(overId)
+        : columns.find((c) => c.id === overId);
 
     if (!activeColumn || !overColumn || activeColumn.id === overColumn.id) return;
 
@@ -187,13 +200,18 @@ export function BoardView({ boardId, initialColumns }: BoardProps) {
         return;
       }
 
-      const reordered = arrayMove(columns, oldIndex, newIndex).map((c, i) => ({ ...c, position: i }));
+      const reordered = arrayMove(columns, oldIndex, newIndex).map((c, i) => ({
+        ...c,
+        position: i,
+      }));
       setColumns(reordered);
       snapshotRef.current = null;
 
       const supabase = createClient();
       const results = await Promise.all(
-        reordered.map((c) => supabase.from('columns').update({ position: c.position }).eq('id', c.id)),
+        reordered.map((c) =>
+          supabase.from('columns').update({ position: c.position }).eq('id', c.id)
+        )
       );
       const failed = results.find((r) => r.error);
       if (failed) {
@@ -213,7 +231,9 @@ export function BoardView({ boardId, initialColumns }: BoardProps) {
       }
 
       const overColumn =
-        over.data.current?.type === 'task' ? findColumnByTaskId(overId) : columns.find((c) => c.id === overId);
+        over.data.current?.type === 'task'
+          ? findColumnByTaskId(overId)
+          : columns.find((c) => c.id === overId);
       const targetColumn = overColumn ?? activeColumn;
 
       let workingColumns = columns;
@@ -222,7 +242,7 @@ export function BoardView({ boardId, initialColumns }: BoardProps) {
         const newIndex = activeColumn.tasks.findIndex((t) => t.id === overId);
         if (oldIndex !== -1 && newIndex !== -1 && oldIndex !== newIndex) {
           workingColumns = columns.map((c) =>
-            c.id === activeColumn.id ? { ...c, tasks: arrayMove(c.tasks, oldIndex, newIndex) } : c,
+            c.id === activeColumn.id ? { ...c, tasks: arrayMove(c.tasks, oldIndex, newIndex) } : c
           );
         }
       }
@@ -240,7 +260,12 @@ export function BoardView({ boardId, initialColumns }: BoardProps) {
       const updates = finalColumns
         .filter((c) => touchedColumnIds.has(c.id))
         .flatMap((c) => c.tasks)
-        .map((t) => supabase.from('tasks').update({ column_id: t.column_id, position: t.position }).eq('id', t.id));
+        .map((t) =>
+          supabase
+            .from('tasks')
+            .update({ column_id: t.column_id, position: t.position })
+            .eq('id', t.id)
+        );
 
       const results = await Promise.all(updates);
       const failed = results.find((r) => r.error);
@@ -280,7 +305,10 @@ export function BoardView({ boardId, initialColumns }: BoardProps) {
     const previous = columns;
     setColumns((prev) => prev.map((c) => (c.id === columnId ? { ...c, name } : c)));
     const supabase = createClient();
-    const { error: updateError } = await supabase.from('columns').update({ name }).eq('id', columnId);
+    const { error: updateError } = await supabase
+      .from('columns')
+      .update({ name })
+      .eq('id', columnId);
     if (updateError) {
       setError('Không thể đổi tên cột — đã khôi phục.');
       setColumns(previous);
@@ -328,9 +356,10 @@ export function BoardView({ boardId, initialColumns }: BoardProps) {
         progress_pct: 0,
         attachment_count: 0,
         position: column.tasks.length,
+        ...(dailyMode ? { due_date: dailyDate } : {}),
       })
       .select(
-        'id, column_id, board_id, title, description, tags, due_date, progress_pct, attachment_count, assignee_id, position, created_at, updated_at',
+        'id, column_id, board_id, title, description, tags, due_date, progress_pct, attachment_count, assignee_id, position, created_at, updated_at'
       )
       .single();
 
@@ -340,7 +369,9 @@ export function BoardView({ boardId, initialColumns }: BoardProps) {
     }
 
     const newTask: BoardTask = { ...data, task_checklist_items: [] };
-    setColumns((prev) => prev.map((c) => (c.id === columnId ? { ...c, tasks: [...c.tasks, newTask] } : c)));
+    setColumns((prev) =>
+      prev.map((c) => (c.id === columnId ? { ...c, tasks: [...c.tasks, newTask] } : c))
+    );
   }
 
   function handleTaskUpdated(task: BoardTask) {
@@ -348,12 +379,14 @@ export function BoardView({ boardId, initialColumns }: BoardProps) {
       prev.map((c) => ({
         ...c,
         tasks: c.tasks.map((t) => (t.id === task.id ? task : t)),
-      })),
+      }))
     );
   }
 
   function handleTaskDeleted(taskId: string) {
-    setColumns((prev) => prev.map((c) => ({ ...c, tasks: c.tasks.filter((t) => t.id !== taskId) })));
+    setColumns((prev) =>
+      prev.map((c) => ({ ...c, tasks: c.tasks.filter((t) => t.id !== taskId) }))
+    );
   }
 
   return (
@@ -362,13 +395,27 @@ export function BoardView({ boardId, initialColumns }: BoardProps) {
       {error && (
         <div className="mb-4 flex items-center justify-between rounded-lg border border-danger bg-card px-3 py-2 text-sm text-danger">
           <span>{error}</span>
-          <button type="button" onClick={() => setError(null)} className="font-medium hover:opacity-80">
+          <button
+            type="button"
+            onClick={() => setError(null)}
+            className="font-medium hover:opacity-80"
+          >
             Đóng
           </button>
         </div>
       )}
 
-      {(dueSummary.overdue > 0 || dueSummary.dueToday > 0) && (
+      {dailyMode && (
+        <div className="mb-6">
+          <DailyTaskCalendar
+            columns={columns}
+            selectedDate={dailyDate}
+            onSelectDate={setDailyDate}
+          />
+        </div>
+      )}
+
+      {!dailyMode && (dueSummary.overdue > 0 || dueSummary.dueToday > 0) && (
         <div className="mb-3 flex flex-wrap gap-2">
           {dueSummary.overdue > 0 && (
             <button
@@ -378,7 +425,7 @@ export function BoardView({ boardId, initialColumns }: BoardProps) {
               className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors ${
                 filters.urgency === 'overdue'
                   ? 'border-danger bg-danger text-white'
-                  : 'border-danger/30 bg-danger/10 text-danger hover:bg-danger/20'
+                  : 'border-danger/30 bg-danger/10 hover:bg-danger/20 text-danger'
               }`}
             >
               <AlertTriangle className="h-3.5 w-3.5" aria-hidden="true" />
@@ -393,7 +440,7 @@ export function BoardView({ boardId, initialColumns }: BoardProps) {
               className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors ${
                 filters.urgency === 'today'
                   ? 'border-accent bg-accent text-accent-foreground'
-                  : 'border-accent/30 bg-accent/10 text-accent hover:bg-accent/20'
+                  : 'border-accent/30 bg-accent/10 hover:bg-accent/20 text-accent'
               }`}
             >
               <Clock className="h-3.5 w-3.5" aria-hidden="true" />
@@ -421,7 +468,10 @@ export function BoardView({ boardId, initialColumns }: BoardProps) {
         onDragEnd={handleDragEnd}
       >
         <div className="flex items-start gap-4 overflow-x-auto pb-4">
-          <SortableContext items={columns.map((c) => c.id)} strategy={horizontalListSortingStrategy}>
+          <SortableContext
+            items={columns.map((c) => c.id)}
+            strategy={horizontalListSortingStrategy}
+          >
             {filteredColumns.map((column) => (
               <Column
                 key={column.id}
@@ -436,7 +486,10 @@ export function BoardView({ boardId, initialColumns }: BoardProps) {
 
           <div className="w-72 shrink-0">
             {addingColumn ? (
-              <form onSubmit={handleAddColumn} className="rounded-lg border border-border bg-card p-3">
+              <form
+                onSubmit={handleAddColumn}
+                className="rounded-lg border border-border bg-card p-3"
+              >
                 <input
                   autoFocus
                   value={newColumnName}
@@ -480,7 +533,9 @@ export function BoardView({ boardId, initialColumns }: BoardProps) {
           </div>
         </div>
 
-        <DragOverlay>{activeTask ? <TaskCard task={activeTask} onClick={() => {}} overlay /> : null}</DragOverlay>
+        <DragOverlay>
+          {activeTask ? <TaskCard task={activeTask} onClick={() => {}} overlay /> : null}
+        </DragOverlay>
       </DndContext>
 
       {selectedTask && (

@@ -9,6 +9,7 @@ export interface BoardSummary {
   id: string;
   user_id: string;
   name: string;
+  is_daily: boolean;
   created_at: string;
 }
 
