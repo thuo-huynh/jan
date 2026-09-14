@@ -27,7 +27,7 @@ import { TaskCard } from './TaskCard';
 import { TaskDetailModal } from './TaskDetailModal';
 import { BoardFilters, EMPTY_FILTERS, type BoardFilterState } from './BoardFilters';
 import { getDueUrgency } from '../lib/urgency';
-import type { BoardColumn, BoardTask } from '../types';
+import type { BoardColumn, BoardTask, FocusBlock } from '../types';
 import { DailyTaskCalendar } from './DailyTaskCalendar';
 import { todayDateKey } from '../lib/dates';
 import { DailyTaskViewSwitcher, type DailyTaskView } from './DailyTaskViewSwitcher';
@@ -38,6 +38,7 @@ import { FocusPlanner } from './FocusPlanner';
 interface BoardProps {
   boardId: string;
   initialColumns: BoardColumn[];
+  initialFocusBlocks?: FocusBlock[];
   dailyMode?: boolean;
 }
 
@@ -49,7 +50,12 @@ interface BoardProps {
  * and an inline error banner is shown (no toast system exists yet — that's
  * Polish-phase T098).
  */
-export function BoardView({ boardId, initialColumns, dailyMode = false }: BoardProps) {
+export function BoardView({
+  boardId,
+  initialColumns,
+  initialFocusBlocks = [],
+  dailyMode = false,
+}: BoardProps) {
   const [columns, setColumns] = useState<BoardColumn[]>(initialColumns);
   const [activeTask, setActiveTask] = useState<BoardTask | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -60,6 +66,7 @@ export function BoardView({ boardId, initialColumns, dailyMode = false }: BoardP
   const [addingColumn, setAddingColumn] = useState(false);
   const [dailyDate, setDailyDate] = useState(todayDateKey);
   const [dailyView, setDailyView] = useState<DailyTaskView>('today');
+  const [focusBlocks, setFocusBlocks] = useState<FocusBlock[]>(initialFocusBlocks);
 
   const snapshotRef = useRef<BoardColumn[] | null>(null);
 
@@ -405,10 +412,29 @@ export function BoardView({ boardId, initialColumns, dailyMode = false }: BoardP
       )}
 
       {dailyMode && (
-        <><DailyTaskViewSwitcher value={dailyView} onChange={setDailyView} /><DailyTaskQuickAdd columns={columns} onAdd={handleAddTask} />
-          {dailyView === 'calendar' && <div className="mb-6"><DailyTaskCalendar columns={columns} selectedDate={dailyDate} onSelectDate={setDailyDate} /></div>}
-          {dailyView === 'today' && <DailyTaskToday columns={columns} date={dailyDate} onTaskClick={setSelectedTaskId} />}
-          {dailyView === 'planner' && <FocusPlanner columns={columns} onTaskClick={setSelectedTaskId} />}
+        <>
+          <DailyTaskViewSwitcher value={dailyView} onChange={setDailyView} />
+          <DailyTaskQuickAdd columns={columns} onAdd={handleAddTask} />
+          {dailyView === 'calendar' && (
+            <div className="mb-6">
+              <DailyTaskCalendar
+                columns={columns}
+                selectedDate={dailyDate}
+                onSelectDate={setDailyDate}
+              />
+            </div>
+          )}
+          {dailyView === 'today' && (
+            <DailyTaskToday columns={columns} date={dailyDate} onTaskClick={setSelectedTaskId} />
+          )}
+          {dailyView === 'planner' && (
+            <FocusPlanner
+              columns={columns}
+              focusBlocks={focusBlocks}
+              onFocusBlocksChange={setFocusBlocks}
+              onTaskClick={setSelectedTaskId}
+            />
+          )}
         </>
       )}
 
@@ -447,7 +473,9 @@ export function BoardView({ boardId, initialColumns, dailyMode = false }: BoardP
         </div>
       )}
 
-      {( !dailyMode || dailyView === 'board') && <BoardFilters columns={columns} filters={filters} onChange={setFilters} />}
+      {(!dailyMode || dailyView === 'board') && (
+        <BoardFilters columns={columns} filters={filters} onChange={setFilters} />
+      )}
 
       {columns.length === 0 && (
         <div className="mb-4 flex flex-col items-center gap-2 rounded-lg border border-dashed border-border p-8 text-center">
@@ -457,83 +485,85 @@ export function BoardView({ boardId, initialColumns, dailyMode = false }: BoardP
         </div>
       )}
 
-      {(!dailyMode || dailyView === 'board') && <DndContext
-        sensors={sensors}
-        collisionDetection={closestCorners}
-        onDragStart={handleDragStart}
-        onDragOver={handleDragOver}
-        onDragEnd={handleDragEnd}
-      >
-        <div className="flex items-start gap-4 overflow-x-auto pb-4">
-          <SortableContext
-            items={columns.map((c) => c.id)}
-            strategy={horizontalListSortingStrategy}
-          >
-            {filteredColumns.map((column) => (
-              <Column
-                key={column.id}
-                column={column}
-                onRename={handleRenameColumn}
-                onDelete={handleDeleteColumn}
-                onAddTask={handleAddTask}
-                onTaskClick={setSelectedTaskId}
-              />
-            ))}
-          </SortableContext>
-
-          <div className="w-72 shrink-0">
-            {addingColumn ? (
-              <form
-                onSubmit={handleAddColumn}
-                className="rounded-lg border border-border bg-card p-3"
-              >
-                <input
-                  autoFocus
-                  value={newColumnName}
-                  onChange={(e) => setNewColumnName(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Escape') {
-                      setAddingColumn(false);
-                      setNewColumnName('');
-                    }
-                  }}
-                  placeholder="Tên cột"
-                  className="input-field h-9"
+      {(!dailyMode || dailyView === 'board') && (
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCorners}
+          onDragStart={handleDragStart}
+          onDragOver={handleDragOver}
+          onDragEnd={handleDragEnd}
+        >
+          <div className="flex items-start gap-4 overflow-x-auto pb-4">
+            <SortableContext
+              items={columns.map((c) => c.id)}
+              strategy={horizontalListSortingStrategy}
+            >
+              {filteredColumns.map((column) => (
+                <Column
+                  key={column.id}
+                  column={column}
+                  onRename={handleRenameColumn}
+                  onDelete={handleDeleteColumn}
+                  onAddTask={handleAddTask}
+                  onTaskClick={setSelectedTaskId}
                 />
-                <div className="mt-2 flex gap-2">
-                  <button type="submit" className="btn-primary h-8 px-3 text-xs">
-                    Thêm cột
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setAddingColumn(false);
-                      setNewColumnName('');
-                    }}
-                    className="btn-ghost h-8 px-3 text-xs"
-                  >
-                    <X className="h-3.5 w-3.5" aria-hidden="true" />
-                    Hủy
-                  </button>
-                </div>
-              </form>
-            ) : (
-              <button
-                type="button"
-                onClick={() => setAddingColumn(true)}
-                className="flex w-full items-center gap-1.5 rounded-lg border border-dashed border-border p-3 text-left text-sm text-muted-foreground transition-colors hover:border-primary hover:text-foreground"
-              >
-                <Plus className="h-4 w-4" aria-hidden="true" />
-                Thêm cột
-              </button>
-            )}
-          </div>
-        </div>
+              ))}
+            </SortableContext>
 
-        <DragOverlay>
-          {activeTask ? <TaskCard task={activeTask} onClick={() => {}} overlay /> : null}
-        </DragOverlay>
-      </DndContext>}
+            <div className="w-72 shrink-0">
+              {addingColumn ? (
+                <form
+                  onSubmit={handleAddColumn}
+                  className="rounded-lg border border-border bg-card p-3"
+                >
+                  <input
+                    autoFocus
+                    value={newColumnName}
+                    onChange={(e) => setNewColumnName(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Escape') {
+                        setAddingColumn(false);
+                        setNewColumnName('');
+                      }
+                    }}
+                    placeholder="Tên cột"
+                    className="input-field h-9"
+                  />
+                  <div className="mt-2 flex gap-2">
+                    <button type="submit" className="btn-primary h-8 px-3 text-xs">
+                      Thêm cột
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setAddingColumn(false);
+                        setNewColumnName('');
+                      }}
+                      className="btn-ghost h-8 px-3 text-xs"
+                    >
+                      <X className="h-3.5 w-3.5" aria-hidden="true" />
+                      Hủy
+                    </button>
+                  </div>
+                </form>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setAddingColumn(true)}
+                  className="flex w-full items-center gap-1.5 rounded-lg border border-dashed border-border p-3 text-left text-sm text-muted-foreground transition-colors hover:border-primary hover:text-foreground"
+                >
+                  <Plus className="h-4 w-4" aria-hidden="true" />
+                  Thêm cột
+                </button>
+              )}
+            </div>
+          </div>
+
+          <DragOverlay>
+            {activeTask ? <TaskCard task={activeTask} onClick={() => {}} overlay /> : null}
+          </DragOverlay>
+        </DndContext>
+      )}
 
       {selectedTask && (
         <TaskDetailModal

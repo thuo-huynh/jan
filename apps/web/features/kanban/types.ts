@@ -48,4 +48,12 @@ export interface BoardColumn {
   tasks: BoardTask[];
 }
 
+export interface FocusBlock {
+  id: string;
+  task_id: string;
+  starts_at: string;
+  ends_at: string;
+  created_at: string;
+}
+
 export const DEFAULT_COLUMN_NAMES = ['Cần làm', 'Đang làm', 'Đang review', 'Hoàn thành'] as const;

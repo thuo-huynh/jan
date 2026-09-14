@@ -6,6 +6,7 @@ import {
   type BoardColumn,
   type BoardTask,
   type ChecklistItem,
+  type FocusBlock,
 } from '@/features/kanban/types';
 
 const DAILY_BOARD_NAME = '__daily_tasks__';
@@ -132,6 +133,14 @@ export default async function BoardsPage() {
     .eq('board_id', board.id)
     .order('position', { ascending: true });
   const taskIds = (taskRows ?? []).map((task) => task.id);
+  const { data: focusBlockRows } =
+    taskIds.length > 0
+      ? await supabase
+          .from('focus_blocks')
+          .select('id, task_id, starts_at, ends_at, created_at')
+          .in('task_id', taskIds)
+          .order('starts_at', { ascending: true })
+      : { data: [] as FocusBlock[] };
   const { data: checklistRows } =
     taskIds.length > 0
       ? await supabase
@@ -165,7 +174,12 @@ export default async function BoardsPage() {
           Chọn một ngày để lên kế hoạch, theo dõi và hoàn thành việc học của bạn.
         </p>
       </div>
-      <BoardView boardId={board.id} initialColumns={columns} dailyMode />
+      <BoardView
+        boardId={board.id}
+        initialColumns={columns}
+        initialFocusBlocks={focusBlockRows ?? []}
+        dailyMode
+      />
     </div>
   );
 }
