@@ -2,7 +2,7 @@
 
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { AlertTriangle, Clock, Paperclip } from 'lucide-react';
+import { AlertTriangle, Clock, Paperclip, Timer } from 'lucide-react';
 import { getDueUrgency } from '../lib/urgency';
 import type { BoardTask } from '../types';
 
@@ -75,19 +75,6 @@ export function TaskCard({ task, onClick, overlay }: TaskCardProps) {
     >
       <p className="text-sm font-medium text-foreground">{task.title}</p>
 
-      {task.tags.length > 0 && (
-        <div className="mt-2 flex flex-wrap gap-1">
-          {task.tags.map((tag) => (
-            <span
-              key={tag}
-              className="rounded bg-muted px-1.5 py-0.5 text-[11px] font-medium text-muted-foreground"
-            >
-              {tag}
-            </span>
-          ))}
-        </div>
-      )}
-
       {checklistTotal > 0 && (
         <div className="mt-2">
           <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
@@ -120,6 +107,12 @@ export function TaskCard({ task, onClick, overlay }: TaskCardProps) {
             {checklistDone}/{checklistTotal}
           </span>
         )}
+        {task.estimated_minutes && (
+          <span className="badge-neutral">
+            <Timer className="h-3 w-3" aria-hidden="true" />
+            {task.estimated_minutes} phút
+          </span>
+        )}
         {task.attachment_count > 0 && (
           <span className="badge-neutral">
             <Paperclip className="h-3 w-3" aria-hidden="true" />
@@ -135,6 +128,19 @@ export function TaskCard({ task, onClick, overlay }: TaskCardProps) {
           </span>
         )}
       </div>
+
+      {task.tags.length > 0 && (
+        <div className="mt-2 flex flex-wrap gap-1">
+          {task.tags.map((tag) => (
+            <span
+              key={tag}
+              className="rounded bg-muted px-1.5 py-0.5 text-[11px] font-medium text-muted-foreground"
+            >
+              {tag}
+            </span>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

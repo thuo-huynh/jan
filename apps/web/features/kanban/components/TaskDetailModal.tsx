@@ -21,6 +21,7 @@ export function TaskDetailModal({ task, onClose, onUpdated, onDeleted }: TaskDet
   const [description, setDescription] = useState(task.description ?? '');
   const [tagsInput, setTagsInput] = useState(task.tags.join(', '));
   const [dueDate, setDueDate] = useState(task.due_date ?? '');
+  const [estimatedMinutes, setEstimatedMinutes] = useState(task.estimated_minutes ?? '');
   const [progressPct, setProgressPct] = useState(task.progress_pct);
   const [checklistItems, setChecklistItems] = useState<ChecklistItem[]>(task.task_checklist_items);
   const [saving, setSaving] = useState(false);
@@ -55,6 +56,7 @@ export function TaskDetailModal({ task, onClose, onUpdated, onDeleted }: TaskDet
       description: description || null,
       tags,
       dueDate: dueDate || null,
+      estimatedMinutes: estimatedMinutes === '' ? null : Number(estimatedMinutes),
     });
     if (!parsed.success) {
       setError(parsed.error.issues[0]?.message ?? 'Thông tin công việc không hợp lệ.');
@@ -68,6 +70,7 @@ export function TaskDetailModal({ task, onClose, onUpdated, onDeleted }: TaskDet
       description: parsed.data.description,
       tags: parsed.data.tags,
       due_date: parsed.data.dueDate,
+      estimated_minutes: parsed.data.estimatedMinutes,
       updated_at: new Date().toISOString(),
     };
     if (!hasChecklist) {
@@ -79,7 +82,7 @@ export function TaskDetailModal({ task, onClose, onUpdated, onDeleted }: TaskDet
       .update(payload)
       .eq('id', task.id)
       .select(
-        'id, column_id, board_id, title, description, tags, due_date, progress_pct, attachment_count, assignee_id, position, created_at, updated_at',
+        'id, column_id, board_id, title, description, tags, due_date, estimated_minutes, progress_pct, attachment_count, assignee_id, position, created_at, updated_at',
       )
       .single();
 
@@ -146,6 +149,18 @@ export function TaskDetailModal({ task, onClose, onUpdated, onDeleted }: TaskDet
               type="date"
               value={dueDate}
               onChange={(e) => setDueDate(e.target.value)}
+              className="input-field h-9"
+            />
+          </div>
+          <div>
+            <label className="label-field text-xs">Thời lượng ước tính (phút)</label>
+            <input
+              type="number"
+              min={5}
+              max={720}
+              value={estimatedMinutes}
+              onChange={(e) => setEstimatedMinutes(e.target.value === '' ? '' : Number(e.target.value))}
+              placeholder="25"
               className="input-field h-9"
             />
           </div>

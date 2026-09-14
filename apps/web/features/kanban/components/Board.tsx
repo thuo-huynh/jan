@@ -359,7 +359,7 @@ export function BoardView({ boardId, initialColumns, dailyMode = false }: BoardP
         ...(dailyMode ? { due_date: dailyDate } : {}),
       })
       .select(
-        'id, column_id, board_id, title, description, tags, due_date, progress_pct, attachment_count, assignee_id, position, created_at, updated_at'
+        'id, column_id, board_id, title, description, tags, due_date, estimated_minutes, progress_pct, attachment_count, assignee_id, position, created_at, updated_at'
       )
       .single();
 

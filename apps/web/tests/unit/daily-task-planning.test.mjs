@@ -28,3 +28,13 @@ test('keeps date-key conversion in a dedicated local-date helper', async () => {
   assert.match(helper, /getMonth\(\) \+ 1/);
   assert.doesNotMatch(helper, /toISOString\(\)/);
 });
+
+test('loads and persists a task estimate across the Daily Tasks surface', async () => {
+  const page = await source(appRoot, 'app/(app)/boards/page.tsx');
+  const board = await source(appRoot, 'features/kanban/components/Board.tsx');
+  const modal = await source(appRoot, 'features/kanban/components/TaskDetailModal.tsx');
+
+  assert.match(page, /estimated_minutes/);
+  assert.match(board, /estimated_minutes/);
+  assert.match(modal, /estimated_minutes/);
+});
