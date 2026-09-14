@@ -79,7 +79,14 @@ export async function loadHomeSummary(
       .select('*')
       .gte('completion_date', localIso(habitWindowStart))
       .lte('completion_date', localIso(now)),
-    loadDueReviewQueue(supabase, userId),
+    // Review count is a helpful dashboard signal, but it must never make the
+    // whole authenticated workspace unavailable when the SRS relation is
+    // temporarily unavailable (for example while Supabase refreshes schema
+    // metadata after a migration).
+    loadDueReviewQueue(supabase, userId).catch((error) => {
+      console.error('Could not load the due review queue for the dashboard.', error);
+      return [];
+    }),
     supabase
       .from('review_logs')
       .select('reviewed_at')
