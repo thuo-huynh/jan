@@ -43,7 +43,7 @@ export default async function BoardDetailPage({ params }: BoardDetailPageProps) 
   const { data: taskRows } = await supabase
     .from('tasks')
     .select(
-      'id, column_id, board_id, title, description, tags, due_date, estimated_minutes, progress_pct, attachment_count, assignee_id, position, created_at, updated_at',
+      'id, column_id, board_id, title, description, tags, due_date, estimated_minutes, priority, progress_pct, attachment_count, assignee_id, position, created_at, updated_at'
     )
     .eq('board_id', board.id)
     .order('position', { ascending: true });
@@ -87,7 +87,9 @@ export default async function BoardDetailPage({ params }: BoardDetailPageProps) 
         >
           <ArrowLeft className="h-5 w-5" aria-hidden="true" />
         </Link>
-        <h1 className="truncate text-2xl font-bold tracking-tight text-foreground sm:text-3xl">{board.name}</h1>
+        <h1 className="truncate text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+          {board.name}
+        </h1>
       </div>
 
       <BoardView boardId={board.id} initialColumns={columns} />

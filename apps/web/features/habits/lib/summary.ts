@@ -5,6 +5,7 @@ export interface TodayHabit {
   habit: Habit;
   completed: boolean;
   streak: number;
+  atRisk: boolean;
 }
 
 export interface HabitSummary {
@@ -58,7 +59,7 @@ function longestRun(dates: IsoDate[]): number {
 export function summarizeHabits(
   habits: Habit[],
   completions: HabitCompletion[],
-  now: Date = new Date(),
+  now: Date = new Date()
 ): HabitSummary {
   const today = localIsoDate(now);
   const byHabit = new Map<string, IsoDate[]>();
@@ -74,6 +75,7 @@ export function summarizeHabits(
       habit,
       completed: dates.includes(today),
       streak: computeHabitStreak(dates, now),
+      atRisk: !dates.includes(today) && computeHabitStreak(dates, now) > 0,
     };
   });
 
@@ -81,12 +83,18 @@ export function summarizeHabits(
   startOfWeek.setHours(0, 0, 0, 0);
   startOfWeek.setDate(startOfWeek.getDate() - 6);
   const weekStart = localIsoDate(startOfWeek);
-  const weeklyCompletions = completions.filter((completion) => completion.completion_date >= weekStart).length;
+  const weeklyCompletions = completions.filter(
+    (completion) => completion.completion_date >= weekStart
+  ).length;
   const weekPossible = habits.length * 7;
 
   const activeDays = new Set(completions.map((completion) => completion.completion_date));
   let currentStreak = 0;
-  for (let cursor = new Date(now); activeDays.has(localIsoDate(cursor)); cursor = dayBefore(cursor)) {
+  for (
+    let cursor = new Date(now);
+    activeDays.has(localIsoDate(cursor));
+    cursor = dayBefore(cursor)
+  ) {
     currentStreak += 1;
   }
 
@@ -97,6 +105,7 @@ export function summarizeHabits(
     totalHabits: habits.length,
     currentStreak,
     longestStreak: longestRun(Array.from(activeDays)),
-    weeklyCompletionRate: weekPossible === 0 ? 0 : Math.round((weeklyCompletions / weekPossible) * 100),
+    weeklyCompletionRate:
+      weekPossible === 0 ? 0 : Math.round((weeklyCompletions / weekPossible) * 100),
   };
 }

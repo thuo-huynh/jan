@@ -128,7 +128,7 @@ export default async function BoardsPage() {
   const { data: taskRows } = await supabase
     .from('tasks')
     .select(
-      'id, column_id, board_id, title, description, tags, due_date, estimated_minutes, progress_pct, attachment_count, assignee_id, position, created_at, updated_at'
+      'id, column_id, board_id, title, description, tags, due_date, estimated_minutes, priority, progress_pct, attachment_count, assignee_id, position, created_at, updated_at'
     )
     .eq('board_id', board.id)
     .order('position', { ascending: true });
@@ -137,7 +137,9 @@ export default async function BoardsPage() {
     taskIds.length > 0
       ? await supabase
           .from('focus_blocks')
-          .select('id, task_id, starts_at, ends_at, created_at')
+          .select(
+            'id, task_id, starts_at, ends_at, created_at, status, paused_at, remaining_seconds, completed_at'
+          )
           .in('task_id', taskIds)
           .order('starts_at', { ascending: true })
       : { data: [] as FocusBlock[] };

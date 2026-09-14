@@ -22,6 +22,7 @@ export function TaskDetailModal({ task, onClose, onUpdated, onDeleted }: TaskDet
   const [tagsInput, setTagsInput] = useState(task.tags.join(', '));
   const [dueDate, setDueDate] = useState(task.due_date ?? '');
   const [estimatedMinutes, setEstimatedMinutes] = useState(task.estimated_minutes ?? '');
+  const [priority, setPriority] = useState(task.priority);
   const [progressPct, setProgressPct] = useState(task.progress_pct);
   const [checklistItems, setChecklistItems] = useState<ChecklistItem[]>(task.task_checklist_items);
   const [saving, setSaving] = useState(false);
@@ -51,13 +52,23 @@ export function TaskDetailModal({ task, onClose, onUpdated, onDeleted }: TaskDet
       .map((t) => t.trim())
       .filter(Boolean);
 
-    const parsed = taskSchema.pick({ title: true, description: true, tags: true, dueDate: true, estimatedMinutes: true }).safeParse({
-      title,
-      description: description || null,
-      tags,
-      dueDate: dueDate || null,
-      estimatedMinutes: estimatedMinutes === '' ? null : Number(estimatedMinutes),
-    });
+    const parsed = taskSchema
+      .pick({
+        title: true,
+        description: true,
+        tags: true,
+        dueDate: true,
+        estimatedMinutes: true,
+        priority: true,
+      })
+      .safeParse({
+        title,
+        description: description || null,
+        tags,
+        dueDate: dueDate || null,
+        estimatedMinutes: estimatedMinutes === '' ? null : Number(estimatedMinutes),
+        priority,
+      });
     if (!parsed.success) {
       setError(parsed.error.issues[0]?.message ?? 'Thông tin công việc không hợp lệ.');
       return;
@@ -71,6 +82,7 @@ export function TaskDetailModal({ task, onClose, onUpdated, onDeleted }: TaskDet
       tags: parsed.data.tags,
       due_date: parsed.data.dueDate,
       estimated_minutes: parsed.data.estimatedMinutes,
+      priority: parsed.data.priority,
       updated_at: new Date().toISOString(),
     };
     if (!hasChecklist) {
@@ -82,7 +94,7 @@ export function TaskDetailModal({ task, onClose, onUpdated, onDeleted }: TaskDet
       .update(payload)
       .eq('id', task.id)
       .select(
-        'id, column_id, board_id, title, description, tags, due_date, estimated_minutes, progress_pct, attachment_count, assignee_id, position, created_at, updated_at',
+        'id, column_id, board_id, title, description, tags, due_date, estimated_minutes, priority, progress_pct, attachment_count, assignee_id, position, created_at, updated_at'
       )
       .single();
 
@@ -97,7 +109,10 @@ export function TaskDetailModal({ task, onClose, onUpdated, onDeleted }: TaskDet
   }
 
   async function handleDelete() {
-    const ok = await confirm({ title: 'Xóa công việc này?', description: 'Không thể hoàn tác thao tác này.' });
+    const ok = await confirm({
+      title: 'Xóa công việc này?',
+      description: 'Không thể hoàn tác thao tác này.',
+    });
     if (!ok) return;
     setSaving(true);
     setError(null);
@@ -114,7 +129,7 @@ export function TaskDetailModal({ task, onClose, onUpdated, onDeleted }: TaskDet
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/40 p-4"
+      className="bg-foreground/40 fixed inset-0 z-50 flex items-center justify-center p-4"
       onClick={onClose}
       role="presentation"
     >
@@ -159,7 +174,9 @@ export function TaskDetailModal({ task, onClose, onUpdated, onDeleted }: TaskDet
               min={5}
               max={720}
               value={estimatedMinutes}
-              onChange={(e) => setEstimatedMinutes(e.target.value === '' ? '' : Number(e.target.value))}
+              onChange={(e) =>
+                setEstimatedMinutes(e.target.value === '' ? '' : Number(e.target.value))
+              }
               placeholder="25"
               className="input-field h-9"
             />
@@ -173,11 +190,28 @@ export function TaskDetailModal({ task, onClose, onUpdated, onDeleted }: TaskDet
               className="input-field h-9"
             />
           </div>
+          <div>
+            <label className="label-field text-xs" htmlFor="task-priority">
+              Mức ưu tiên
+            </label>
+            <select
+              id="task-priority"
+              value={priority}
+              onChange={(event) => setPriority(event.target.value as typeof priority)}
+              className="input-field h-9"
+            >
+              <option value="high">Quan trọng</option>
+              <option value="normal">Bình thường</option>
+              <option value="low">Có thể để sau</option>
+            </select>
+          </div>
         </div>
 
         {!hasChecklist && (
           <div className="mt-4">
-            <label className="label-field text-xs">Tiến độ % (chưa có checklist — đặt thủ công)</label>
+            <label className="label-field text-xs">
+              Tiến độ % (chưa có checklist — đặt thủ công)
+            </label>
             <input
               type="number"
               min={0}
@@ -200,20 +234,34 @@ export function TaskDetailModal({ task, onClose, onUpdated, onDeleted }: TaskDet
         </div>
 
         <div className="mt-5 border-t border-border pt-4">
-          <ChecklistEditor taskId={task.id} items={checklistItems} onChange={handleChecklistChange} />
+          <ChecklistEditor
+            taskId={task.id}
+            items={checklistItems}
+            onChange={handleChecklistChange}
+          />
         </div>
 
         {error && <p className="error-text mt-3">{error}</p>}
 
         <div className="mt-5 flex items-center justify-between border-t border-border pt-4">
-          <button type="button" onClick={handleDelete} disabled={saving} className="btn-ghost h-9 px-2.5 text-danger hover:bg-danger/10">
+          <button
+            type="button"
+            onClick={handleDelete}
+            disabled={saving}
+            className="btn-ghost hover:bg-danger/10 h-9 px-2.5 text-danger"
+          >
             Xóa công việc
           </button>
           <div className="flex gap-2">
             <button type="button" onClick={onClose} className="btn-outline h-9 px-3 text-sm">
               Hủy
             </button>
-            <button type="button" onClick={handleSave} disabled={saving} className="btn-primary h-9 px-4 text-sm">
+            <button
+              type="button"
+              onClick={handleSave}
+              disabled={saving}
+              className="btn-primary h-9 px-4 text-sm"
+            >
               {saving ? 'Đang lưu…' : 'Lưu'}
             </button>
           </div>

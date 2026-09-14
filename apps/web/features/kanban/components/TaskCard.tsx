@@ -27,6 +27,12 @@ const DUE_BADGE_CLASS: Record<'overdue' | 'today' | 'soon' | 'none', string> = {
   none: 'badge-neutral',
 };
 
+const PRIORITY_LABEL: Record<BoardTask['priority'], string> = {
+  high: 'Quan trọng',
+  normal: 'Bình thường',
+  low: 'Để sau',
+};
+
 function initials(assigneeId: string | null): string {
   if (!assigneeId) return '';
   return assigneeId.slice(0, 2).toUpperCase();
@@ -53,6 +59,7 @@ export function TaskCard({ task, onClick, overlay }: TaskCardProps) {
   const checklistTotal = checklist.length;
   const checklistDone = checklist.filter((item) => item.completed).length;
   const urgency = getDueUrgency(task.due_date);
+  const priority = task.priority ?? 'normal';
 
   return (
     <div
@@ -69,7 +76,7 @@ export function TaskCard({ task, onClick, overlay }: TaskCardProps) {
           onClick(task.id);
         }
       }}
-      className={`cursor-pointer rounded-lg border border-border bg-card p-3 text-left shadow-sm transition-colors hover:border-primary/40 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-primary ${
+      className={`hover:border-primary/40 cursor-pointer rounded-lg border border-border bg-card p-3 text-left shadow-sm transition-colors hover:shadow-md focus:outline-none focus:ring-2 focus:ring-primary ${
         overlay ? 'shadow-lg' : ''
       }`}
     >
@@ -111,6 +118,11 @@ export function TaskCard({ task, onClick, overlay }: TaskCardProps) {
           <span className="badge-neutral">
             <Timer className="h-3 w-3" aria-hidden="true" />
             {task.estimated_minutes} phút
+          </span>
+        )}
+        {priority !== 'normal' && (
+          <span className={priority === 'high' ? 'badge-primary' : 'badge-neutral'}>
+            {PRIORITY_LABEL[priority]}
           </span>
         )}
         {task.attachment_count > 0 && (

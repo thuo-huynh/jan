@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Check, Circle, Flame } from 'lucide-react';
+import { Check, Circle, Flame, ShieldAlert } from 'lucide-react';
 import { createClient } from '@/shared/supabase/client';
 import type { TodayHabit } from '../lib/summary';
 
@@ -69,7 +69,7 @@ export function TodayHabitList({ initialHabits, date }: TodayHabitListProps) {
 
   return (
     <div className="bg-background/50 divide-y divide-border rounded-lg border border-border">
-      {habits.map(({ habit, completed, streak }) => (
+      {habits.map(({ habit, completed, streak, atRisk }) => (
         <button
           key={habit.id}
           type="button"
@@ -94,6 +94,11 @@ export function TodayHabitList({ initialHabits, date }: TodayHabitListProps) {
             <span className="flex items-center gap-1 text-xs text-muted-foreground">
               <Flame className="h-3.5 w-3.5 text-warning" aria-hidden="true" />
               {streak} ngày
+            </span>
+          )}
+          {atRisk && (
+            <span className="badge-warning shrink-0" title="Hoàn thành hôm nay để duy trì chuỗi">
+              <ShieldAlert className="h-3 w-3" aria-hidden="true" /> Giữ chuỗi
             </span>
           )}
         </button>

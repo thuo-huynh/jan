@@ -30,6 +30,7 @@ export interface BoardTask {
   tags: string[];
   due_date: string | null;
   estimated_minutes: number | null;
+  priority: 'low' | 'normal' | 'high';
   progress_pct: number;
   attachment_count: number;
   assignee_id: string | null;
@@ -54,6 +55,10 @@ export interface FocusBlock {
   starts_at: string;
   ends_at: string;
   created_at: string;
+  status: 'scheduled' | 'active' | 'paused' | 'completed';
+  paused_at: string | null;
+  remaining_seconds: number | null;
+  completed_at: string | null;
 }
 
 export const DEFAULT_COLUMN_NAMES = ['Cần làm', 'Đang làm', 'Đang review', 'Hoàn thành'] as const;

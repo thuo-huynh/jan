@@ -11,6 +11,8 @@ import {
 } from 'lucide-react';
 import { createClient, getAuthedUser } from '@/shared/supabase/server';
 import { TodayHabitList } from '@/features/habits/components/TodayHabitList';
+import { DailyTaskOverview } from '@/features/dashboard/components/DailyTaskOverview';
+import { DailyReviewCard } from '@/features/dashboard/components/DailyReviewCard';
 import { loadHomeSummary } from '@/features/dashboard/lib/home';
 
 function greeting(hour: number) {
@@ -40,7 +42,7 @@ export default async function DashboardPage() {
     <div className="space-y-7">
       <section className="daily-sheet">
         <div className="max-w-2xl pl-2">
-          <p className="inline-flex items-center gap-2 rounded-full bg-card/70 px-3 py-1 text-xs font-bold text-primary">
+          <p className="bg-card/70 inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-bold text-primary">
             <SparkleDot /> {date}
           </p>
           <h1 className="mt-2 text-3xl font-bold tracking-[-0.04em] text-foreground sm:text-5xl">
@@ -60,6 +62,11 @@ export default async function DashboardPage() {
               <span>
                 <strong className="font-semibold">{summary.habits.currentStreak} ngày</strong> duy
                 trì liên tiếp
+              </span>
+            )}
+            {summary.daily.todayCount > 0 && (
+              <span>
+                <strong className="font-semibold">{summary.daily.todayCount}</strong> việc cần làm
               </span>
             )}
           </div>
@@ -83,24 +90,40 @@ export default async function DashboardPage() {
           </div>
           <TodayHabitList initialHabits={summary.habits.todayHabits} date={summary.habits.today} />
         </section>
-        <section className="relative overflow-hidden rounded-2xl border border-border bg-primary p-5 text-primary-foreground shadow-sm sm:p-6">
-          <div className="absolute right-5 top-5 text-4xl" aria-hidden="true">🦊</div>
-          <Brain className="h-6 w-6" strokeWidth={1.75} aria-hidden="true" />
-          <h2 className="mt-5 text-xl font-semibold tracking-tight">Tiếp tục học</h2>
-          <p className="mt-2 max-w-[18rem] text-sm leading-6 text-primary-foreground/80">
-            {summary.dueReviews > 0
-              ? `${summary.dueReviews} mục nên được ôn lại hôm nay.`
-              : 'Chưa có mục cần ôn. Chọn một kho cá nhân để bắt đầu.'}
-          </p>
-          <Link
-            href={summary.dueReviews > 0 ? '/learn/review' : '/learn/vocab'}
-            className="mt-5 inline-flex h-10 items-center gap-2 rounded-xl bg-card px-4 text-sm font-bold text-primary transition-transform hover:-translate-y-0.5"
-          >
-            {summary.dueReviews > 0 ? 'Ôn lại ngay' : 'Mở kho từ'}
-            <ArrowRight className="h-4 w-4" aria-hidden="true" />
-          </Link>
-        </section>
+        <div className="space-y-5">
+          <DailyTaskOverview
+            tasks={summary.daily.tasks}
+            overdueCount={summary.daily.overdueCount}
+            todayCount={summary.daily.todayCount}
+            activeFocusTaskId={summary.daily.activeFocusTaskId}
+          />
+          <section className="relative overflow-hidden rounded-2xl border border-border bg-primary p-5 text-primary-foreground shadow-sm sm:p-6">
+            <div className="absolute right-5 top-5 text-4xl" aria-hidden="true">
+              🦊
+            </div>
+            <Brain className="h-6 w-6" strokeWidth={1.75} aria-hidden="true" />
+            <h2 className="mt-5 text-xl font-semibold tracking-tight">Tiếp tục học</h2>
+            <p className="text-primary-foreground/80 mt-2 max-w-[18rem] text-sm leading-6">
+              {summary.dueReviews > 0
+                ? `${summary.dueReviews} mục nên được ôn lại hôm nay.`
+                : 'Chưa có mục cần ôn. Chọn một kho cá nhân để bắt đầu.'}
+            </p>
+            <Link
+              href={summary.dueReviews > 0 ? '/learn/review' : '/learn/vocab'}
+              className="mt-5 inline-flex h-10 items-center gap-2 rounded-xl bg-card px-4 text-sm font-bold text-primary transition-transform hover:-translate-y-0.5"
+            >
+              {summary.dueReviews > 0 ? 'Ôn lại ngay' : 'Mở kho từ'}
+              <ArrowRight className="h-4 w-4" aria-hidden="true" />
+            </Link>
+          </section>
+        </div>
       </div>
+
+      <DailyReviewCard
+        date={summary.habits.today}
+        tasks={summary.daily.tasks}
+        initialReview={summary.daily.review}
+      />
 
       <section>
         <div className="mb-5">
@@ -201,7 +224,7 @@ function Metric({
 }) {
   return (
     <Link href={href} className="skill-card block p-5">
-      <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10">
+      <span className="bg-primary/10 flex h-10 w-10 items-center justify-center rounded-xl">
         <Icon className="h-5 w-5 text-primary" strokeWidth={1.75} aria-hidden="true" />
       </span>
       <p className="mt-6 text-3xl font-semibold tracking-[-0.04em] text-foreground">{value}</p>
