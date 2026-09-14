@@ -1,16 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState, type ReactNode } from 'react';
-import {
-  CalendarDays,
-  Check,
-  ChevronDown,
-  Columns3,
-  Search,
-  SlidersHorizontal,
-  Tags,
-  X,
-} from 'lucide-react';
+import { CalendarDays, Check, ChevronDown, Columns3, Search, Tags, X } from 'lucide-react';
 import type { DueUrgency } from '../lib/urgency';
 import type { BoardColumn } from '../types';
 
@@ -148,41 +139,12 @@ export function BoardFilters({ columns, filters, onChange }: BoardFiltersProps) 
   const hasActiveFilters = Boolean(
     filters.query || filters.tag || filters.dueBefore || filters.columnId || filters.urgency
   );
-  const activeFilterCount = [
-    filters.query,
-    filters.tag,
-    filters.dueBefore,
-    filters.columnId,
-    filters.urgency,
-  ].filter(Boolean).length;
-
   return (
-    <section className="card mb-6 overflow-visible p-0 shadow-xs" aria-label="Bộ lọc công việc">
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border px-4 py-3 sm:px-5">
-        <div className="flex items-center gap-2.5">
-          <span className="bg-primary/10 flex h-8 w-8 items-center justify-center rounded-md text-primary">
-            <SlidersHorizontal className="h-4 w-4" aria-hidden="true" />
-          </span>
-          <div>
-            <h2 className="text-sm font-semibold text-foreground">Lọc công việc</h2>
-            <p className="text-xs text-muted-foreground">
-              Tìm theo nội dung, nhãn, trạng thái hoặc hạn hoàn thành.
-            </p>
-          </div>
-        </div>
-        {hasActiveFilters && (
-          <button
-            type="button"
-            onClick={() => onChange(EMPTY_FILTERS)}
-            className="btn-ghost h-9 shrink-0 px-2.5 text-xs"
-          >
-            <X className="h-3.5 w-3.5" aria-hidden="true" />
-            Xóa {activeFilterCount} bộ lọc
-          </button>
-        )}
-      </div>
-
-      <div className="grid gap-3 p-4 sm:grid-cols-2 sm:p-5 xl:grid-cols-[minmax(0,1.6fr)_minmax(9rem,0.7fr)_minmax(9rem,0.7fr)_minmax(11rem,0.8fr)]">
+    <section
+      className="card mb-6 overflow-visible p-3 shadow-xs sm:p-4"
+      aria-label="Bộ lọc công việc"
+    >
+      <div className="grid items-end gap-3 sm:grid-cols-2 xl:grid-cols-[minmax(0,1.6fr)_minmax(9rem,0.7fr)_minmax(9rem,0.7fr)_minmax(11rem,0.8fr)_auto]">
         <div className="min-w-0">
           <label htmlFor="task-search" className="label-field mb-1.5 flex items-center gap-1.5">
             <Search className="h-3.5 w-3.5" aria-hidden="true" />
@@ -263,6 +225,16 @@ export function BoardFilters({ columns, filters, onChange }: BoardFiltersProps) 
             )}
           </div>
         </div>
+        {hasActiveFilters && (
+          <button
+            type="button"
+            onClick={() => onChange(EMPTY_FILTERS)}
+            className="btn-ghost h-10 shrink-0 px-2.5 text-xs xl:mb-0"
+          >
+            <X className="h-3.5 w-3.5" aria-hidden="true" />
+            Xóa lọc
+          </button>
+        )}
       </div>
     </section>
   );
