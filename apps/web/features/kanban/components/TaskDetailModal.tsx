@@ -51,7 +51,7 @@ export function TaskDetailModal({ task, onClose, onUpdated, onDeleted }: TaskDet
       .map((t) => t.trim())
       .filter(Boolean);
 
-    const parsed = taskSchema.pick({ title: true, description: true, tags: true, dueDate: true }).safeParse({
+    const parsed = taskSchema.pick({ title: true, description: true, tags: true, dueDate: true, estimatedMinutes: true }).safeParse({
       title,
       description: description || null,
       tags,

@@ -29,6 +29,10 @@ import { BoardFilters, EMPTY_FILTERS, type BoardFilterState } from './BoardFilte
 import { getDueUrgency } from '../lib/urgency';
 import type { BoardColumn, BoardTask } from '../types';
 import { DailyTaskCalendar } from './DailyTaskCalendar';
+import { DailyTaskViewSwitcher, type DailyTaskView } from './DailyTaskViewSwitcher';
+import { DailyTaskToday } from './DailyTaskToday';
+import { DailyTaskQuickAdd } from './DailyTaskQuickAdd';
+import { FocusPlanner } from './FocusPlanner';
 
 interface BoardProps {
   boardId: string;
@@ -61,6 +65,7 @@ export function BoardView({ boardId, initialColumns, dailyMode = false }: BoardP
   const [newColumnName, setNewColumnName] = useState('');
   const [addingColumn, setAddingColumn] = useState(false);
   const [dailyDate, setDailyDate] = useState(todayDateKey);
+  const [dailyView, setDailyView] = useState<DailyTaskView>('today');
 
   const snapshotRef = useRef<BoardColumn[] | null>(null);
 
@@ -406,13 +411,11 @@ export function BoardView({ boardId, initialColumns, dailyMode = false }: BoardP
       )}
 
       {dailyMode && (
-        <div className="mb-6">
-          <DailyTaskCalendar
-            columns={columns}
-            selectedDate={dailyDate}
-            onSelectDate={setDailyDate}
-          />
-        </div>
+        <><DailyTaskViewSwitcher value={dailyView} onChange={setDailyView} /><DailyTaskQuickAdd columns={columns} onAdd={handleAddTask} />
+          {dailyView === 'calendar' && <div className="mb-6"><DailyTaskCalendar columns={columns} selectedDate={dailyDate} onSelectDate={setDailyDate} /></div>}
+          {dailyView === 'today' && <DailyTaskToday columns={columns} date={dailyDate} onTaskClick={setSelectedTaskId} />}
+          {dailyView === 'planner' && <FocusPlanner columns={columns} onTaskClick={setSelectedTaskId} />}
+        </>
       )}
 
       {!dailyMode && (dueSummary.overdue > 0 || dueSummary.dueToday > 0) && (
@@ -450,7 +453,7 @@ export function BoardView({ boardId, initialColumns, dailyMode = false }: BoardP
         </div>
       )}
 
-      <BoardFilters columns={columns} filters={filters} onChange={setFilters} />
+      {( !dailyMode || dailyView === 'board') && <BoardFilters columns={columns} filters={filters} onChange={setFilters} />}
 
       {columns.length === 0 && (
         <div className="mb-4 flex flex-col items-center gap-2 rounded-lg border border-dashed border-border p-8 text-center">
@@ -460,7 +463,7 @@ export function BoardView({ boardId, initialColumns, dailyMode = false }: BoardP
         </div>
       )}
 
-      <DndContext
+      {(!dailyMode || dailyView === 'board') && <DndContext
         sensors={sensors}
         collisionDetection={closestCorners}
         onDragStart={handleDragStart}
@@ -536,7 +539,7 @@ export function BoardView({ boardId, initialColumns, dailyMode = false }: BoardP
         <DragOverlay>
           {activeTask ? <TaskCard task={activeTask} onClick={() => {}} overlay /> : null}
         </DragOverlay>
-      </DndContext>
+      </DndContext>}
 
       {selectedTask && (
         <TaskDetailModal

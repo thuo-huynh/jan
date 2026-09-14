@@ -18,3 +18,13 @@ test('names the Kanban landing page for daily planning', async () => {
   assert.match(boardsPage, />Daily Tasks</);
   assert.match(boardsPage, /Chọn một ngày để lên kế hoạch/);
 });
+
+test('provides Today as the default daily view with quick task creation', async () => {
+  const board = await readFile(new URL('features/kanban/components/Board.tsx', appRoot), 'utf8');
+
+  assert.match(board, /DailyTaskView/);
+  assert.match(board, /useState<DailyTaskView>\('today'\)/);
+  assert.match(board, /DailyTaskViewSwitcher/);
+  assert.match(board, /DailyTaskToday/);
+  assert.match(board, /DailyTaskQuickAdd/);
+});

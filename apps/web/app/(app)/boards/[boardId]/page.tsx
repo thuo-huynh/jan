@@ -43,7 +43,7 @@ export default async function BoardDetailPage({ params }: BoardDetailPageProps) 
   const { data: taskRows } = await supabase
     .from('tasks')
     .select(
-      'id, column_id, board_id, title, description, tags, due_date, progress_pct, attachment_count, assignee_id, position, created_at, updated_at',
+      'id, column_id, board_id, title, description, tags, due_date, estimated_minutes, progress_pct, attachment_count, assignee_id, position, created_at, updated_at',
     )
     .eq('board_id', board.id)
     .order('position', { ascending: true });
