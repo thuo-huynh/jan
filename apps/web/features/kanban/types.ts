@@ -29,6 +29,7 @@ export interface BoardTask {
   description: string | null;
   tags: string[];
   due_date: string | null;
+  estimated_minutes: number | null;
   progress_pct: number;
   attachment_count: number;
   assignee_id: string | null;

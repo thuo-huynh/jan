@@ -44,6 +44,7 @@ export const taskSchema = z.object({
   description: z.string().max(10_000).optional().nullable(),
   tags: z.array(z.string().trim().min(1).max(50)).max(20).optional().default([]),
   dueDate: isoDate.optional().nullable(),
+  estimatedMinutes: z.number().int().min(5).max(720).optional().nullable(),
   assigneeId: uuid.optional().nullable(),
   position: z.number().int().min(0).optional(),
 });
