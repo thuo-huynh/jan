@@ -3,6 +3,7 @@
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import type { BoardColumn, BoardTask } from '../types';
+import { todayDateKey } from '../lib/dates';
 
 interface DailyTaskCalendarProps {
   columns: BoardColumn[];
@@ -26,7 +27,7 @@ function dateKey(date: Date) {
 }
 
 function localToday() {
-  return dateKey(new Date());
+  return todayDateKey();
 }
 
 function isDoneColumn(column: BoardColumn) {
@@ -90,6 +91,13 @@ export function DailyTaskCalendar({ columns, selectedDate, onSelectDate }: Daily
     setMonthCursor(new Date(date.getFullYear(), date.getMonth(), 1));
   }
 
+  function selectDateKey(value: string) {
+    const [year, month, day] = value.split('-').map(Number);
+    const date = new Date(year, month - 1, day);
+    onSelectDate(value);
+    setMonthCursor(new Date(date.getFullYear(), date.getMonth(), 1));
+  }
+
   return (
     <section className="card overflow-hidden" aria-label="Lịch Daily Tasks">
       <div className="border-b border-border px-5 py-4 sm:flex sm:items-center sm:justify-between">
@@ -116,7 +124,7 @@ export function DailyTaskCalendar({ columns, selectedDate, onSelectDate }: Daily
           </button>
           <button
             type="button"
-            onClick={() => selectDate(new Date())}
+            onClick={() => selectDateKey(todayDateKey())}
             className="btn-outline h-9 px-3 text-xs"
           >
             Hôm nay

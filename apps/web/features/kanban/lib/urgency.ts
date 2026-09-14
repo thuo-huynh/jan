@@ -9,14 +9,15 @@
  */
 export type DueUrgency = 'overdue' | 'today' | 'soon';
 
+import { todayDateKey } from './dates';
+
 export function getDueUrgency(dueDate: string | null): DueUrgency | null {
   if (!dueDate) return null;
 
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const due = new Date(`${dueDate}T00:00:00`);
-
-  const diffDays = Math.round((due.getTime() - today.getTime()) / 86_400_000);
+  const today = todayDateKey();
+  const diffDays = Math.round(
+    (Date.parse(`${dueDate}T00:00:00Z`) - Date.parse(`${today}T00:00:00Z`)) / 86_400_000
+  );
   if (diffDays < 0) return 'overdue';
   if (diffDays === 0) return 'today';
   if (diffDays <= 2) return 'soon';

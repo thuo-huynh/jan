@@ -29,6 +29,7 @@ import { BoardFilters, EMPTY_FILTERS, type BoardFilterState } from './BoardFilte
 import { getDueUrgency } from '../lib/urgency';
 import type { BoardColumn, BoardTask } from '../types';
 import { DailyTaskCalendar } from './DailyTaskCalendar';
+import { todayDateKey } from '../lib/dates';
 import { DailyTaskViewSwitcher, type DailyTaskView } from './DailyTaskViewSwitcher';
 import { DailyTaskToday } from './DailyTaskToday';
 import { DailyTaskQuickAdd } from './DailyTaskQuickAdd';
@@ -48,13 +49,6 @@ interface BoardProps {
  * and an inline error banner is shown (no toast system exists yet — that's
  * Polish-phase T098).
  */
-function todayDateKey() {
-  const now = new Date();
-  const month = String(now.getMonth() + 1).padStart(2, '0');
-  const day = String(now.getDate()).padStart(2, '0');
-  return `${now.getFullYear()}-${month}-${day}`;
-}
-
 export function BoardView({ boardId, initialColumns, dailyMode = false }: BoardProps) {
   const [columns, setColumns] = useState<BoardColumn[]>(initialColumns);
   const [activeTask, setActiveTask] = useState<BoardTask | null>(null);
