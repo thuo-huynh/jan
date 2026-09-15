@@ -18,6 +18,18 @@ type DeckCardVocab = {
   is_kanji: boolean;
 };
 
+function sharedDeckTablesAreUnavailable(error: { code?: string; message?: string } | null) {
+  return (
+    error?.code === 'PGRST205' ||
+    Boolean(
+      error?.message &&
+        /could not find the table ['\"]public\.shared_flashcard_decks['\"] in the schema cache/i.test(
+          error.message
+        )
+    )
+  );
+}
+
 /** Loads published decks plus learner-private reviewed counts without creating progress rows. */
 export async function loadSharedFlashcardDecks(
   supabase: ServerSupabaseClient,
@@ -30,7 +42,13 @@ export async function loadSharedFlashcardDecks(
     )
     .eq('is_published', true)
     .order('created_at', { ascending: false });
-  if (deckError) throw new Error(deckError.message);
+  // Shared decks are optional reference data. Existing learners can continue
+  // using their own and global vocabulary while a new deployment waits for
+  // migrations 0035–0036 to be applied.
+  if (deckError) {
+    if (sharedDeckTablesAreUnavailable(deckError)) return [];
+    throw new Error(deckError.message);
+  }
 
   const decks = deckRows ?? [];
   const vocabIds = Array.from(
@@ -85,7 +103,10 @@ export async function loadSharedFlashcardDeckCards(
     .eq('id', deckId)
     .eq('is_published', true)
     .maybeSingle();
-  if (error) throw new Error(error.message);
+  if (error) {
+    if (sharedDeckTablesAreUnavailable(error)) return null;
+    throw new Error(error.message);
+  }
   if (!deck) return null;
 
   const cards = (
