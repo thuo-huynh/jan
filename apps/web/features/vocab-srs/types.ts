@@ -15,3 +15,10 @@ export interface SharedFlashcardDeckSummary {
   cardCount: number;
   reviewedCount: number;
 }
+
+/** A learner-owned vocabulary set with its ready-to-study card count. */
+export interface PersonalFlashcardSetSummary {
+  id: string;
+  name: string;
+  cardCount: number;
+}

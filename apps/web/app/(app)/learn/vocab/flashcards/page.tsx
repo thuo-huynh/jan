@@ -8,12 +8,14 @@ import { loadDueReviewQueue } from '@/features/vocab-srs/lib/queue';
 import {
   loadSharedFlashcardDeckCards,
   loadSharedFlashcardDecks,
+  loadPersonalFlashcardSetCards,
+  loadPersonalFlashcardSets,
 } from '@/features/vocab-srs/lib/sharedFlashcardDecks';
 
 type Source = 'all' | 'custom' | 'global';
 
 interface FlashcardsPageProps {
-  searchParams: { deck?: string; source?: string; q?: string };
+  searchParams: { deck?: string; set?: string; source?: string; q?: string };
 }
 
 const SOURCE_TABS: { value: Source; label: string }[] = [
@@ -78,6 +80,7 @@ export default async function FlashcardsPage({ searchParams }: FlashcardsPagePro
   if (!user) redirect('/login');
 
   const deckId = searchParams.deck?.trim() ?? '';
+  const setId = searchParams.set?.trim() ?? '';
   const source: Source | null =
     searchParams.source === 'custom' ||
     searchParams.source === 'global' ||
@@ -107,6 +110,31 @@ export default async function FlashcardsPage({ searchParams }: FlashcardsPagePro
           </p>
         </div>
         <FlashcardDeck cards={deck.cards} />
+      </div>
+    );
+  }
+
+  if (setId) {
+    const set = await loadPersonalFlashcardSetCards(supabase, user.id, setId);
+    if (!set) redirect('/learn/vocab/flashcards');
+    return (
+      <div className="mx-auto max-w-2xl space-y-6">
+        <div>
+          <Link
+            href="/learn/vocab/flashcards"
+            className="section-link inline-flex items-center gap-1"
+          >
+            <ArrowLeft className="h-3.5 w-3.5" aria-hidden="true" />
+            Về Flashcards
+          </Link>
+          <h1 className="mt-3 text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+            {set.title}
+          </h1>
+          <p className="mt-1.5 text-sm text-muted-foreground">
+            Bộ từ của bạn · chạm để lật thẻ, vuốt ngang hoặc dùng phím mũi tên để chuyển.
+          </p>
+        </div>
+        <FlashcardDeck cards={set.cards} />
       </div>
     );
   }
@@ -169,7 +197,7 @@ export default async function FlashcardsPage({ searchParams }: FlashcardsPagePro
     );
   }
 
-  const [decks, dueQueue, globalCount, customCount, personalSetCount] = await Promise.all([
+  const [decks, dueQueue, globalCount, customCount, personalSets] = await Promise.all([
     loadSharedFlashcardDecks(supabase, user.id),
     loadDueReviewQueue(supabase, user.id),
     supabase.from('vocab_entries').select('id', { count: 'exact', head: true }).is('user_id', null),
@@ -177,7 +205,7 @@ export default async function FlashcardsPage({ searchParams }: FlashcardsPagePro
       .from('vocab_entries')
       .select('id', { count: 'exact', head: true })
       .eq('user_id', user.id),
-    supabase.from('vocab_sets').select('id', { count: 'exact', head: true }).eq('user_id', user.id),
+    loadPersonalFlashcardSets(supabase, user.id),
   ]);
 
   return (
@@ -185,7 +213,7 @@ export default async function FlashcardsPage({ searchParams }: FlashcardsPagePro
       decks={decks}
       totalCardCount={(globalCount.count ?? 0) + (customCount.count ?? 0)}
       dueCount={dueQueue.length}
-      personalSetCount={personalSetCount.count ?? 0}
+      personalSets={personalSets}
     />
   );
 }

@@ -3,13 +3,13 @@
 import Link from 'next/link';
 import { useMemo, useState } from 'react';
 import { BookOpenCheck, LibraryBig, Play, RotateCw, Search } from 'lucide-react';
-import type { SharedFlashcardDeckSummary } from '../types';
+import type { PersonalFlashcardSetSummary, SharedFlashcardDeckSummary } from '../types';
 
 interface FlashcardCatalogProps {
   decks: SharedFlashcardDeckSummary[];
   totalCardCount: number;
   dueCount: number;
-  personalSetCount: number;
+  personalSets: PersonalFlashcardSetSummary[];
 }
 
 /** Client-side catalog filters keep deck discovery instant without duplicating server queries. */
@@ -17,7 +17,7 @@ export function FlashcardCatalog({
   decks,
   totalCardCount,
   dueCount,
-  personalSetCount,
+  personalSets,
 }: FlashcardCatalogProps) {
   const [query, setQuery] = useState('');
   const [level, setLevel] = useState('all');
@@ -116,18 +116,42 @@ export function FlashcardCatalog({
         </div>
       </section>
 
-      <section className="card flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
+      <section className="card space-y-4 p-5">
         <div>
           <h2 className="text-base font-semibold text-foreground">Bộ từ của bạn</h2>
           <p className="mt-1 text-sm text-muted-foreground">
-            {personalSetCount > 0
-              ? `Bạn đang có ${personalSetCount} bộ từ riêng để học theo cách của mình.`
+            {personalSets.length > 0
+              ? `Chọn một bộ để học đúng những từ bạn đã thêm.`
               : 'Tạo bộ từ riêng từ những từ bạn tự thêm hoặc lưu lại.'}
           </p>
         </div>
-        <Link href="/learn/vocab" className="btn-outline h-9 shrink-0 px-3 text-sm">
-          Quản lý bộ từ
-        </Link>
+        {personalSets.length > 0 && (
+          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+            {personalSets.map((set) => (
+              <Link
+                key={set.id}
+                href={`/learn/vocab/flashcards?set=${set.id}`}
+                className="group flex items-center justify-between gap-3 rounded-xl border border-border bg-card px-4 py-3 transition-colors hover:border-primary/40 hover:bg-primary/5"
+              >
+                <span className="min-w-0">
+                  <span className="block truncate text-sm font-semibold text-foreground">{set.name}</span>
+                  <span className="mt-0.5 block text-xs text-muted-foreground">{set.cardCount} thẻ</span>
+                </span>
+                <Play className="h-4 w-4 shrink-0 text-primary" aria-hidden="true" />
+              </Link>
+            ))}
+          </div>
+        )}
+        <div className="flex flex-wrap gap-2">
+          {personalSets.length > 0 && (
+            <Link href="/learn/vocab/flashcards?source=custom" className="btn-primary h-9 px-3 text-sm">
+              Học tất cả từ của tôi
+            </Link>
+          )}
+          <Link href="/learn/vocab" className="btn-outline h-9 px-3 text-sm">
+            Quản lý bộ từ
+          </Link>
+        </div>
       </section>
 
       <section className="space-y-5" aria-labelledby="shared-decks-heading">

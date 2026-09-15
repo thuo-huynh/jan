@@ -1,6 +1,6 @@
 import { createClient } from '@/shared/supabase/server';
 import type { FlashcardItem } from '../components/FlashcardDeck';
-import type { SharedFlashcardDeckSummary } from '../types';
+import type { PersonalFlashcardSetSummary, SharedFlashcardDeckSummary } from '../types';
 
 type ServerSupabaseClient = ReturnType<typeof createClient>;
 
@@ -16,6 +16,10 @@ type DeckCardVocab = {
   meaning: string;
   example: string | null;
   is_kanji: boolean;
+};
+
+type PersonalVocabCard = DeckCardVocab & {
+  set_id: string | null;
 };
 
 function sharedDeckTablesAreUnavailable(error: { code?: string; message?: string } | null) {
@@ -136,4 +140,68 @@ export async function loadSharedFlashcardDeckCards(
     });
 
   return { title: deck.title, cards };
+}
+
+/** Lists a learner's own vocab sets with counts without creating SRS progress. */
+export async function loadPersonalFlashcardSets(
+  supabase: ServerSupabaseClient,
+  userId: string
+): Promise<PersonalFlashcardSetSummary[]> {
+  const [setsResult, entriesResult] = await Promise.all([
+    supabase
+      .from('vocab_sets')
+      .select('id, name')
+      .eq('user_id', userId)
+      .order('created_at', { ascending: true }),
+    supabase.from('vocab_entries').select('set_id').eq('user_id', userId).not('set_id', 'is', null),
+  ]);
+  if (setsResult.error) throw new Error(setsResult.error.message);
+  if (entriesResult.error) throw new Error(entriesResult.error.message);
+
+  const cardCounts = new Map<string, number>();
+  for (const entry of entriesResult.data ?? []) {
+    if (entry.set_id) cardCounts.set(entry.set_id, (cardCounts.get(entry.set_id) ?? 0) + 1);
+  }
+
+  return (setsResult.data ?? []).map((set) => ({
+    id: set.id,
+    name: set.name,
+    cardCount: cardCounts.get(set.id) ?? 0,
+  }));
+}
+
+/** Loads only the caller's cards from one personal vocabulary set. */
+export async function loadPersonalFlashcardSetCards(
+  supabase: ServerSupabaseClient,
+  userId: string,
+  setId: string
+): Promise<{ title: string; cards: FlashcardItem[] } | null> {
+  const { data: set, error: setError } = await supabase
+    .from('vocab_sets')
+    .select('id, name')
+    .eq('id', setId)
+    .eq('user_id', userId)
+    .maybeSingle();
+  if (setError) throw new Error(setError.message);
+  if (!set) return null;
+
+  const { data: rows, error: cardsError } = await supabase
+    .from('vocab_entries')
+    .select('id, word, reading, meaning, example, is_kanji, set_id')
+    .eq('user_id', userId)
+    .eq('set_id', set.id)
+    .order('created_at', { ascending: false });
+  if (cardsError) throw new Error(cardsError.message);
+
+  const cards = ((rows ?? []) as PersonalVocabCard[]).map((row) => ({
+    id: row.id,
+    word: row.word,
+    reading: row.reading,
+    meaning: row.meaning,
+    example: row.example,
+    isKanji: row.is_kanji,
+    source: 'custom' as const,
+  }));
+
+  return { title: set.name, cards };
 }
